@@ -1,0 +1,17 @@
+src/main/web/app/components/auth/clientId.js
+.idea/*
+*.iml
+*.props
+*.properties
+dist/*
+build/*
+classes/*
+javadocs/*
+javadocs/
+tripleOutput/
+.gradle
+jetty-env.xml
+out/
+triples/
+**/clientId.js
+src/main/web/WEB-INF/web.xml
