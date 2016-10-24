@@ -2,7 +2,6 @@ package biocode.fims.fileManagers.fastq;
 
 import biocode.fims.digester.Field;
 import biocode.fims.digester.List;
-import biocode.fims.digester.Mapping;
 import biocode.fims.digester.Validation;
 import biocode.fims.fileManagers.AuxilaryFileManager;
 import biocode.fims.fileManagers.dataset.Dataset;
@@ -11,18 +10,25 @@ import biocode.fims.run.ProcessController;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
-import org.openjena.atlas.json.JSON;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.PatternMatchUtils;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * AuxilaryFileManger implementation to handle fastq sequences
  */
 public class FastqFileManager implements AuxilaryFileManager {
+    private static final Logger logger = LoggerFactory.getLogger(FastqFileManager.class);
     private static final String NAME = "fastq";
+    public static final String PAIRED_FILE_1_PATTERN = "^{sampleId}(\\.|_).*1.*\\.(fq|fastq)$";
+    public static final String PAIRED_FILE_2_PATTERN = "^{sampleId}(\\.|_).*2.*\\.(fq|fastq)$";
+    public static final String SINGLE_FILE_PATTERN = "^{sampleId}\\.(fq|fastq)$";
 
     private ProcessController processController;
     private String filename;
@@ -30,10 +36,6 @@ public class FastqFileManager implements AuxilaryFileManager {
     private JSONObject fastqMetadata;
     // TODO remove when fastqMetadata is refactored to FastqMetadata class
     private java.util.List<String> fastqFilenames;
-
-    @Autowired
-    public FastqFileManager() {
-    }
 
     @Override
     public String getName() {
@@ -66,6 +68,8 @@ public class FastqFileManager implements AuxilaryFileManager {
         Assert.notNull(processController);
         boolean valid = true;
         if (filename != null || fastqMetadata != null) {
+            processController.appendStatus("\nRunning FASTQ validation");
+
             if (fastqMetadata == null) {
                 processController.addMessage(
                         "FASTQ",
@@ -79,9 +83,14 @@ public class FastqFileManager implements AuxilaryFileManager {
                         "FASTQ",
                         new RowMessage("No FASTQ file", "FASTQ filenames check", RowMessage.ERROR)
                 );
+                return false;
             }
 
-            if (!validateMetadata() || !validateFilenames(dataset)) {
+            if (!validateMetadata()) {
+                valid = false;
+            }
+
+            if (!validateFilenames(dataset)) {
                 valid = false;
             }
         }
@@ -96,18 +105,17 @@ public class FastqFileManager implements AuxilaryFileManager {
 
     /**
      * validate that every sample has the corresponding fastqFile(s).
-     *
-     *
+     * <p>
+     * <p>
      * If fastqMetadata.libraryLayout == "single" then we are looking for a corresponding fastq filename of the format
-     *
-     *      {sampleUniqueKeyValue}.(fq/fastq)
-     *
-     *
-     * If fastqMetadata.libraryLayout == "paired" then we are looking for a corresponding fastq filenames of the format
-     *
-     *      {sampleUniqueKeyValue}.1.(fq/fastq) and {sampleUniqueKeyValue}.2.(fq/fastq)
-     *      or
-     *      {sampleUniqueKeyValue}.R1.(fq/fastq) and {sampleUniqueKeyValue}.R2.(fq/fastq)
+     * <p>
+     * {sampleUniqueKeyValue}.(fq/fastq)
+     * <p>
+     * <p>
+     * If fastqMetadata.libraryLayout == "paired" then we are looking for a corresponding fastq filenames with the
+     * REGEXP:
+     * <p>
+     * "^{sampleUniqueKeyValue}(\.|_).*1.*\.(fq|fastq)$"
      *
      * @param dataset
      * @return
@@ -116,6 +124,10 @@ public class FastqFileManager implements AuxilaryFileManager {
         boolean paired = StringUtils.equalsIgnoreCase(String.valueOf(fastqMetadata.get("libraryLayout")), "paired");
         java.util.List<String> samplesMissingFiles = new ArrayList<>();
         fastqFilenames = parseFastqFilenames();
+
+        // hack until we get FastqFileManger.upload working
+        fastqMetadata.put("filenames", fastqFilenames);
+        processController.setFastqMetadata(fastqMetadata);
 
         String uniqueKey = processController.getMapping().getDefaultSheetUniqueKey();
 
@@ -126,14 +138,15 @@ public class FastqFileManager implements AuxilaryFileManager {
             boolean found2 = false;
 
             String sampleId = (String) sample.get(uniqueKey);
+            Pattern pairedEnd1Pattern = Pattern.compile(PAIRED_FILE_1_PATTERN.replace("{sampleId}", sampleId));
+            Pattern pairedEnd2Pattern = Pattern.compile(PAIRED_FILE_2_PATTERN.replace("{sampleId}", sampleId));
+            Pattern singleEndPattern = Pattern.compile(SINGLE_FILE_PATTERN.replace("{sampleId}", sampleId));
 
             for (String filename : fastqFilenames) {
                 if (paired) {
-                    if (!found1 &&
-                            StringUtils.startsWithAny(filename, new String[] { sampleId + ".1", sampleId + ".R1" })) {
+                    if (!found1 && pairedEnd1Pattern.matcher(filename).matches()) {
                         found1 = true;
-                    } else if (!found2 &&
-                            StringUtils.startsWithAny(filename, new String[] { sampleId + ".2", sampleId + ".R2" })) {
+                    } else if (!found2 && pairedEnd2Pattern.matcher(filename).matches()) {
                         found2 = true;
                     }
 
@@ -142,7 +155,7 @@ public class FastqFileManager implements AuxilaryFileManager {
                         break;
                     }
                 } else {
-                    if (StringUtils.startsWithIgnoreCase(filename, sampleId + ".")) {
+                    if (singleEndPattern.matcher(filename).matches()) {
                         foundFastqFiles = true;
                         break;
                     }
@@ -158,7 +171,8 @@ public class FastqFileManager implements AuxilaryFileManager {
             processController.addMessage(
                     "FASTQ",
                     new RowMessage(
-                            "FASTQ filenames data missing FASTQ filenames for the following " + uniqueKey + "'s : \n " + ArrayUtils.toString(samplesMissingFiles),
+                            "Missing filenames for the following " + uniqueKey + "'s : \n " + ArrayUtils.toString(samplesMissingFiles) +
+                                    ". If this is paired data, be sure to include 2 fastq files for each sampleId.",
                             "FASTQ filenames check",
                             RowMessage.ERROR
                     )
@@ -184,7 +198,7 @@ public class FastqFileManager implements AuxilaryFileManager {
 
             String line;
 
-            while ((line = br.readLine()) != null) {
+            while (!StringUtils.isBlank(line = br.readLine())) {
                 fastqFilenames.add(line.trim());
             }
 
@@ -211,16 +225,27 @@ public class FastqFileManager implements AuxilaryFileManager {
             String key = String.valueOf(k);
 
             if (!StringUtils.equalsIgnoreCase(key, "filenames")) {
-                if (!inList(key, String.valueOf(fastqMetadata.get(key)))) {
+                String value = (String) fastqMetadata.get(key);
+                if (value == null) {
                     processController.addMessage(
                             "FASTQ",
                             new RowMessage(
-                                    "Invalid value \"" + fastqMetadata.get(key) + "\" FASTQ metadata " + key,
+                                    "Invalid value \"" + value + "\" for FASTQ metadata: " + key,
                                     "FASTQ Metadata Check",
                                     RowMessage.ERROR
                             )
                     );
                     valid = false;
+                } else {
+
+                    // instrumentModel is a special case where the list is dependent on FastqMetadata.platform
+                    if (StringUtils.equalsIgnoreCase(key, "instrumentModel")) {
+                        key = (String) fastqMetadata.get("platform");
+                    }
+
+                    if (!inList(key, value)) {
+                        valid = false;
+                    }
                 }
             }
 
@@ -229,9 +254,15 @@ public class FastqFileManager implements AuxilaryFileManager {
         return valid;
     }
 
-    private boolean inList(String listName, String value) {
+    private boolean inList(String key, String value) {
         Validation validation = processController.getValidation();
-        List list = validation.findList(listName);
+        List list = validation.findList(key);
+
+        // don't throw an exception if the list isn't defined
+        if (list == null) {
+            logger.warn("Couldn't find List for FastqMetadata key: " + key);
+            return true;
+        }
 
         boolean containsValue = false;
 
@@ -240,6 +271,18 @@ public class FastqFileManager implements AuxilaryFileManager {
                 containsValue = true;
                 break;
             }
+        }
+
+        if (!containsValue) {
+            processController.addMessage(
+                    "FASTQ",
+                    new RowMessage(
+                            "Invalid value \"" + fastqMetadata.get(key) + "\" for FASTQ metadata: " + key,
+                            "FASTQ Metadata Check",
+                            RowMessage.ERROR
+                    )
+            );
+
         }
 
         return containsValue;

@@ -1,4 +1,4 @@
-package fasta;
+package biocode.fims.fasta;
 
 /**
  * fasta sequence domain object

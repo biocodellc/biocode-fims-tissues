@@ -1,7 +1,7 @@
 package biocode.fims.fileManagers.fasta;
 
 import biocode.fims.digester.Mapping;
-import fasta.FastaSequence;
+import biocode.fims.fasta.FastaSequence;
 import biocode.fims.fileManagers.AuxilaryFileManager;
 import biocode.fims.fileManagers.dataset.Dataset;
 import biocode.fims.fimsExceptions.ServerErrorException;

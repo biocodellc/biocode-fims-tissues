@@ -2,8 +2,8 @@ package biocode.fims.fileManagers.fasta;
 
 import biocode.fims.digester.Entity;
 import biocode.fims.entities.Bcid;
-import fasta.FastaSequence;
-import fasta.FastaUtils;
+import biocode.fims.fasta.FastaSequence;
+import biocode.fims.fasta.FastaUtils;
 import biocode.fims.fimsExceptions.ServerErrorException;
 import biocode.fims.fuseki.Uploader;
 import biocode.fims.run.ProcessController;

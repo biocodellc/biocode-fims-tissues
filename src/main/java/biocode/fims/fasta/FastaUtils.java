@@ -1,4 +1,4 @@
-package fasta;
+package biocode.fims.fasta;
 
 import biocode.fims.digester.Entity;
 import biocode.fims.digester.Mapping;

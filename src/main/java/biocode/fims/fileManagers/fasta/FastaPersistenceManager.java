@@ -1,6 +1,6 @@
 package biocode.fims.fileManagers.fasta;
 
-import fasta.FastaSequence;
+import biocode.fims.fasta.FastaSequence;
 import biocode.fims.run.ProcessController;
 
 import java.util.List;
