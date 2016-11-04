@@ -1,12 +1,19 @@
 package biocode.fims.fileManagers.fasta;
 
 import biocode.fims.digester.Mapping;
+import biocode.fims.entities.Bcid;
 import biocode.fims.fasta.FastaSequence;
 import biocode.fims.fileManagers.AuxilaryFileManager;
 import biocode.fims.fileManagers.dataset.Dataset;
 import biocode.fims.fimsExceptions.ServerErrorException;
 import biocode.fims.renderers.RowMessage;
 import biocode.fims.run.ProcessController;
+import biocode.fims.service.BcidService;
+import biocode.fims.service.ExpeditionService;
+import biocode.fims.settings.PathManager;
+import biocode.fims.settings.SettingsManager;
+import biocode.fims.tools.ServerSideSpreadsheetTools;
+import biocode.fims.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +33,19 @@ public class FastaFileManager implements AuxilaryFileManager {
     private static final String NAME = "fasta";
 
     private final FastaPersistenceManager persistenceManager;
+    private final SettingsManager settingsManager;
+    private final BcidService bcidService;
 
     private List<FastaSequence> fastaSequences = null;
     private ProcessController processController;
     private String filename;
 
     @Autowired
-    public FastaFileManager(FastaPersistenceManager persistenceManager) {
+    public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager,
+                            BcidService bcidService) {
         this.persistenceManager = persistenceManager;
+        this.settingsManager = settingsManager;
+        this.bcidService = bcidService;
     }
 
     /**
@@ -101,6 +113,15 @@ public class FastaFileManager implements AuxilaryFileManager {
     @Override
     public void upload(boolean newDataset) {
         persistenceManager.upload(processController, fastaSequences, newDataset);
+
+        // save the file on the server
+        File inputFile = new File(filename);
+        String ext = FileUtils.getExtension(inputFile.getName(), null);
+        String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
+        File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
+
+        ServerSideSpreadsheetTools serverSideSpreadsheetTools = new ServerSideSpreadsheetTools(inputFile);
+        serverSideSpreadsheetTools.write(outputFile);
     }
 
     private List<String> getUniqueIds(Dataset dataset) {
