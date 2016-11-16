@@ -114,14 +114,16 @@ public class FastaFileManager implements AuxilaryFileManager {
     public void upload(boolean newDataset) {
         persistenceManager.upload(processController, fastaSequences, newDataset);
 
-        // save the file on the server
-        File inputFile = new File(filename);
-        String ext = FileUtils.getExtension(inputFile.getName(), null);
-        String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
-        File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
+        if (filename != null) {
+            // save the file on the server
+            File inputFile = new File(filename);
+            String ext = FileUtils.getExtension(inputFile.getName(), null);
+            String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
+            File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
 
-        ServerSideSpreadsheetTools serverSideSpreadsheetTools = new ServerSideSpreadsheetTools(inputFile);
-        serverSideSpreadsheetTools.write(outputFile);
+            ServerSideSpreadsheetTools serverSideSpreadsheetTools = new ServerSideSpreadsheetTools(inputFile);
+            serverSideSpreadsheetTools.write(outputFile);
+        }
     }
 
     private List<String> getUniqueIds(Dataset dataset) {
