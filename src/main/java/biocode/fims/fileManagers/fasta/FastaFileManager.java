@@ -1,28 +1,27 @@
 package biocode.fims.fileManagers.fasta;
 
 import biocode.fims.digester.Mapping;
-import biocode.fims.entities.Bcid;
 import biocode.fims.fasta.FastaSequence;
 import biocode.fims.fileManagers.AuxilaryFileManager;
-import biocode.fims.fileManagers.dataset.Dataset;
 import biocode.fims.fimsExceptions.ServerErrorException;
 import biocode.fims.renderers.RowMessage;
 import biocode.fims.run.ProcessController;
 import biocode.fims.service.BcidService;
-import biocode.fims.service.ExpeditionService;
 import biocode.fims.settings.PathManager;
 import biocode.fims.settings.SettingsManager;
-import biocode.fims.tools.ServerSideSpreadsheetTools;
 import biocode.fims.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +29,7 @@ import java.util.List;
  * AuxilaryFileManger implementation to handle fasta sequences
  */
 public class FastaFileManager implements AuxilaryFileManager {
+    private static final Logger logger = LoggerFactory.getLogger(FastaFileManager.class);
     private static final String NAME = "fasta";
 
     private final FastaPersistenceManager persistenceManager;
@@ -40,7 +40,6 @@ public class FastaFileManager implements AuxilaryFileManager {
     private ProcessController processController;
     private String filename;
 
-    @Autowired
     public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager,
                             BcidService bcidService) {
         this.persistenceManager = persistenceManager;
@@ -53,7 +52,7 @@ public class FastaFileManager implements AuxilaryFileManager {
      *
      */
     @Override
-    public boolean validate(Dataset dataset) {
+    public boolean validate(JSONArray dataset) {
         Assert.notNull(processController);
 
         if (filename != null) {
@@ -114,23 +113,28 @@ public class FastaFileManager implements AuxilaryFileManager {
     public void upload(boolean newDataset) {
         persistenceManager.upload(processController, fastaSequences, newDataset);
 
-        // save the file on the server
-        File inputFile = new File(filename);
-        String ext = FileUtils.getExtension(inputFile.getName(), null);
-        String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
-        File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
+        if (filename != null) {
+            // save the file on the server
+            File inputFile = new File(filename);
+            String ext = FileUtils.getExtension(inputFile.getName(), null);
+            String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
+            File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
 
-        ServerSideSpreadsheetTools serverSideSpreadsheetTools = new ServerSideSpreadsheetTools(inputFile);
-        serverSideSpreadsheetTools.write(outputFile);
+            try {
+                Files.copy(inputFile.toPath(), outputFile.toPath());
+            } catch (IOException e) {
+                logger.warn("failed to save fasta input file {}", filename);
+            }
+        }
     }
 
-    private List<String> getUniqueIds(Dataset dataset) {
+    private List<String> getUniqueIds(JSONArray dataset) {
         List<String> sampleIds = new ArrayList<>();
         Mapping mapping = processController.getMapping();
 
         String uniqueKey = mapping.getDefaultSheetUniqueKey();
 
-        for (Object obj : dataset.getSamples()) {
+        for (Object obj : dataset) {
             JSONObject sample = (JSONObject) obj;
             if (sample.containsKey(uniqueKey)) {
                 sampleIds.add(String.valueOf(sample.get(uniqueKey)));
@@ -162,8 +166,19 @@ public class FastaFileManager implements AuxilaryFileManager {
                         // after putting the sequence into the hashmap, reset the sequence
                         sequence = "";
                     }
+
+                    int endIdentifierIndex;
+
+                    if (line.contains(" ")) {
+                        endIdentifierIndex = line.indexOf(" ");
+                    } else if (line.contains("\n")) {
+                        endIdentifierIndex = line.indexOf("\n");
+                    } else {
+                        endIdentifierIndex = line.length();
+                    }
+
                     // parse the identifier - minus the deliminator
-                    identifier = line.substring(1, line.indexOf(" "));
+                    identifier = line.substring(1, endIdentifierIndex);
                 } else {
                     // if we are here, we are inbetween 2 identifiers. This means this is all sequence data
                     sequence += line;

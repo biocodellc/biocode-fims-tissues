@@ -1,18 +1,13 @@
 package biocode.fims.sra;
 
 import biocode.fims.exceptions.SraCode;
-import biocode.fims.fileManagers.dataset.Dataset;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.settings.PathManager;
-import org.apache.commons.lang.StringUtils;
-import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * class to generate a Genbank sra metadata file (https://www.ncbi.nlm.nih.gov/sra/docs/submitmeta/)

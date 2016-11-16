@@ -1,9 +1,8 @@
 apply plugin: "java"
 apply plugin: "idea"
-apply plugin: "application"
 
-targetCompatibility = 1.7
-sourceCompatibility = 1.7
+targetCompatibility = 1.8
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -34,7 +33,7 @@ sourceSets {
 dependencies {
     server 'org.apache.jena:jena-arq:2.9.1'
     server 'com.googlecode.json-simple:json-simple:1.1.1'
-    server group: 'org.springframework', name: 'spring-context', version: '4.2.5.RELEASE'
+    server group: 'org.springframework', name: 'spring-context', version: '4.3.4.RELEASE'
     server 'commons-lang:commons-lang:2.6'
 
     compile project(":biocode-fims-commons")

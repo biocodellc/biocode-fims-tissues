@@ -4,20 +4,18 @@ import biocode.fims.digester.Field;
 import biocode.fims.digester.List;
 import biocode.fims.digester.Validation;
 import biocode.fims.fileManagers.AuxilaryFileManager;
-import biocode.fims.fileManagers.dataset.Dataset;
 import biocode.fims.renderers.RowMessage;
 import biocode.fims.run.ProcessController;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.PatternMatchUtils;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -64,7 +62,7 @@ public class FastqFileManager implements AuxilaryFileManager {
     }
 
     @Override
-    public boolean validate(Dataset dataset) {
+    public boolean validate(JSONArray dataset) {
         Assert.notNull(processController);
         boolean valid = true;
         if (filename != null || fastqMetadata != null) {
@@ -104,6 +102,14 @@ public class FastqFileManager implements AuxilaryFileManager {
     }
 
     /**
+     * Adds the fastqMetadata object to each entry in the dataset
+     */
+//    @Override
+    public void index(JSONArray dataset) {
+        dataset.forEach(e -> ((JSONObject) e).put("fastqMetadata", fastqMetadata));
+    }
+
+    /**
      * validate that every sample has the corresponding fastqFile(s).
      * <p>
      * <p>
@@ -120,7 +126,7 @@ public class FastqFileManager implements AuxilaryFileManager {
      * @param dataset
      * @return
      */
-    private boolean validateFilenames(Dataset dataset) {
+    private boolean validateFilenames(JSONArray dataset) {
         boolean paired = StringUtils.equalsIgnoreCase(String.valueOf(fastqMetadata.get("libraryLayout")), "paired");
         java.util.List<String> samplesMissingFiles = new ArrayList<>();
         fastqFilenames = parseFastqFilenames();
@@ -131,7 +137,7 @@ public class FastqFileManager implements AuxilaryFileManager {
 
         String uniqueKey = processController.getMapping().getDefaultSheetUniqueKey();
 
-        for (Object obj : dataset.getSamples()) {
+        for (Object obj : dataset) {
             JSONObject sample = (JSONObject) obj;
             boolean foundFastqFiles = false;
             boolean found1 = false;
