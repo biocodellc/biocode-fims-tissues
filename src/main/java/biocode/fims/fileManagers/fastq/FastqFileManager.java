@@ -104,9 +104,11 @@ public class FastqFileManager implements AuxilaryFileManager {
     /**
      * Adds the fastqMetadata object to each entry in the dataset
      */
-//    @Override
+    @Override
     public void index(JSONArray dataset) {
-        dataset.forEach(e -> ((JSONObject) e).put("fastqMetadata", fastqMetadata));
+        if (fastqMetadata != null) {
+            dataset.forEach(resource -> ((JSONObject) resource).put("expedition.fastqMetadata", fastqMetadata));
+        }
     }
 
     /**

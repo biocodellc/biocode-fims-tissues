@@ -1,5 +1,6 @@
 package biocode.fims.fileManagers.fasta;
 
+import biocode.fims.digester.Entity;
 import biocode.fims.digester.Mapping;
 import biocode.fims.fasta.FastaSequence;
 import biocode.fims.fileManagers.AuxilaryFileManager;
@@ -30,6 +31,7 @@ import java.util.List;
  */
 public class FastaFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastaFileManager.class);
+    private static final String ENTITY_CONCEPT_ALIAS = "fastaSequence";
     private static final String NAME = "fasta";
 
     private final FastaPersistenceManager persistenceManager;
@@ -49,7 +51,6 @@ public class FastaFileManager implements AuxilaryFileManager {
 
     /**
      * verify that the identifiers in the fasta file are in a dataset.
-     *
      */
     @Override
     public boolean validate(JSONArray dataset) {
@@ -124,6 +125,29 @@ public class FastaFileManager implements AuxilaryFileManager {
                 Files.copy(inputFile.toPath(), outputFile.toPath());
             } catch (IOException e) {
                 logger.warn("failed to save fasta input file {}", filename);
+            }
+        }
+    }
+
+    @Override
+    /**
+     * add the fastaSequence entities to the dataset for indexing
+     */
+    public void index(JSONArray dataset) {
+        //TODO add support for copying existing sequences to index?
+        // TODO support multiple sequence, marker pairs
+        if (fastaSequences != null) {
+            Entity entity = processController.getMapping().findEntity(ENTITY_CONCEPT_ALIAS);
+
+            for (Object o : dataset) {
+                JSONObject resource = (JSONObject) o;
+                for (FastaSequence sequence : fastaSequences) {
+                    if (StringUtils.equals(sequence.getLocalIdentifier(), String.valueOf(resource.get(processController.getMapping().getDefaultSheetUniqueKey())))) {
+                        JSONObject fastaSequence = new JSONObject();
+                        fastaSequence.put("sequence", sequence.getSequence());
+                        resource.put(entity.getConceptAlias(), fastaSequence);
+                    }
+                }
             }
         }
     }
