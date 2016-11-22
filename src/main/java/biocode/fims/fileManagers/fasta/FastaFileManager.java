@@ -41,7 +41,7 @@ public class FastaFileManager implements AuxilaryFileManager {
 
     private ProcessController processController;
     private Map<String, List<JSONObject>> fastaSequences = new HashMap<>();
-    private List<FastaData> fastaDataList;
+    private List<FastaData> fastaDataList = new ArrayList<>();
     private Entity entity;
 
     public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager) {
