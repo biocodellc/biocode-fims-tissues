@@ -35,6 +35,9 @@ dependencies {
     server 'com.googlecode.json-simple:json-simple:1.1.1'
     server group: 'org.springframework', name: 'spring-context', version: '4.3.4.RELEASE'
     server 'commons-lang:commons-lang:2.6'
+    server group: 'org.elasticsearch.client', name: 'transport', version: '5.0.0'
+    // required for elasticsearch
+    server group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.7'
 
     compile project(":biocode-fims-commons")
     compile project(":biocode-fims-fuseki")

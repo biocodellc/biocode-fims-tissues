@@ -40,7 +40,6 @@ public class FastqFileManager implements AuxilaryFileManager {
         return NAME;
     }
 
-    @Override
     public void setFilename(String value) {
         this.filename = value;
     }

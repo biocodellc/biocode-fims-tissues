@@ -1,13 +1,13 @@
 package biocode.fims.fileManagers.fasta;
 
+import biocode.fims.digester.Attribute;
 import biocode.fims.digester.Entity;
 import biocode.fims.digester.Mapping;
-import biocode.fims.fasta.FastaSequence;
+import biocode.fims.fasta.FastaData;
 import biocode.fims.fileManagers.AuxilaryFileManager;
 import biocode.fims.fimsExceptions.ServerErrorException;
 import biocode.fims.renderers.RowMessage;
 import biocode.fims.run.ProcessController;
-import biocode.fims.service.BcidService;
 import biocode.fims.settings.PathManager;
 import biocode.fims.settings.SettingsManager;
 import biocode.fims.utils.FileUtils;
@@ -24,29 +24,29 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * AuxilaryFileManger implementation to handle fasta sequences
  */
 public class FastaFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastaFileManager.class);
-    private static final String ENTITY_CONCEPT_ALIAS = "fastaSequence";
+    private static final String ENTITY_CONCEPT_URI = "urn:fastaSequence";
     private static final String NAME = "fasta";
 
     private final FastaPersistenceManager persistenceManager;
     private final SettingsManager settingsManager;
-    private final BcidService bcidService;
 
-    private List<FastaSequence> fastaSequences = null;
     private ProcessController processController;
-    private String filename;
+    private Map<String, List<JSONObject>> fastaSequences = new HashMap<>();
+    private List<FastaData> fastaDataList;
+    private Entity entity;
 
-    public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager,
-                            BcidService bcidService) {
+    public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager) {
         this.persistenceManager = persistenceManager;
         this.settingsManager = settingsManager;
-        this.bcidService = bcidService;
     }
 
     /**
@@ -56,7 +56,7 @@ public class FastaFileManager implements AuxilaryFileManager {
     public boolean validate(JSONArray dataset) {
         Assert.notNull(processController);
 
-        if (filename != null) {
+        if (!fastaDataList.isEmpty()) {
             processController.appendStatus("\nRunning FASTA validation");
             List<String> sampleIds = getUniqueIds(dataset);
 
@@ -69,8 +69,8 @@ public class FastaFileManager implements AuxilaryFileManager {
                 return false;
             }
 
-            // parse the FASTA file to get an array of sequence identifiers
-            fastaSequences = parseFasta();
+            // parse the FASTA file, setting the fastaSequences object
+            parseFasta();
 
             if (fastaSequences.isEmpty()) {
                 processController.addMessage(
@@ -82,11 +82,12 @@ public class FastaFileManager implements AuxilaryFileManager {
 
             // verify that all fastaIds exist in the dataset
             ArrayList<String> invalidIds = new ArrayList<>();
-            for (FastaSequence sequence : fastaSequences) {
-                if (!sampleIds.contains(sequence.getLocalIdentifier())) {
-                    invalidIds.add(sequence.getLocalIdentifier());
+            for (String identifier : fastaSequences.keySet()) {
+                if (!sampleIds.contains(identifier)) {
+                    invalidIds.add(identifier);
                 }
             }
+
             if (!invalidIds.isEmpty()) {
                 int level;
                 // this is an error if no ids exist in the dataset
@@ -114,42 +115,125 @@ public class FastaFileManager implements AuxilaryFileManager {
     public void upload(boolean newDataset) {
         persistenceManager.upload(processController, fastaSequences, newDataset);
 
-        if (filename != null) {
+        if (!fastaDataList.isEmpty()) {
             // save the file on the server
-            File inputFile = new File(filename);
-            String ext = FileUtils.getExtension(inputFile.getName(), null);
-            String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
-            File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
+            for (FastaData fastaData : fastaDataList) {
+                File inputFile = new File(fastaData.getFilename());
+                String ext = FileUtils.getExtension(inputFile.getName(), null);
+                String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
+                File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
 
-            try {
-                Files.copy(inputFile.toPath(), outputFile.toPath());
-            } catch (IOException e) {
-                logger.warn("failed to save fasta input file {}", filename);
+                try {
+                    Files.copy(inputFile.toPath(), outputFile.toPath());
+                } catch (IOException e) {
+                    logger.warn("failed to save fasta input file {}", filename);
+                }
             }
         }
     }
 
-    @Override
     /**
      * add the fastaSequence entities to the dataset for indexing
      */
+    @Override
     public void index(JSONArray dataset) {
-        //TODO add support for copying existing sequences to index?
-        // TODO support multiple sequence, marker pairs
-        if (fastaSequences != null) {
-            Entity entity = processController.getMapping().findEntity(ENTITY_CONCEPT_ALIAS);
+        String uniqueKey = processController.getMapping().getDefaultSheetUniqueKey();
+
+        mergeFastaSequences(dataset);
+
+        if (!fastaSequences.isEmpty()) {
 
             for (Object o : dataset) {
                 JSONObject resource = (JSONObject) o;
-                for (FastaSequence sequence : fastaSequences) {
-                    if (StringUtils.equals(sequence.getLocalIdentifier(), String.valueOf(resource.get(processController.getMapping().getDefaultSheetUniqueKey())))) {
-                        JSONObject fastaSequence = new JSONObject();
-                        fastaSequence.put("sequence", sequence.getSequence());
-                        resource.put(entity.getConceptAlias(), fastaSequence);
-                    }
+
+                String localIdentifier = String.valueOf(resource.get(uniqueKey));
+
+                if (fastaSequences.containsKey(localIdentifier)) {
+                    resource.put(entity.getConceptAlias(), fastaSequences.get(localIdentifier));
                 }
             }
+
         }
+
+    }
+
+    /**
+     * merge any existing fastaSequences with and new fastaSequences. merging is done based on the
+     * {@link Entity#getUniqueKey()}. we will either overwrite the existing fastaSequence object if
+     * the identifier and uniqueKey match, or add the new fastaSequence to the list of existing
+     * fastaSequences for the identifier
+     */
+    private void mergeFastaSequences(JSONArray dataset) {
+        // TODO, if this isn't a new dataset, then the fastaSequences will have already be fetched
+        Map<String, List<JSONObject>> existingSequences = persistenceManager.getFastaSequences(processController, entity.getConceptAlias());
+
+        for (String identifier : existingSequences.keySet()) {
+
+            if (!fastaSequences.containsKey(identifier)) {
+
+                if (datasetContainsResource(dataset, identifier)) {
+                    fastaSequences.put(identifier, existingSequences.get(identifier));
+                }
+
+            } else {
+
+                for (JSONObject existingSequence : existingSequences.get(identifier)) {
+
+                    if (!fastaSequencesContainsSequence(identifier, existingSequence)) {
+                        fastaSequences.get(identifier).add(existingSequence);
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
+    /**
+     * check if a resource with the same local identifier exists in the dataset
+     *
+     * @param dataset
+     * @param localIdentifier the value to check against the {@link Entity#getUniqueKey()} value for each resource in
+     *                        the dataset
+     * @return
+     */
+    private boolean datasetContainsResource(JSONArray dataset, String localIdentifier) {
+        // check that the dataset still contains the resource, and add the existingSequences if it does
+        for (Object o : dataset) {
+            JSONObject resource = (JSONObject) o;
+
+            if (resource.get(processController.getMapping().getDefaultSheetUniqueKey()).equals(localIdentifier)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * check if fastaSequences contains a sequence with the same identifier and {@link Entity#getUniqueKey()}
+     *
+     * @param identifier
+     * @param sequence
+     * @return
+     */
+    private boolean fastaSequencesContainsSequence(String identifier, JSONObject sequence) {
+        String uniqueKey = entity.getUniqueKey();
+
+        for (JSONObject newSequence : fastaSequences.get(identifier)) {
+
+            if (StringUtils.equals(
+                    String.valueOf(newSequence.get(uniqueKey)),
+                    String.valueOf(sequence.get(uniqueKey))
+            )) {
+
+                return true;
+
+            }
+        }
+
+        return false;
     }
 
     private List<String> getUniqueIds(JSONArray dataset) {
@@ -169,54 +253,109 @@ public class FastaFileManager implements AuxilaryFileManager {
     }
 
     /**
-     * parse the fasta file identifier-sequence pairs
+     * parse the fasta file identifier-sequence pairs, populating the fastaSequences property
      *
-     * @return list of {@link FastaSequence} objects
      */
-    private List<FastaSequence> parseFasta() {
-        List<FastaSequence> sequences = new ArrayList<>();
+    private void parseFasta() {
+
         try {
-            FileReader input = new FileReader(filename);
-            BufferedReader bufRead = new BufferedReader(input);
-            String line;
-            String identifier = null;
-            String sequence = "";
+            for (FastaData fastaData : fastaDataList) {
 
-            while ((line = bufRead.readLine()) != null) {
-                // > deliminates the next identifier, sequence block in the fasta file
-                if (line.startsWith(">")) {
-                    if (!sequence.isEmpty() || identifier != null) {
-                        sequences.add(new FastaSequence(identifier, sequence));
-                        // after putting the sequence into the hashmap, reset the sequence
-                        sequence = "";
-                    }
+                FileReader input = new FileReader(fastaData.getFilename());
+                BufferedReader bufRead = new BufferedReader(input);
+                String line;
+                String identifier = null;
+                String sequence = "";
 
-                    int endIdentifierIndex;
+                while ((line = bufRead.readLine()) != null) {
 
-                    if (line.contains(" ")) {
-                        endIdentifierIndex = line.indexOf(" ");
-                    } else if (line.contains("\n")) {
-                        endIdentifierIndex = line.indexOf("\n");
+                    // > deliminates the next identifier, sequence block in the fasta file
+                    if (line.startsWith(">")) {
+
+                        if (!sequence.isEmpty() || identifier != null) {
+
+                            addFastaSequence(identifier, sequence, fastaData.getMetadata());
+
+                            // after putting the sequence into the object, reset the sequence
+                            sequence = "";
+
+                        }
+
+                        int endIdentifierIndex;
+
+                        if (line.contains(" ")) {
+                            endIdentifierIndex = line.indexOf(" ");
+                        } else if (line.contains("\n")) {
+                            endIdentifierIndex = line.indexOf("\n");
+                        } else {
+                            endIdentifierIndex = line.length();
+                        }
+
+                        // parse the identifier - minus the deliminator
+                        identifier = line.substring(1, endIdentifierIndex);
+
                     } else {
-                        endIdentifierIndex = line.length();
+
+                        // if we are here, we are in between 2 identifiers. This means this is all sequence data
+                        sequence += line;
+
                     }
 
-                    // parse the identifier - minus the deliminator
-                    identifier = line.substring(1, endIdentifierIndex);
-                } else {
-                    // if we are here, we are inbetween 2 identifiers. This means this is all sequence data
-                    sequence += line;
                 }
-            }
 
-            // need to put the last sequence data into the hashmap
-            if (identifier != null) {
-                sequences.add(new FastaSequence(identifier, sequence));
+                // need to put the last sequence data into the hashmap
+                if (identifier != null) {
+
+                    addFastaSequence(identifier, sequence, fastaData.getMetadata());
+
+                }
             }
         } catch (IOException e) {
             throw new ServerErrorException(e);
         }
-        return sequences;
+    }
+
+    /**
+     * adds a fastaSequence object to the fastaSequences map
+     *
+     * @param identifier
+     * @param sequence
+     * @param metadata
+     */
+    private void addFastaSequence(String identifier, String sequence, JSONObject metadata) {
+        List<Attribute> fastaAttributes = entity.getAttributes();
+
+        JSONObject fastaSequence = new JSONObject();
+        fastaSequence.put("sequence", sequence);
+
+        // currently we are only looking for fastaSequence entity attributes in the FastaData object.
+        // in the future, if we don't find an attribute in the FastaData, we should look for the attribute
+        // in the fasta definition line https://www.ncbi.nlm.nih.gov/Sequin/modifiers.html
+        for (Attribute attribute : fastaAttributes) {
+
+            // sequence is a required column that is already added to the object
+            if (!attribute.getColumn().equals("sequence")) {
+
+                String key = attribute.getColumn();
+
+                if (metadata.containsKey(key)) {
+                    fastaSequence.put(key, metadata.get(key));
+                }
+
+            }
+
+        }
+
+        if (!fastaSequences.containsKey(identifier)) {
+            List<JSONObject> sequences = new ArrayList<>();
+
+            sequences.add(fastaSequence);
+            fastaSequences.put(identifier, sequences);
+
+        } else {
+            fastaSequences.get(identifier).add(fastaSequence);
+        }
+
     }
 
     @Override
@@ -224,20 +363,22 @@ public class FastaFileManager implements AuxilaryFileManager {
         return NAME;
     }
 
-    @Override
-    public void setFilename(String value) {
-        this.filename = value;
+    public void setFastaData(List<FastaData> fastaDataList) {
+        this.fastaDataList = fastaDataList;
     }
 
     @Override
     public void setProcessController(ProcessController processController) {
         this.processController = processController;
+        entity = processController.getMapping().findEntityByConceptUri(ENTITY_CONCEPT_URI);
     }
 
     @Override
     public void close() {
-        if (filename != null) {
-            new File(filename).delete();
+        if (!fastaDataList.isEmpty()) {
+            for (FastaData fastaData : fastaDataList) {
+                new File(fastaData.getFilename()).delete();
+            }
         }
     }
 }
