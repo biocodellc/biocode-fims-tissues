@@ -34,6 +34,7 @@ import java.util.Map;
 public class FastaFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastaFileManager.class);
     private static final String ENTITY_CONCEPT_URI = "urn:fastaSequence";
+    private static final String SEQUENCE_ATTRIBUTE_URI = "urn:sequence";
     private static final String NAME = "fasta";
 
     private final FastaPersistenceManager persistenceManager;
@@ -326,7 +327,7 @@ public class FastaFileManager implements AuxilaryFileManager {
         List<Attribute> fastaAttributes = entity.getAttributes();
 
         JSONObject fastaSequence = new JSONObject();
-        fastaSequence.put("sequence", sequence);
+        fastaSequence.put(SEQUENCE_ATTRIBUTE_URI, sequence);
 
         // currently we are only looking for fastaSequence entity attributes in the FastaData object.
         // in the future, if we don't find an attribute in the FastaData, we should look for the attribute
@@ -334,12 +335,12 @@ public class FastaFileManager implements AuxilaryFileManager {
         for (Attribute attribute : fastaAttributes) {
 
             // sequence is a required column that is already added to the object
-            if (!attribute.getColumn().equals("sequence")) {
+            if (!attribute.getUri().equals(SEQUENCE_ATTRIBUTE_URI)) {
 
                 String key = attribute.getColumn();
 
                 if (metadata.containsKey(key)) {
-                    fastaSequence.put(key, metadata.get(key));
+                    fastaSequence.put(attribute.getUri(), metadata.get(key));
                 }
 
             }
