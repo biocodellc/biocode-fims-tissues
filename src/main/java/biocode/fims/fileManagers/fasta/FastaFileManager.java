@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class FastaFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastaFileManager.class);
-    private static final String ENTITY_CONCEPT_URI = "urn:fastaSequence";
+    public static final String ENTITY_CONCEPT_ALIAS = "fastaSequence";
     private static final String SEQUENCE_ATTRIBUTE_URI = "urn:sequence";
     private static final String NAME = "fasta";
 
@@ -138,7 +138,8 @@ public class FastaFileManager implements AuxilaryFileManager {
      */
     @Override
     public void index(JSONArray dataset) {
-        String uniqueKey = processController.getMapping().getDefaultSheetUniqueKey();
+        Mapping mapping = processController.getMapping();
+        String uniqueKey = mapping.lookupUriForColumn(mapping.getDefaultSheetUniqueKey(), mapping.getDefaultSheetAttributes());
 
         mergeFastaSequences(dataset);
 
@@ -220,7 +221,7 @@ public class FastaFileManager implements AuxilaryFileManager {
      * @return
      */
     private boolean fastaSequencesContainsSequence(String identifier, JSONObject sequence) {
-        String uniqueKey = entity.getUniqueKey();
+        String uniqueKey = processController.getMapping().lookupUriForColumn(entity.getUniqueKey(), entity.getAttributes());
 
         for (JSONObject newSequence : fastaSequences.get(identifier)) {
 
@@ -371,7 +372,7 @@ public class FastaFileManager implements AuxilaryFileManager {
     @Override
     public void setProcessController(ProcessController processController) {
         this.processController = processController;
-        entity = processController.getMapping().findEntityByConceptUri(ENTITY_CONCEPT_URI);
+        entity = processController.getMapping().findEntity(ENTITY_CONCEPT_ALIAS);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package biocode.fims.fileManagers.fasta;
 
+import biocode.fims.digester.Mapping;
 import biocode.fims.elasticSearch.ElasticSearchIndexer;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.run.ProcessController;
@@ -38,7 +39,8 @@ public class ESFastaPersistenceManager implements FastaPersistenceManager {
     @Override
     public Map<String, List<JSONObject>> getFastaSequences(ProcessController processController, String conceptAlias) {
         Map<String, List<JSONObject>> fastaSequences = new HashMap<>();
-        String uniqueKey = processController.getMapping().getDefaultSheetUniqueKey();
+        Mapping mapping = processController.getMapping();
+        String uniqueKey = mapping.lookupUriForColumn(mapping.getDefaultSheetUniqueKey(), mapping.getDefaultSheetAttributes());
 
         SearchRequestBuilder builder = esClient.prepareSearch(String.valueOf(processController.getProjectId()))
                 .setTypes(ElasticSearchIndexer.TYPE)
