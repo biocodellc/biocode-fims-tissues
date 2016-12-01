@@ -35,7 +35,7 @@ public class FastaFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastaFileManager.class);
     public static final String ENTITY_CONCEPT_ALIAS = "fastaSequence";
     private static final String SEQUENCE_ATTRIBUTE_URI = "urn:sequence";
-    private static final String NAME = "fasta";
+    public static final String NAME = "fasta";
 
     private final FastaPersistenceManager persistenceManager;
     private final SettingsManager settingsManager;

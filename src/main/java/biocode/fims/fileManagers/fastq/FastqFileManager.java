@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public class FastqFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastqFileManager.class);
-    private static final String NAME = "fastq";
+    public static final String NAME = "fastq";
     public static final String PAIRED_FILE_1_PATTERN = "^{sampleId}(\\.|_).*1.*\\.(fq|fastq)$";
     public static final String PAIRED_FILE_2_PATTERN = "^{sampleId}(\\.|_).*2.*\\.(fq|fastq)$";
     public static final String SINGLE_FILE_PATTERN = "^{sampleId}\\.(fq|fastq)$";
