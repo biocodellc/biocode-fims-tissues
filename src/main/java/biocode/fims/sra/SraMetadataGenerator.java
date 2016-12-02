@@ -23,7 +23,7 @@ public class SraMetadataGenerator {
      * @return
      */
     public static File generateFile(SraMetadataMapper mapper, String outputDirectory) {
-        File metadataFile = PathManager.createUniqueFile("sra_metadata.tsv", outputDirectory);
+        File metadataFile = PathManager.createUniqueFile("sra-metadata.tsv", outputDirectory);
 
         try (FileWriter fw = new FileWriter(metadataFile)) {
             List<String> headers = mapper.getHeaderValues();

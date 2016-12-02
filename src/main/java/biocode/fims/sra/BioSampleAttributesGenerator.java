@@ -24,7 +24,7 @@ public class BioSampleAttributesGenerator {
      * @return
      */
     public static File generateFile(BioSampleMapper mapper, String outputDirectory) {
-        File attributesFile = PathManager.createUniqueFile("sra_bio_sample_attributes.tsv", outputDirectory);
+        File attributesFile = PathManager.createUniqueFile("bioSample-attributes.tsv", outputDirectory);
 
         try (FileWriter fw = new FileWriter(attributesFile)) {
 
