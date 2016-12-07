@@ -1,6 +1,6 @@
 package biocode.fims.fasta;
 
-import biocode.fims.fimsExceptions.FileCode;
+import biocode.fims.fimsExceptions.errorCodes.FileCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.query.JsonFieldTransform;
 import biocode.fims.query.JsonWriter;

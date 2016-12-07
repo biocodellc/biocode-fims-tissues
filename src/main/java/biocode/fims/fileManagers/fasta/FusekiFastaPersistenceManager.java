@@ -137,7 +137,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     private Bcid getCurrentBcid(ProcessController processController) {
-        List<Bcid> datasetBcids = bcidService.getDatasets(
+        List<Bcid> datasetBcids = bcidService.getFimsMetadataDatasets(
                 processController.getProjectId(),
                 processController.getExpeditionCode()
         );
@@ -150,7 +150,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     private String getCurrentGraph(ProcessController processController) {
-        List<Bcid> datasetBcids = bcidService.getDatasets(
+        List<Bcid> datasetBcids = bcidService.getFimsMetadataDatasets(
                 processController.getProjectId(),
                 processController.getExpeditionCode()
         );
@@ -163,7 +163,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     private String getPreviousGraph(ProcessController processController) {
-        List<Bcid> datasetBcids = bcidService.getDatasets(
+        List<Bcid> datasetBcids = bcidService.getFimsMetadataDatasets(
                 processController.getProjectId(),
                 processController.getExpeditionCode()
         );

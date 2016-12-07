@@ -1,6 +1,6 @@
 package biocode.fims.exceptions;
 
-import biocode.fims.fimsExceptions.ErrorCode;
+import biocode.fims.fimsExceptions.errorCodes.ErrorCode;
 
 /**
  * Created by rjewing on 10/23/16.
