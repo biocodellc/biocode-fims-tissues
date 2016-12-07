@@ -16,6 +16,8 @@ public class FastaSequenceFields {
     private final String sequencePath;
     private final List<JsonFieldTransform> metadata;
 
+    private String uniqueKeyPath;
+
     /**
      * @param sequencesPath  the path to the fastaSequences array
      * @param identifierPath the path to the identifier for each fastaSequence
@@ -40,6 +42,18 @@ public class FastaSequenceFields {
 
     public String getSequencePath() {
         return sequencePath;
+    }
+
+    /**
+     * this is used to determine if we should write 1 or multiple fasta file
+     * @param uniqueKeyPath the path to the field that denotes the unique fastaSequence entity
+     */
+    public void setUniqueKeyPath(String uniqueKeyPath) {
+        this.uniqueKeyPath = uniqueKeyPath;
+    }
+
+    public String getUniqueKeyPath() {
+        return uniqueKeyPath;
     }
 
     public List<JsonFieldTransform> getMetadata() {

@@ -5,14 +5,19 @@ import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.query.JsonFieldTransform;
 import biocode.fims.query.JsonWriter;
 import biocode.fims.settings.PathManager;
+import biocode.fims.utils.FileUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class to write Json fastaSequences to a fasta file
@@ -52,18 +57,22 @@ public class FastaJsonWriter implements JsonWriter {
         this.fastaSequenceFilters = fastaSequenceFilters;
     }
 
+    /**
+     * writes the given resources to a file, using the {@link FastaSequenceFields} object. If {@link FastaSequenceFields#getUniqueKeyPath()}
+     * isn't null, a zip file will be returned containing a fasta file containing the fastaSequences objects for each unique
+     * fastaSequence.{uniqueKeyPath} in the given resources
+     * @return
+     */
     @Override
     public File write() {
-        File file = PathManager.createUniqueFile("output.fasta", outputDirectory);
-
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(file)))) {
+        Map<String, List<SequenceData>> fastaFileMap = new HashMap<>();
 
             for (JsonNode resource : resources) {
 
                 JsonNode sequencesNode = resource.path(fastaSequenceFields.getSequencesPath());
 
                 ValueNode identifierNode = (ValueNode) resource.path(fastaSequenceFields.getIdentifierPath());
+                String identifier = identifierNode.asText();
 
                 if (!sequencesNode.isMissingNode()) {
 
@@ -73,29 +82,13 @@ public class FastaJsonWriter implements JsonWriter {
 
                         if (writeSequence((ObjectNode) sequenceNode)) {
 
-                            ValueNode sequence = (ValueNode) sequenceNode.path(fastaSequenceFields.getSequencePath());
+                            // add the sequenceNode to a map based on the uniqueKeyPath so we can later write 1 file for
+                            // each key in the map
+                            String uniqueKey = sequenceNode.path(fastaSequenceFields.getUniqueKeyPath()).asText();
 
-                            writer.write("> ");
-                            writer.write(identifierNode.asText());
+                            fastaFileMap.computeIfAbsent(uniqueKey, k -> new ArrayList<>());
 
-                            StringBuilder metadataBuilder = new StringBuilder();
-
-                            for (JsonFieldTransform field : fastaSequenceFields.getMetadata()) {
-                                JsonNode fieldNode = sequenceNode.at(field.getPath());
-
-                                if (!fieldNode.isMissingNode()) {
-                                    metadataBuilder.append(" [");
-                                    metadataBuilder.append(field.getFieldName());
-                                    metadataBuilder.append(" = ");
-                                    metadataBuilder.append(fieldNode.asText());
-                                    metadataBuilder.append("]");
-                                }
-                            }
-
-                            writer.write(metadataBuilder.toString());
-                            writer.write("\n");
-                            writer.write(sequence.asText());
-                            writer.write("\n");
+                            fastaFileMap.get(uniqueKey).add(new SequenceData(identifier, (ObjectNode) sequenceNode));
 
                         }
 
@@ -103,11 +96,7 @@ public class FastaJsonWriter implements JsonWriter {
                 }
             }
 
-        } catch (IOException e) {
-            throw new FimsRuntimeException(FileCode.WRITE_ERROR, 500);
-        }
-
-        return file;
+        return writeFiles(fastaFileMap);
     }
 
     /**
@@ -130,5 +119,84 @@ public class FastaJsonWriter implements JsonWriter {
         }
 
         return true;
+    }
+
+    private File writeFiles(Map<String, List<SequenceData>> fileMap) {
+        List<File> sequenceFiles = new ArrayList<>();
+
+        for (Map.Entry<String, List<SequenceData>> entry: fileMap.entrySet()) {
+            sequenceFiles.add(writeSequenceFile(entry.getValue(), entry.getKey()));
+        }
+
+        if (sequenceFiles.size() <= 1) {
+            return sequenceFiles.get(0);
+        } else {
+            Map<String, File> fastaFileMap = new HashMap<>();
+
+            for (File fastaFile: sequenceFiles) {
+                fastaFileMap.put(fastaFile.getName(), fastaFile);
+            }
+
+            return FileUtils.zip(fastaFileMap, outputDirectory);
+        }
+    }
+
+    private File writeSequenceFile(List<SequenceData> sequences, String sequenceUniqueKey) {
+        String filename = StringUtils.isBlank(sequenceUniqueKey) ? "output.fasta" : sequenceUniqueKey + ".fasta";
+        File file = PathManager.createFile(filename, outputDirectory);
+
+
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(file)))) {
+
+            for (SequenceData s: sequences) {
+                ValueNode sequence = (ValueNode) s.getSequenceNode().path(fastaSequenceFields.getSequencePath());
+
+                writer.write("> ");
+                writer.write(s.getIdentifier());
+
+                StringBuilder metadataBuilder = new StringBuilder();
+
+                for (JsonFieldTransform field : fastaSequenceFields.getMetadata()) {
+                    JsonNode fieldNode = s.getSequenceNode().at(field.getPath());
+
+                    if (!fieldNode.isMissingNode()) {
+                        metadataBuilder.append(" [");
+                        metadataBuilder.append(field.getFieldName());
+                        metadataBuilder.append(" = ");
+                        metadataBuilder.append(fieldNode.asText());
+                        metadataBuilder.append("]");
+                    }
+                }
+
+                writer.write(metadataBuilder.toString());
+                writer.write("\n");
+                writer.write(sequence.asText());
+                writer.write("\n");
+            }
+
+        } catch (IOException e) {
+            throw new FimsRuntimeException(FileCode.WRITE_ERROR, 500);
+        }
+
+        return file;
+    }
+
+    private class SequenceData {
+        private final String identifier;
+        private final ObjectNode sequenceNode;
+
+        private SequenceData(String identifier, ObjectNode sequenceNode) {
+            this.identifier = identifier;
+            this.sequenceNode = sequenceNode;
+        }
+
+        String getIdentifier() {
+            return identifier;
+        }
+
+        ObjectNode getSequenceNode() {
+            return sequenceNode;
+        }
     }
 }
