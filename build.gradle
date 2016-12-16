@@ -1,9 +1,8 @@
 apply plugin: "java"
 apply plugin: "idea"
-apply plugin: "application"
 
-targetCompatibility = 1.7
-sourceCompatibility = 1.7
+targetCompatibility = 1.8
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -34,8 +33,14 @@ sourceSets {
 dependencies {
     server 'org.apache.jena:jena-arq:2.9.1'
     server 'com.googlecode.json-simple:json-simple:1.1.1'
-    server group: 'org.springframework', name: 'spring-context', version: '4.2.5.RELEASE'
+    server group: 'org.springframework', name: 'spring-context', version: '4.3.4.RELEASE'
     server 'commons-lang:commons-lang:2.6'
+    server group: 'org.elasticsearch.client', name: 'transport', version: '5.0.0'
+
+    server group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.5.4'
+
+    // required for elasticsearch
+    server group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.7'
 
     compile project(":biocode-fims-commons")
     compile project(":biocode-fims-fuseki")

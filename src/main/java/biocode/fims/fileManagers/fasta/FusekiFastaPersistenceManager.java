@@ -14,15 +14,19 @@ import com.hp.hpl.jena.sparql.modify.UpdateProcessRemote;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Created by rjewing on 10/16/16.
+ * {@link FastaPersistenceManager to handle uploading to fuseki
+ * //TODO rewrite this to support multiple fastaSequence per resource, and use the fastaSequence entity attributes
  */
 public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     private final BcidService bcidService;
@@ -35,12 +39,10 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     @Override
-    public void upload(ProcessController processController, List<FastaSequence> fastaSequences, boolean newDataset) {
+    public void upload(ProcessController processController, Map<String,List<JSONObject>> fastaSequences, boolean newDataset) {
         String fusekiService = processController.getMapping().getMetadata().getQueryTarget();
-        if (fastaSequences != null) {
-            if (fastaSequences.isEmpty()) {
-                throw new ServerErrorException("No fasta data was found.");
-            }
+
+        if (!fastaSequences.isEmpty()) {
 
             // save fasta data as a triple file
             File tripleFile = PathManager.createUniqueFile(
@@ -50,12 +52,16 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
 
             try (PrintWriter out = new PrintWriter(tripleFile)) {
 
-                for (FastaSequence sequence : fastaSequences) {
-                    out.write("<");
-                    out.write(getEntityRootIdentifier(processController) + sequence.getLocalIdentifier());
-                    out.write("> <" + FastaSequence.SEQUENCE_URI + "> \"");
-                    out.write(sequence.getSequence());
-                    out.write("\" .\n");
+                for (String localIdentifier: fastaSequences.keySet()) {
+                    JSONObject sequence = (JSONObject) fastaSequences.get(0);
+
+                    if (sequence != null) {
+                        out.write("<");
+                        out.write(getEntityRootIdentifier(processController) + localIdentifier);
+                        out.write("> <" + FastaSequence.SEQUENCE_URI + "> \"");
+                        out.write(String.valueOf(sequence.get("sequence")));
+                        out.write("\" .\n");
+                    }
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -79,6 +85,12 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
             copySequences(processController, fusekiService, newDataset);
         }
 
+    }
+
+    @Override
+    public HashMap<String, List<JSONObject>> getFastaSequences(ProcessController processController, String conceptAlias) {
+        // TODO fetch the fastaSequences from fuseki
+        return new HashMap<>();
     }
 
     /**
@@ -125,7 +137,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     private Bcid getCurrentBcid(ProcessController processController) {
-        List<Bcid> datasetBcids = bcidService.getDatasets(
+        List<Bcid> datasetBcids = bcidService.getFimsMetadataDatasets(
                 processController.getProjectId(),
                 processController.getExpeditionCode()
         );
@@ -138,7 +150,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     private String getCurrentGraph(ProcessController processController) {
-        List<Bcid> datasetBcids = bcidService.getDatasets(
+        List<Bcid> datasetBcids = bcidService.getFimsMetadataDatasets(
                 processController.getProjectId(),
                 processController.getExpeditionCode()
         );
@@ -151,7 +163,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     private String getPreviousGraph(ProcessController processController) {
-        List<Bcid> datasetBcids = bcidService.getDatasets(
+        List<Bcid> datasetBcids = bcidService.getFimsMetadataDatasets(
                 processController.getProjectId(),
                 processController.getExpeditionCode()
         );
