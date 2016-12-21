@@ -239,10 +239,12 @@ public class FastaFileManager implements AuxilaryFileManager {
      */
     private boolean datasetContainsResource(JSONArray dataset, String localIdentifier) {
         // check that the dataset still contains the resource, and add the existingSequences if it does
+        Mapping mapping = processController.getMapping();
+        String uniqueKeyUri = mapping.lookupUriForColumn(mapping.getDefaultSheetUniqueKey(), mapping.getDefaultSheetAttributes());
         for (Object o : dataset) {
             JSONObject resource = (JSONObject) o;
 
-            if (resource.get(processController.getMapping().getDefaultSheetUniqueKey()).equals(localIdentifier)) {
+            if (resource.get(uniqueKeyUri).equals(localIdentifier)) {
                 return true;
             }
         }
