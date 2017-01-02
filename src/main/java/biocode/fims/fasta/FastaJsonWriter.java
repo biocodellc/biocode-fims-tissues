@@ -61,40 +61,41 @@ public class FastaJsonWriter implements JsonWriter {
      * writes the given resources to a file, using the {@link FastaSequenceFields} object. If {@link FastaSequenceFields#getUniqueKeyPath()}
      * isn't null, a zip file will be returned containing a fasta file containing the fastaSequences objects for each unique
      * fastaSequence.{uniqueKeyPath} in the given resources
+     *
      * @return
      */
     @Override
     public File write() {
         Map<String, List<SequenceData>> fastaFileMap = new HashMap<>();
 
-            for (JsonNode resource : resources) {
+        for (JsonNode resource : resources) {
 
-                JsonNode sequencesNode = resource.path(fastaSequenceFields.getSequencesPath());
+            JsonNode sequencesNode = resource.path(fastaSequenceFields.getSequencesPath());
 
-                ValueNode identifierNode = (ValueNode) resource.path(fastaSequenceFields.getIdentifierPath());
-                String identifier = identifierNode.asText();
+            ValueNode identifierNode = (ValueNode) resource.path(fastaSequenceFields.getIdentifierPath());
+            String identifier = identifierNode.asText();
 
-                if (!sequencesNode.isMissingNode()) {
+            if (!sequencesNode.isMissingNode()) {
 
-                    ArrayNode sequencesArrayNode = (ArrayNode) sequencesNode;
+                ArrayNode sequencesArrayNode = (ArrayNode) sequencesNode;
 
-                    for (JsonNode sequenceNode : sequencesArrayNode) {
+                for (JsonNode sequenceNode : sequencesArrayNode) {
 
-                        if (writeSequence((ObjectNode) sequenceNode)) {
+                    if (writeSequence((ObjectNode) sequenceNode)) {
 
-                            // add the sequenceNode to a map based on the uniqueKeyPath so we can later write 1 file for
-                            // each key in the map
-                            String uniqueKey = sequenceNode.path(fastaSequenceFields.getUniqueKeyPath()).asText();
+                        // add the sequenceNode to a map based on the uniqueKeyPath so we can later write 1 file for
+                        // each key in the map
+                        String uniqueKey = sequenceNode.path(fastaSequenceFields.getUniqueKeyPath()).asText();
 
-                            fastaFileMap.computeIfAbsent(uniqueKey, k -> new ArrayList<>());
+                        fastaFileMap.computeIfAbsent(uniqueKey, k -> new ArrayList<>());
 
-                            fastaFileMap.get(uniqueKey).add(new SequenceData(identifier, (ObjectNode) sequenceNode));
-
-                        }
+                        fastaFileMap.get(uniqueKey).add(new SequenceData(identifier, (ObjectNode) sequenceNode));
 
                     }
+
                 }
             }
+        }
 
         return writeFiles(fastaFileMap);
     }
@@ -124,16 +125,22 @@ public class FastaJsonWriter implements JsonWriter {
     private File writeFiles(Map<String, List<SequenceData>> fileMap) {
         List<File> sequenceFiles = new ArrayList<>();
 
-        for (Map.Entry<String, List<SequenceData>> entry: fileMap.entrySet()) {
+        for (Map.Entry<String, List<SequenceData>> entry : fileMap.entrySet()) {
             sequenceFiles.add(writeSequenceFile(entry.getValue(), entry.getKey()));
         }
 
-        if (sequenceFiles.size() <= 1) {
+        if (sequenceFiles.size() < 1) {
+            try {
+                return File.createTempFile("output", "fasta");
+            } catch (IOException e) {
+                throw new FimsRuntimeException(FileCode.WRITE_ERROR, 500);
+            }
+        } else if (sequenceFiles.size() == 1) {
             return sequenceFiles.get(0);
         } else {
             Map<String, File> fastaFileMap = new HashMap<>();
 
-            for (File fastaFile: sequenceFiles) {
+            for (File fastaFile : sequenceFiles) {
                 fastaFileMap.put(fastaFile.getName(), fastaFile);
             }
 
@@ -149,7 +156,7 @@ public class FastaJsonWriter implements JsonWriter {
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(file)))) {
 
-            for (SequenceData s: sequences) {
+            for (SequenceData s : sequences) {
                 ValueNode sequence = (ValueNode) s.getSequenceNode().path(fastaSequenceFields.getSequencePath());
 
                 writer.write("> ");

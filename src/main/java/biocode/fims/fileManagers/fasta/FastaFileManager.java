@@ -32,13 +32,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * AuxilaryFileManger implementation to handle fasta sequences
  */
 public class FastaFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastaFileManager.class);
-    
+
     public static final String ENTITY_CONCEPT_ALIAS = "fastaSequence";
     public static final String SEQUENCE_ATTRIBUTE_URI = "urn:sequence";
     public static final String NAME = "fasta";
@@ -54,7 +56,7 @@ public class FastaFileManager implements AuxilaryFileManager {
     private List<FastaData> fastaDataList = new ArrayList<>();
     private Entity entity;
 
-    public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager, 
+    public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager,
                             BcidService bcidService, ExpeditionService expeditionService) {
         this.persistenceManager = persistenceManager;
         this.settingsManager = settingsManager;
@@ -68,11 +70,11 @@ public class FastaFileManager implements AuxilaryFileManager {
     @Override
     public boolean validate(JSONArray dataset) {
         Assert.notNull(processController);
+        boolean valid = true;
 
         if (!fastaDataList.isEmpty()) {
-            processController.appendStatus("\nRunning FASTA validation");
-            List<String> sampleIds = getUniqueIds(dataset);
 
+            List<String> sampleIds = getUniqueIds(dataset);
 
             if (sampleIds.isEmpty()) {
                 processController.addMessage(
@@ -82,45 +84,59 @@ public class FastaFileManager implements AuxilaryFileManager {
                 return false;
             }
 
-            // parse the FASTA file, setting the fastaSequences object
-            parseFasta();
+            for (FastaData fastaData : fastaDataList) {
+                String uniqueKey = "[" + String.valueOf(fastaData.getMetadata().get(entity.getUniqueKey())) + "] " + entity.getUniqueKey();
 
-            if (fastaSequences.isEmpty()) {
-                processController.addMessage(
-                        "FASTA",
-                        new RowMessage("No data found", "FASTA check", RowMessage.ERROR)
-                );
-                return false;
-            }
+                processController.appendStatus("\nRunning FASTA validation " + uniqueKey);
 
-            // verify that all fastaIds exist in the dataset
-            ArrayList<String> invalidIds = new ArrayList<>();
-            for (String identifier : fastaSequences.keySet()) {
-                if (!sampleIds.contains(identifier)) {
-                    invalidIds.add(identifier);
-                }
-            }
+                // parse the FASTA file, setting the fastaSequences object
+                Map<String, List<JSONObject>> fastaSequences = parseFasta(fastaData);
 
-            if (!invalidIds.isEmpty()) {
-                int level;
-                // this is an error if no ids exist in the dataset
-                if (invalidIds.size() == fastaSequences.size()) {
-                    level = RowMessage.ERROR;
-                } else {
-                    level = RowMessage.WARNING;
-                    processController.setHasWarnings(true);
+                if (fastaSequences.isEmpty()) {
+                    processController.addMessage(
+                            "FASTA: " + uniqueKey,
+                            new RowMessage("No data found", "FASTA check", RowMessage.ERROR)
+                    );
+                    valid = false;
                 }
-                processController.addMessage(
-                        "FASTA",
-                        new RowMessage(StringUtils.join(invalidIds, ", "),
-                                "The following sequences exist in the FASTA file, but not the dataset.", level)
-                );
-                if (level == RowMessage.ERROR) {
-                    return false;
+
+                // verify that all fastaIds exist in the dataset
+                ArrayList<String> invalidIds = new ArrayList<>();
+                for (String identifier : fastaSequences.keySet()) {
+                    if (!sampleIds.contains(identifier)) {
+                        invalidIds.add(identifier);
+                    }
                 }
+
+                if (!invalidIds.isEmpty()) {
+                    int level;
+                    // this is an error if no ids exist in the dataset
+                    if (invalidIds.size() == fastaSequences.size()) {
+                        level = RowMessage.ERROR;
+                    } else {
+                        level = RowMessage.WARNING;
+                        processController.setHasWarnings(true);
+                    }
+                    processController.addMessage(
+                            "FASTA: " + uniqueKey,
+                            new RowMessage(StringUtils.join(invalidIds, ", "),
+                                    "The following sequences exist in the FASTA file, but not the dataset.", level)
+                    );
+                    if (level == RowMessage.ERROR) {
+                        valid = false;
+                    }
+                }
+
+                fastaSequences.entrySet()
+                        .forEach(e -> this.fastaSequences.merge(
+                                e.getKey(), e.getValue(), (l1, l2) -> Stream.concat(l1.stream(), l2.stream())
+                                        .collect(Collectors.toList())
+                                )
+                        );
             }
         }
-        return true;
+
+        return valid;
     }
 
 
@@ -157,7 +173,7 @@ public class FastaFileManager implements AuxilaryFileManager {
                 File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
 
                 try {
-                    
+
                     Files.copy(inputFile.toPath(), outputFile.toPath());
 
                     bcid.setSourceFile(filename);
@@ -296,63 +312,63 @@ public class FastaFileManager implements AuxilaryFileManager {
     /**
      * parse the fasta file identifier-sequence pairs, populating the fastaSequences property
      */
-    private void parseFasta() {
+    private Map<String, List<JSONObject>> parseFasta(FastaData fastaData) {
+        Map<String, List<JSONObject>> fastaSequences = new HashMap<>();
 
         try {
-            for (FastaData fastaData : fastaDataList) {
+            FileReader input = new FileReader(fastaData.getFilename());
+            BufferedReader bufRead = new BufferedReader(input);
+            String line;
+            String identifier = null;
+            String sequence = "";
 
-                FileReader input = new FileReader(fastaData.getFilename());
-                BufferedReader bufRead = new BufferedReader(input);
-                String line;
-                String identifier = null;
-                String sequence = "";
+            while ((line = bufRead.readLine()) != null) {
 
-                while ((line = bufRead.readLine()) != null) {
+                // > deliminates the next identifier, sequence block in the fasta file
+                if (line.startsWith(">")) {
 
-                    // > deliminates the next identifier, sequence block in the fasta file
-                    if (line.startsWith(">")) {
+                    if (!sequence.isEmpty() || identifier != null) {
 
-                        if (!sequence.isEmpty() || identifier != null) {
+                        addFastaSequence(identifier, sequence, fastaData.getMetadata(), fastaSequences);
 
-                            addFastaSequence(identifier, sequence, fastaData.getMetadata());
-
-                            // after putting the sequence into the object, reset the sequence
-                            sequence = "";
-
-                        }
-
-                        int endIdentifierIndex;
-
-                        if (line.contains(" ")) {
-                            endIdentifierIndex = line.indexOf(" ");
-                        } else if (line.contains("\n")) {
-                            endIdentifierIndex = line.indexOf("\n");
-                        } else {
-                            endIdentifierIndex = line.length();
-                        }
-
-                        // parse the identifier - minus the deliminator
-                        identifier = line.substring(1, endIdentifierIndex);
-
-                    } else {
-
-                        // if we are here, we are in between 2 identifiers. This means this is all sequence data
-                        sequence += line;
+                        // after putting the sequence into the object, reset the sequence
+                        sequence = "";
 
                     }
 
+                    int endIdentifierIndex;
+
+                    if (line.contains(" ")) {
+                        endIdentifierIndex = line.indexOf(" ");
+                    } else if (line.contains("\n")) {
+                        endIdentifierIndex = line.indexOf("\n");
+                    } else {
+                        endIdentifierIndex = line.length();
+                    }
+
+                    // parse the identifier - minus the deliminator
+                    identifier = line.substring(1, endIdentifierIndex);
+
+                } else {
+
+                    // if we are here, we are in between 2 identifiers. This means this is all sequence data
+                    sequence += line;
+
                 }
 
-                // need to put the last sequence data into the hashmap
-                if (identifier != null) {
+            }
 
-                    addFastaSequence(identifier, sequence, fastaData.getMetadata());
+            // need to put the last sequence data into the hashmap
+            if (identifier != null) {
 
-                }
+                addFastaSequence(identifier, sequence, fastaData.getMetadata(), fastaSequences);
+
             }
         } catch (IOException e) {
             throw new ServerErrorException(e);
         }
+
+        return fastaSequences;
     }
 
     /**
@@ -362,7 +378,7 @@ public class FastaFileManager implements AuxilaryFileManager {
      * @param sequence
      * @param metadata
      */
-    private void addFastaSequence(String identifier, String sequence, JSONObject metadata) {
+    private void addFastaSequence(String identifier, String sequence, JSONObject metadata, Map<String, List<JSONObject>> fastaSequences) {
         List<Attribute> fastaAttributes = entity.getAttributes();
 
         JSONObject fastaSequence = new JSONObject();
