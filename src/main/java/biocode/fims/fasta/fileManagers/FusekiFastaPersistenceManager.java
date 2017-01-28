@@ -1,4 +1,4 @@
-package biocode.fims.fileManagers.fasta;
+package biocode.fims.fasta.fileManagers;
 
 import biocode.fims.digester.Entity;
 import biocode.fims.entities.Bcid;
@@ -10,11 +10,11 @@ import biocode.fims.run.ProcessController;
 import biocode.fims.service.BcidService;
 import biocode.fims.service.ExpeditionService;
 import biocode.fims.settings.PathManager;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.hp.hpl.jena.sparql.modify.UpdateProcessRemote;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     @Override
-    public void upload(ProcessController processController, Map<String,List<JSONObject>> fastaSequences, boolean newDataset) {
+    public void upload(ProcessController processController, Map<String, ArrayNode> fastaSequences, boolean newDataset) {
         String fusekiService = processController.getMapping().getMetadata().getQueryTarget();
 
         if (!fastaSequences.isEmpty()) {
@@ -53,7 +53,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
             try (PrintWriter out = new PrintWriter(tripleFile)) {
 
                 for (String localIdentifier: fastaSequences.keySet()) {
-                    JSONObject sequence = (JSONObject) fastaSequences.get(0);
+                    ArrayNode sequence = (ArrayNode) fastaSequences.get(0);
 
                     if (sequence != null) {
                         out.write("<");
@@ -88,7 +88,7 @@ public class FusekiFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     @Override
-    public HashMap<String, List<JSONObject>> getFastaSequences(ProcessController processController, String conceptAlias) {
+    public Map<String, ArrayNode> getFastaSequences(ProcessController processController, String conceptAlias) {
         // TODO fetch the fastaSequences from fuseki
         return new HashMap<>();
     }

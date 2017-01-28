@@ -1,4 +1,4 @@
-package biocode.fims.fileManagers.fasta;
+package biocode.fims.fasta.fileManagers;
 
 import biocode.fims.bcid.ResourceTypes;
 import biocode.fims.digester.Attribute;
@@ -16,9 +16,10 @@ import biocode.fims.service.ExpeditionService;
 import biocode.fims.settings.PathManager;
 import biocode.fims.settings.SettingsManager;
 import biocode.fims.utils.FileUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -32,8 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * AuxilaryFileManger implementation to handle fasta sequences
@@ -52,7 +51,7 @@ public class FastaFileManager implements AuxilaryFileManager {
     private final ExpeditionService expeditionService;
 
     private ProcessController processController;
-    private Map<String, List<JSONObject>> fastaSequences = new HashMap<>();
+    private Map<String, ArrayNode> fastaSequences = new HashMap<>();
     private List<FastaData> fastaDataList = new ArrayList<>();
     private Entity entity;
 
@@ -68,7 +67,7 @@ public class FastaFileManager implements AuxilaryFileManager {
      * verify that the identifiers in the fasta file are in a dataset.
      */
     @Override
-    public boolean validate(JSONArray dataset) {
+    public boolean validate(ArrayNode dataset) {
         Assert.notNull(processController);
         boolean valid = true;
 
@@ -85,12 +84,12 @@ public class FastaFileManager implements AuxilaryFileManager {
             }
 
             for (FastaData fastaData : fastaDataList) {
-                String uniqueKey = "[" + String.valueOf(fastaData.getMetadata().get(entity.getUniqueKey())) + "] " + entity.getUniqueKey();
+                String uniqueKey = "[" + fastaData.getMetadata().get(entity.getUniqueKey()).asText() + "] " + entity.getUniqueKey();
 
                 processController.appendStatus("\nRunning FASTA validation " + uniqueKey);
 
                 // parse the FASTA file, setting the fastaSequences object
-                Map<String, List<JSONObject>> fastaSequences = parseFasta(fastaData);
+                Map<String, ArrayNode> fastaSequences = parseFasta(fastaData);
 
                 if (fastaSequences.isEmpty()) {
                     processController.addMessage(
@@ -129,9 +128,7 @@ public class FastaFileManager implements AuxilaryFileManager {
 
                 fastaSequences.entrySet()
                         .forEach(e -> this.fastaSequences.merge(
-                                e.getKey(), e.getValue(), (l1, l2) -> Stream.concat(l1.stream(), l2.stream())
-                                        .collect(Collectors.toList())
-                                )
+                                e.getKey(), e.getValue(), ArrayNode::addAll)
                         );
             }
         }
@@ -190,7 +187,7 @@ public class FastaFileManager implements AuxilaryFileManager {
      * add the fastaSequence entities to the dataset for indexing
      */
     @Override
-    public void index(JSONArray dataset) {
+    public void index(ArrayNode dataset) {
         Mapping mapping = processController.getMapping();
         String uniqueKey = mapping.lookupUriForColumn(mapping.getDefaultSheetUniqueKey(), mapping.getDefaultSheetAttributes());
 
@@ -198,13 +195,13 @@ public class FastaFileManager implements AuxilaryFileManager {
 
         if (!fastaSequences.isEmpty()) {
 
-            for (Object o : dataset) {
-                JSONObject resource = (JSONObject) o;
+            for (JsonNode node : dataset) {
+                ObjectNode resource = (ObjectNode) node;
 
-                String localIdentifier = String.valueOf(resource.get(uniqueKey));
+                String localIdentifier = resource.get(uniqueKey).asText();
 
                 if (fastaSequences.containsKey(localIdentifier)) {
-                    resource.put(entity.getConceptAlias(), fastaSequences.get(localIdentifier));
+                    resource.set(entity.getConceptAlias(), fastaSequences.get(localIdentifier));
                 }
             }
 
@@ -217,10 +214,12 @@ public class FastaFileManager implements AuxilaryFileManager {
      * {@link Entity#getUniqueKey()}. we will either overwrite the existing fastaSequence object if
      * the identifier and uniqueKey match, or add the new fastaSequence to the list of existing
      * fastaSequences for the identifier
+     *
+     * @param dataset
      */
-    private void mergeFastaSequences(JSONArray dataset) {
+    private void mergeFastaSequences(ArrayNode dataset) {
         // TODO, if this isn't a new dataset, then the fastaSequences will have already be fetched
-        Map<String, List<JSONObject>> existingSequences = persistenceManager.getFastaSequences(processController, entity.getConceptAlias());
+        Map<String, ArrayNode> existingSequences = persistenceManager.getFastaSequences(processController, entity.getConceptAlias());
 
         for (String identifier : existingSequences.keySet()) {
 
@@ -232,7 +231,8 @@ public class FastaFileManager implements AuxilaryFileManager {
 
             } else {
 
-                for (JSONObject existingSequence : existingSequences.get(identifier)) {
+                for (JsonNode node: existingSequences.get(identifier)) {
+                    ObjectNode existingSequence = (ObjectNode) node;
 
                     if (!fastaSequencesContainsSequence(identifier, existingSequence)) {
                         fastaSequences.get(identifier).add(existingSequence);
@@ -253,14 +253,14 @@ public class FastaFileManager implements AuxilaryFileManager {
      *                        the dataset
      * @return
      */
-    private boolean datasetContainsResource(JSONArray dataset, String localIdentifier) {
+    private boolean datasetContainsResource(ArrayNode dataset, String localIdentifier) {
         // check that the dataset still contains the resource, and add the existingSequences if it does
         Mapping mapping = processController.getMapping();
         String uniqueKeyUri = mapping.lookupUriForColumn(mapping.getDefaultSheetUniqueKey(), mapping.getDefaultSheetAttributes());
-        for (Object o : dataset) {
-            JSONObject resource = (JSONObject) o;
+        for (JsonNode node : dataset) {
+            ObjectNode resource = (ObjectNode) node;
 
-            if (resource.get(uniqueKeyUri).equals(localIdentifier)) {
+            if (resource.get(uniqueKeyUri).asText().equals(localIdentifier)) {
                 return true;
             }
         }
@@ -275,10 +275,11 @@ public class FastaFileManager implements AuxilaryFileManager {
      * @param sequence
      * @return
      */
-    private boolean fastaSequencesContainsSequence(String identifier, JSONObject sequence) {
+    private boolean fastaSequencesContainsSequence(String identifier, ObjectNode sequence) {
         String uniqueKey = processController.getMapping().lookupUriForColumn(entity.getUniqueKey(), entity.getAttributes());
 
-        for (JSONObject newSequence : fastaSequences.get(identifier)) {
+        for (JsonNode node: fastaSequences.get(identifier)) {
+            ObjectNode newSequence = (ObjectNode) node;
 
             if (StringUtils.equals(
                     String.valueOf(newSequence.get(uniqueKey)),
@@ -293,27 +294,27 @@ public class FastaFileManager implements AuxilaryFileManager {
         return false;
     }
 
-    private List<String> getUniqueIds(JSONArray dataset) {
-        List<String> sampleIds = new ArrayList<>();
+    private List<String> getUniqueIds(ArrayNode dataset) {
+        List<String> resourceIds = new ArrayList<>();
         Mapping mapping = processController.getMapping();
 
         String uniqueKey = mapping.getDefaultSheetUniqueKey();
 
-        for (Object obj : dataset) {
-            JSONObject sample = (JSONObject) obj;
-            if (sample.containsKey(uniqueKey)) {
-                sampleIds.add(String.valueOf(sample.get(uniqueKey)));
+        for (JsonNode node: dataset) {
+            ObjectNode resource = (ObjectNode) node;
+            if (resource.has(uniqueKey)) {
+                resourceIds.add(resource.get(uniqueKey).asText());
             }
         }
 
-        return sampleIds;
+        return resourceIds;
     }
 
     /**
      * parse the fasta file identifier-sequence pairs, populating the fastaSequences property
      */
-    private Map<String, List<JSONObject>> parseFasta(FastaData fastaData) {
-        Map<String, List<JSONObject>> fastaSequences = new HashMap<>();
+    private Map<String, ArrayNode> parseFasta(FastaData fastaData) {
+        Map<String, ArrayNode> fastaSequences = new HashMap<>();
 
         try {
             FileReader input = new FileReader(fastaData.getFilename());
@@ -373,15 +374,15 @@ public class FastaFileManager implements AuxilaryFileManager {
 
     /**
      * adds a fastaSequence object to the fastaSequences map
-     *
-     * @param identifier
+     *  @param identifier
      * @param sequence
      * @param metadata
+     * @param fastaSequences
      */
-    private void addFastaSequence(String identifier, String sequence, JSONObject metadata, Map<String, List<JSONObject>> fastaSequences) {
+    private void addFastaSequence(String identifier, String sequence, ObjectNode metadata, Map<String, ArrayNode> fastaSequences) {
         List<Attribute> fastaAttributes = entity.getAttributes();
 
-        JSONObject fastaSequence = new JSONObject();
+        ObjectNode fastaSequence = metadata.objectNode();
         fastaSequence.put(SEQUENCE_ATTRIBUTE_URI, sequence);
 
         // currently we are only looking for fastaSequence entity attributes in the FastaData object.
@@ -394,8 +395,8 @@ public class FastaFileManager implements AuxilaryFileManager {
 
                 String key = attribute.getColumn();
 
-                if (metadata.containsKey(key)) {
-                    fastaSequence.put(attribute.getUri(), metadata.get(key));
+                if (metadata.has(key)) {
+                    fastaSequence.set(attribute.getUri(), metadata.get(key));
                 }
 
             }
@@ -403,7 +404,7 @@ public class FastaFileManager implements AuxilaryFileManager {
         }
 
         if (!fastaSequences.containsKey(identifier)) {
-            List<JSONObject> sequences = new ArrayList<>();
+            ArrayNode sequences = fastaSequence.arrayNode();
 
             sequences.add(fastaSequence);
             fastaSequences.put(identifier, sequences);

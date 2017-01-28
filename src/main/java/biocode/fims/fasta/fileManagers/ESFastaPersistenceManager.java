@@ -1,10 +1,11 @@
-package biocode.fims.fileManagers.fasta;
+package biocode.fims.fasta.fileManagers;
 
 import biocode.fims.digester.Mapping;
 import biocode.fims.elasticSearch.ElasticSearchIndexer;
-import biocode.fims.fimsExceptions.FimsRuntimeException;
+import biocode.fims.rest.SpringObjectMapper;
 import biocode.fims.run.ProcessController;
 import biocode.fims.utils.EmailUtils;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -13,7 +14,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +32,13 @@ public class ESFastaPersistenceManager implements FastaPersistenceManager {
     }
 
     @Override
-    public void upload(ProcessController processController, Map<String, List<JSONObject>> fastaSequences, boolean newDataset) {
+    public void upload(ProcessController processController, Map<String, ArrayNode> fastaSequences, boolean newDataset) {
         // do nothing, as elasticsearch "uploading" is handled in FastaFileManager.index
     }
 
     @Override
-    public Map<String, List<JSONObject>> getFastaSequences(ProcessController processController, String conceptAlias) {
-        Map<String, List<JSONObject>> fastaSequences = new HashMap<>();
+    public Map<String, ArrayNode> getFastaSequences(ProcessController processController, String conceptAlias) {
+        Map<String, ArrayNode> fastaSequences = new HashMap<>();
         Mapping mapping = processController.getMapping();
         String uniqueKey = mapping.lookupUriForColumn(mapping.getDefaultSheetUniqueKey(), mapping.getDefaultSheetAttributes());
 
@@ -56,7 +56,7 @@ public class ESFastaPersistenceManager implements FastaPersistenceManager {
                                                 ),
                                         ScoreMode.None)
                         ).must(
-                                QueryBuilders.matchQuery("expedition.expeditionCode", processController.getExpeditionCode())
+                                QueryBuilders.matchQuery("expedition.expeditionCode.keyword", processController.getExpeditionCode())
                         )
                 )
                 .setFetchSource(new String[]{uniqueKey, conceptAlias}, null);
@@ -72,17 +72,16 @@ public class ESFastaPersistenceManager implements FastaPersistenceManager {
             );
         } else {
 
+            SpringObjectMapper objectMapper = new SpringObjectMapper();
             do {
 
                 for (SearchHit hit : response.getHits().getHits()) {
                     Map<String, Object> source = hit.getSource();
                     String localIdentifier = String.valueOf(source.get(uniqueKey));
 
-                    List<JSONObject> sourceSequences = new ArrayList<>();
+                    ArrayNode sourceSequences = objectMapper.createArrayNode();
 
-                    for (Map o: (List<Map>) source.get(conceptAlias)) {
-                        sourceSequences.add(new JSONObject(o));
-                    }
+                    sourceSequences.addAll((ArrayNode) objectMapper.valueToTree(source.get(conceptAlias)));
 
                     fastaSequences.put(localIdentifier, sourceSequences);
                 }

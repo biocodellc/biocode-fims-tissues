@@ -1,13 +1,13 @@
 package biocode.fims.fasta;
 
-import org.json.simple.JSONObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * object to hold fasta data
  */
 public class FastaData {
     private String filename;
-    private JSONObject metadata;
+    private ObjectNode metadata;
 
     /**
      * the filename containing the fasta data
@@ -26,14 +26,14 @@ public class FastaData {
     /**
      * any metadata that is associated with the fasta file
      */
-    public JSONObject getMetadata() {
+    public ObjectNode getMetadata() {
         return metadata;
     }
 
     /**
      * {@link FastaData#getMetadata}
      */
-    public void setMetadata(JSONObject metadata) {
+    public void setMetadata(ObjectNode metadata) {
         this.metadata = metadata;
     }
 }
