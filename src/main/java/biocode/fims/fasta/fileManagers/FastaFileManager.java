@@ -145,36 +145,34 @@ public class FastaFileManager implements AuxilaryFileManager {
             // save the file on the server
             for (FastaData fastaData : fastaDataList) {
 
-                Bcid bcid = new Bcid.BcidBuilder(ResourceTypes.DATASET_RESOURCE_TYPE)
-                        .ezidRequest(Boolean.parseBoolean(settingsManager.retrieveValue("ezidRequests")))
-                        .title("Fasta Dataset: " + processController.getExpeditionCode())
-                        .subResourceType(DATASET_RESOURCE_SUB_TYPE)
-                        .finalCopy(processController.getFinalCopy())
-                        .build();
-
-                bcidService.create(bcid, processController.getUserId());
-
-                Expedition expedition = expeditionService.getExpedition(
-                        processController.getExpeditionCode(),
-                        processController.getProjectId()
-                );
-
-                bcidService.attachBcidToExpedition(
-                        bcid,
-                        expedition.getExpeditionId()
-                );
-
                 File inputFile = new File(fastaData.getFilename());
                 String ext = FileUtils.getExtension(inputFile.getName(), null);
-                String filename = "fasta_bcid_id_" + bcid.getBcidId() + "." + ext;
+                String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
                 File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
 
                 try {
 
                     Files.copy(inputFile.toPath(), outputFile.toPath());
 
-                    bcid.setSourceFile(filename);
-                    bcidService.update(bcid);
+                    Bcid bcid = new Bcid.BcidBuilder(ResourceTypes.DATASET_RESOURCE_TYPE)
+                            .ezidRequest(Boolean.parseBoolean(settingsManager.retrieveValue("ezidRequests")))
+                            .title("Fasta Dataset: " + processController.getExpeditionCode())
+                            .subResourceType(DATASET_RESOURCE_SUB_TYPE)
+                            .finalCopy(processController.getFinalCopy())
+                            .sourceFile(filename)
+                            .build();
+
+                    bcidService.create(bcid, processController.getUserId());
+
+                    Expedition expedition = expeditionService.getExpedition(
+                            processController.getExpeditionCode(),
+                            processController.getProjectId()
+                    );
+
+                    bcidService.attachBcidToExpedition(
+                            bcid,
+                            expedition.getExpeditionId()
+                    );
 
                 } catch (IOException e) {
                     logger.error("failed to save fasta input file {}", filename);
@@ -231,7 +229,7 @@ public class FastaFileManager implements AuxilaryFileManager {
 
             } else {
 
-                for (JsonNode node: existingSequences.get(identifier)) {
+                for (JsonNode node : existingSequences.get(identifier)) {
                     ObjectNode existingSequence = (ObjectNode) node;
 
                     if (!fastaSequencesContainsSequence(identifier, existingSequence)) {
@@ -278,7 +276,7 @@ public class FastaFileManager implements AuxilaryFileManager {
     private boolean fastaSequencesContainsSequence(String identifier, ObjectNode sequence) {
         String uniqueKey = processController.getMapping().lookupUriForColumn(entity.getUniqueKey(), entity.getAttributes());
 
-        for (JsonNode node: fastaSequences.get(identifier)) {
+        for (JsonNode node : fastaSequences.get(identifier)) {
             ObjectNode newSequence = (ObjectNode) node;
 
             if (StringUtils.equals(
@@ -300,7 +298,7 @@ public class FastaFileManager implements AuxilaryFileManager {
 
         String uniqueKey = mapping.getDefaultSheetUniqueKey();
 
-        for (JsonNode node: dataset) {
+        for (JsonNode node : dataset) {
             ObjectNode resource = (ObjectNode) node;
             if (resource.has(uniqueKey)) {
                 resourceIds.add(resource.get(uniqueKey).asText());
@@ -374,7 +372,8 @@ public class FastaFileManager implements AuxilaryFileManager {
 
     /**
      * adds a fastaSequence object to the fastaSequences map
-     *  @param identifier
+     *
+     * @param identifier
      * @param sequence
      * @param metadata
      * @param fastaSequences

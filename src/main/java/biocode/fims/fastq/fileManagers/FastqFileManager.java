@@ -1,15 +1,23 @@
 package biocode.fims.fastq.fileManagers;
 
+import biocode.fims.bcid.ResourceTypes;
 import biocode.fims.digester.Entity;
 import biocode.fims.digester.Field;
 import biocode.fims.digester.Mapping;
 import biocode.fims.digester.Validation;
+import biocode.fims.entities.Bcid;
+import biocode.fims.entities.Expedition;
 import biocode.fims.fastq.FastqMetadata;
 import biocode.fims.fileManagers.AuxilaryFileManager;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.renderers.RowMessage;
 import biocode.fims.rest.SpringObjectMapper;
 import biocode.fims.run.ProcessController;
+import biocode.fims.service.BcidService;
+import biocode.fims.service.ExpeditionService;
+import biocode.fims.settings.PathManager;
+import biocode.fims.settings.SettingsManager;
+import biocode.fims.utils.FileUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -28,6 +37,7 @@ import java.util.regex.Pattern;
  */
 public class FastqFileManager implements AuxilaryFileManager {
     private static final Logger logger = LoggerFactory.getLogger(FastqFileManager.class);
+    private static final String DATASET_RESOURCE_SUB_TYPE = "Fastq";
     public static final String CONCEPT_ALIAS = "fastqMetadata";
 
     public static final String NAME = "fastq";
@@ -36,13 +46,21 @@ public class FastqFileManager implements AuxilaryFileManager {
     public static final String SINGLE_FILE_PATTERN = "^{resourceId}\\.(fq|fastq)$";
 
     private final FastqPersistenceManager persistenceManager;
+    private final ExpeditionService expeditionService;
+    private final BcidService bcidService;
+    private final SettingsManager settingsManager;
+
     private ProcessController processController;
     private String filename;
     private Map<String, FastqMetadata> resourceFastqMetadataObjects = new HashMap<>();
     private FastqMetadata fastqMetadata;
 
-    public FastqFileManager(FastqPersistenceManager persistenceManager) {
+    public FastqFileManager(FastqPersistenceManager persistenceManager, ExpeditionService expeditionService,
+                            BcidService bcidService, SettingsManager settingsManager) {
         this.persistenceManager = persistenceManager;
+        this.expeditionService = expeditionService;
+        this.bcidService = bcidService;
+        this.settingsManager = settingsManager;
     }
 
     @Override
@@ -77,6 +95,14 @@ public class FastqFileManager implements AuxilaryFileManager {
         if (filename != null || fastqMetadata != null) {
             processController.appendStatus("\nRunning FASTQ validation");
 
+            if (dataset.size() == 0) {
+                processController.addMessage(
+                        processController.getMapping().getDefaultSheetName(),
+                        new RowMessage("No fims metadata found", "Spreadsheet check", RowMessage.ERROR)
+                );
+                return false;
+            }
+
             if (fastqMetadata == null) {
                 processController.addMessage(
                         "FASTQ",
@@ -108,6 +134,39 @@ public class FastqFileManager implements AuxilaryFileManager {
     @Override
     public void upload(boolean newDataset) {
         persistenceManager.upload(processController, resourceFastqMetadataObjects, newDataset);
+
+        if (!resourceFastqMetadataObjects.isEmpty()) {
+            try {
+                String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fastq_metadata.json";
+                File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
+
+                SpringObjectMapper objectMapper = new SpringObjectMapper();
+                objectMapper.writeValue(outputFile, resourceFastqMetadataObjects);
+
+                Bcid bcid = new Bcid.BcidBuilder(ResourceTypes.DATASET_RESOURCE_TYPE)
+                        .ezidRequest(Boolean.parseBoolean(settingsManager.retrieveValue("ezidRequests")))
+                        .title("Fastq Metadata: " + processController.getExpeditionCode())
+                        .subResourceType(DATASET_RESOURCE_SUB_TYPE)
+                        .finalCopy(processController.getFinalCopy())
+                        .sourceFile(filename)
+                        .build();
+
+                bcidService.create(bcid, processController.getUserId());
+
+                Expedition expedition = expeditionService.getExpedition(
+                        processController.getExpeditionCode(),
+                        processController.getProjectId()
+                );
+
+                bcidService.attachBcidToExpedition(
+                        bcid,
+                        expedition.getExpeditionId()
+                );
+
+            } catch (IOException e) {
+                logger.error("failed to save fastq json file {}", filename);
+            }
+        }
     }
 
     /**
