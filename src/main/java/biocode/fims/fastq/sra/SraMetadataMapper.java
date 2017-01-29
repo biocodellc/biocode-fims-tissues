@@ -1,4 +1,4 @@
-package biocode.fims.sra;
+package biocode.fims.fastq.sra;
 
 import java.util.List;
 
@@ -7,9 +7,9 @@ import java.util.List;
  */
 public interface SraMetadataMapper {
 
-    boolean hasNextSample();
+    boolean hasNextResource();
 
     List<String> getHeaderValues();
 
-    List<String> getSampleMetadata();
+    List<String> getResourceMetadata();
 }

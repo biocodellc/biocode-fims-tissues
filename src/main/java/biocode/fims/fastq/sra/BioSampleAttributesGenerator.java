@@ -1,4 +1,4 @@
-package biocode.fims.sra;
+package biocode.fims.fastq.sra;
 
 import biocode.fims.exceptions.SraCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * class to generate a Genbank sra BioSample attributes file (https://www.ncbi.nlm.nih.gov/biosample/docs/submission/faq/)
+ * class to generate a NCBI sra BioSample attributes file (https://www.ncbi.nlm.nih.gov/biosample/docs/submission/faq/)
  * This takes the sample metadata stored in the FIMS system and writes it to a tsv file. The attributes file is compatible
  * with both invertebrate and "model organism or animal sample" BioSample submissions.
  */
@@ -36,11 +36,14 @@ public class BioSampleAttributesGenerator {
             fw.write("\n");
 
             while (mapper.hasNextSample()) {
-                for (String attribute: mapper.getBioSampleAttributes()) {
-                    fw.write(attribute + DELIMITER);
-                }
+                List<String> bioSampleAttributes = mapper.getBioSampleAttributes();
 
-                fw.write("\n");
+                if (!bioSampleAttributes.isEmpty()) {
+                    for (String mValue : bioSampleAttributes) {
+                        fw.write(mValue + DELIMITER);
+                    }
+                    fw.write("\n");
+                }
             }
         } catch (IOException e) {
             throw new FimsRuntimeException(SraCode.METADATA_FILE_CREATION_FAILED, 500);

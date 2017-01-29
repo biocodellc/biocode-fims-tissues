@@ -1,4 +1,4 @@
-package biocode.fims.sra;
+package biocode.fims.fastq.sra;
 
 import java.util.List;
 
