@@ -9,6 +9,7 @@ import java.util.List;
 public abstract class AbstractSraMetadataMapper implements SraMetadataMapper{
 
     private static final List<String> SRA_HEADERS = new ArrayList<String>() {{
+        add("sample_name");
         add("library_ID");
         add("title");
         add("library_strategy");
