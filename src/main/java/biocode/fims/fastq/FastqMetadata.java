@@ -32,7 +32,6 @@ public class FastqMetadata implements Serializable {
         private String platform;
         private String instrumentModel;
         private String designDescription;
-//        private String filename;
         private List<String> filenames;
 
         public FASTQMetadataBuilder() {
@@ -73,10 +72,6 @@ public class FastqMetadata implements Serializable {
             return this;
         }
 
-//        public FASTQMetadataBuilder filename(String filename) {
-//            this.filename = filename;
-//            return this;
-//        }
         public FASTQMetadataBuilder filenames(List<String> filenames) {
             this.filenames = filenames;
             return this;
