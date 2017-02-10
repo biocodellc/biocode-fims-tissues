@@ -37,7 +37,13 @@ dependencies {
     server 'commons-lang:commons-lang:2.6'
     server group: 'org.elasticsearch.client', name: 'transport', version: '5.0.0'
 
-    server group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.5.4'
+    server group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.25'
+    server('org.glassfish.jersey.ext:jersey-spring3:2.25') {
+        exclude module: 'bean-validator'
+        exclude module: 'asm-all-repackaged'
+    }
+
+    server group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.4'
 
     // required for elasticsearch
     server group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.7'
