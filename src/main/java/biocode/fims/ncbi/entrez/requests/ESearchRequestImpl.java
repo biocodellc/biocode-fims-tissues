@@ -1,7 +1,7 @@
-package biocode.fims.ncbi.entrez;
+package biocode.fims.ncbi.entrez.requests;
 
+import biocode.fims.ncbi.entrez.EntrezQueryParams;
 import biocode.fims.ncbi.models.ESearchResponse;
-import biocode.fims.ncbi.NCBIEntrezRequest;
 import org.springframework.util.Assert;
 
 import javax.ws.rs.client.Client;
@@ -15,13 +15,12 @@ import java.util.Map;
  * @author rjewing
  */
 
-public class ESearchRequest extends NCBIEntrezRequest<ESearchResponse> {
+public class ESearchRequestImpl extends AbstractEntrezRequest<ESearchResponse> implements ESearchRequest {
     private final static String SERVICE_PATH = "esearch.fcgi";
     private final static String RET_MODE = "json";
-    private final static int RET_START = 0;
-    private final static int RET_MAX = 100000;
+    public final static int RET_MAX = 100000;
 
-    public ESearchRequest(String db, String term, Client client) {
+    public ESearchRequestImpl(String db, String term, Client client) {
         super(SERVICE_PATH, client, "GET", biocode.fims.ncbi.models.ESearchResponse.class);
         setQueryParams(getDefaultQueryParams(db, term));
         setAccepts(MediaType.APPLICATION_JSON_TYPE);
@@ -32,11 +31,11 @@ public class ESearchRequest extends NCBIEntrezRequest<ESearchResponse> {
         Assert.hasText(term, "Required parameter term must not be empty");
 
         Map<String, Object[]> queryParams = new HashMap<>();
-        queryParams.put("db", new Object[]{db});
-        queryParams.put("term", new Object[]{term});
-        queryParams.put("retmode", new Object[]{RET_MODE});
-        queryParams.put("retstart", new Object[]{RET_START});
-        queryParams.put("retmax", new Object[]{RET_MAX});
+        queryParams.put(EntrezQueryParams.DB.getName(), new Object[]{db});
+        queryParams.put(EntrezQueryParams.TERM.getName(), new Object[]{term});
+        queryParams.put(EntrezQueryParams.RETRIEVAL_MODE.getName(), new Object[]{RET_MODE});
+        queryParams.put(EntrezQueryParams.RETRIEVAL_START.getName(), new Object[]{currentPage});
+        queryParams.put(EntrezQueryParams.RETRIEVAL_MAX.getName(), new Object[]{RET_MAX});
 
         return queryParams;
     }

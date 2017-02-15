@@ -1,15 +1,12 @@
-package biocode.fims.ncbi.entrez;
+package biocode.fims.ncbi.entrez.requests;
 
-import biocode.fims.ncbi.NCBIEntrezRequest;
-import biocode.fims.ncbi.models.ESearchResponse;
-import org.elasticsearch.common.recycler.Recycler;
+import biocode.fims.ncbi.entrez.EntrezQueryParams;
 import org.glassfish.jersey.moxy.xml.MoxyXmlFeature;
 import org.springframework.util.Assert;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.*;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +17,19 @@ import java.util.Map;
  * @author rjewing
  */
 
-public class EFetchRequest<T> extends NCBIEntrezRequest<T> {
+public class AbstractEFetchRequest<T> extends AbstractEntrezRequest<T> implements EFetchRequest<T> {
     private final static String SERVICE_PATH = "efetch.fcgi";
     private final static String RET_MODE = "xml";
-    private final static int RET_START = 0;
-    private final static int RET_MAX = 100000;
+    public final static int RET_MAX = 10000;
 
-    public EFetchRequest(String db, List<String> ids, Client client, Class<T> responseClass) {
+    /**
+     *
+     * @param db
+     * @param ids size must be between 1 and {@link AbstractEFetchRequest#RET_MAX}
+     * @param client
+     * @param responseClass
+     */
+    AbstractEFetchRequest(String db, List<String> ids, Client client, Class<T> responseClass) {
         super(SERVICE_PATH, client, "POST", responseClass);
         registerDefaultClientFeatures(client);
 
@@ -37,6 +40,7 @@ public class EFetchRequest<T> extends NCBIEntrezRequest<T> {
 
     private Entity getDefaultHttpEntity(List<String> ids) {
         Assert.notEmpty(ids, "Required parameter ids must not be empty");
+        assert ids.size() <= RET_MAX;
 
         MultivaluedMap<String, String> formParams = new MultivaluedHashMap<>();
         formParams.addAll("id", ids);
@@ -50,10 +54,10 @@ public class EFetchRequest<T> extends NCBIEntrezRequest<T> {
         Assert.hasText(db, "Required parameter db must not be empty");
 
         Map<String, Object[]> queryParams = new HashMap<>();
-        queryParams.put("db", new Object[]{db});
-        queryParams.put("retmode", new Object[]{RET_MODE});
-        queryParams.put("retstart", new Object[]{RET_START});
-        queryParams.put("retmax", new Object[]{RET_MAX});
+        queryParams.put(EntrezQueryParams.DB.getName(), new Object[]{db});
+        queryParams.put(EntrezQueryParams.RETRIEVAL_MODE.getName(), new Object[]{RET_MODE});
+        queryParams.put(EntrezQueryParams.RETRIEVAL_START.getName(), new Object[]{currentPage});
+        queryParams.put(EntrezQueryParams.RETRIEVAL_MAX.getName(), new Object[]{RET_MAX});
 
         return queryParams;
     }

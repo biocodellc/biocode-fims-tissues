@@ -26,7 +26,7 @@ public class SraExperimentPackage {
     @XmlPath("RUN_SET/RUN/@accession")
     private List<String> runAccessions;
 
-    public SraExperimentPackage() {}
+    private SraExperimentPackage() {}
 
     public SraExperimentPackage(String studyAccession, String experimentAccession, String bioSampleAccession, List<String> runAccessions) {
         this.studyAccession = studyAccession;
@@ -43,11 +43,36 @@ public class SraExperimentPackage {
         return experimentAccession;
     }
 
-    public String getBioSampleAccession() {
-        return bioSampleAccession;
+    public boolean hasBioSampleAccession(String bioSampleAccession) {
+        return this.bioSampleAccession.equals(bioSampleAccession);
     }
 
     public List<String> getRunAccessions() {
         return runAccessions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SraExperimentPackage)) return false;
+
+        SraExperimentPackage that = (SraExperimentPackage) o;
+
+        if (getStudyAccession() != null ? !getStudyAccession().equals(that.getStudyAccession()) : that.getStudyAccession() != null)
+            return false;
+        if (getExperimentAccession() != null ? !getExperimentAccession().equals(that.getExperimentAccession()) : that.getExperimentAccession() != null)
+            return false;
+        if (bioSampleAccession != null ? !bioSampleAccession.equals(that.bioSampleAccession) : that.bioSampleAccession != null)
+            return false;
+        return getRunAccessions() != null ? getRunAccessions().equals(that.getRunAccessions()) : that.getRunAccessions() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getStudyAccession() != null ? getStudyAccession().hashCode() : 0;
+        result = 31 * result + (getExperimentAccession() != null ? getExperimentAccession().hashCode() : 0);
+        result = 31 * result + (bioSampleAccession != null ? bioSampleAccession.hashCode() : 0);
+        result = 31 * result + (getRunAccessions() != null ? getRunAccessions().hashCode() : 0);
+        return result;
     }
 }

@@ -26,6 +26,7 @@ public class BioSample {
 
     @XmlPath("Links/Link[@target='bioproject']/@label")
     private String bioProjectAccession;
+    private SraExperimentPackage sraExperimentPackage;
 
     private BioSample() {
     }
@@ -56,5 +57,13 @@ public class BioSample {
 
     public String getBioProjectAccession() {
         return bioProjectAccession;
+    }
+
+    public SraExperimentPackage getSraExperimentPackage() {
+        return sraExperimentPackage;
+    }
+
+    public void setSraExperimentPackage(SraExperimentPackage sraExperimentPackage) {
+        this.sraExperimentPackage = sraExperimentPackage;
     }
 }

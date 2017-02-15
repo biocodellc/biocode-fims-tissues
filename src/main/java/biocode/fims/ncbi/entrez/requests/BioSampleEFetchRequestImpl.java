@@ -1,4 +1,4 @@
-package biocode.fims.ncbi.entrez;
+package biocode.fims.ncbi.entrez.requests;
 
 import biocode.fims.ncbi.NCBIDatabase;
 import biocode.fims.ncbi.models.BioSampleEFetchResult;
@@ -11,9 +11,9 @@ import java.util.List;
  *
  * @author rjewing
  */
-public class BioSampleEFetchRequest extends EFetchRequest<BioSampleEFetchResult> {
+public class BioSampleEFetchRequestImpl extends AbstractEFetchRequest<BioSampleEFetchResult> implements BioSampleEFetchRequest {
 
-    public BioSampleEFetchRequest(List<String> ids, Client client) {
+    public BioSampleEFetchRequestImpl(List<String> ids, Client client) {
         super(NCBIDatabase.BIO_SAMPLE.getName(), ids, client, BioSampleEFetchResult.class);
     }
 }

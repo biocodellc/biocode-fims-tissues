@@ -10,7 +10,6 @@ public enum NCBIDatabase {
 
     private final String name;
 
-
     NCBIDatabase(String name) {
         this.name = name;
     }

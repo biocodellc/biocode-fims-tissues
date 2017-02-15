@@ -1,4 +1,4 @@
-package biocode.fims.fastq.sra;
+package biocode.fims.ncbi.sra.submission;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Abstract class that contains general SraMetadataMapper funcitonality
  */
-public abstract class AbstractSraMetadataMapper implements SraMetadataMapper{
+public abstract class AbstractSraMetadataMapper implements SraMetadataMapper {
 
     private static final List<String> SRA_HEADERS = new ArrayList<String>() {{
         add("sample_name");

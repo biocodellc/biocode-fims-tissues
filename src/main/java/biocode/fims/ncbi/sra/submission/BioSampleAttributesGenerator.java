@@ -1,4 +1,4 @@
-package biocode.fims.fastq.sra;
+package biocode.fims.ncbi.sra.submission;
 
 import biocode.fims.exceptions.SraCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;

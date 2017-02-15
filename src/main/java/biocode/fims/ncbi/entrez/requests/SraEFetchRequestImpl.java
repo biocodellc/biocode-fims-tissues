@@ -1,4 +1,4 @@
-package biocode.fims.ncbi.entrez;
+package biocode.fims.ncbi.entrez.requests;
 
 import biocode.fims.ncbi.NCBIDatabase;
 import biocode.fims.ncbi.models.SraEFetchResult;
@@ -11,9 +11,9 @@ import java.util.List;
  *
  * @author rjewing
  */
-public class SraEFetchRequest extends EFetchRequest<SraEFetchResult> {
+public class SraEFetchRequestImpl extends AbstractEFetchRequest<SraEFetchResult> implements SraEFetchRequest {
 
-    public SraEFetchRequest(List<String> ids, Client client) {
+    public SraEFetchRequestImpl(List<String> ids, Client client) {
         super(NCBIDatabase.SRA.getName(), ids, client, SraEFetchResult.class);
     }
 }

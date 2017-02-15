@@ -1,5 +1,6 @@
 package biocode.fims.ncbi.models;
 
+import biocode.fims.api.services.PaginatedResponse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -7,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author rjewing
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ESearchResponse {
+public class ESearchResponse implements PaginatedResponse {
 
     private ESearchResult eSearchResult;
 
@@ -27,5 +28,11 @@ public class ESearchResponse {
         this.eSearchResult = eSearchResult;
     }
 
+    public boolean hasMoreResults() {
+        return eSearchResult.getCount() > lastResultNumber();
+    }
 
+    public int lastResultNumber() {
+        return (eSearchResult.getRetrievalStart() + 1) * eSearchResult.getRetrievalMax();
+    }
 }

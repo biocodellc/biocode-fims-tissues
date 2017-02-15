@@ -1,15 +1,15 @@
-package biocode.fims.fastq.sra;
+package biocode.fims.ncbi.sra.submission;
 
 import java.util.List;
 
 /**
  * Interface to handle the mapping of Biocode FIMS project attributes to Sra BioSample attributes
  */
-public interface BioSampleMapper {
+public interface SraMetadataMapper {
 
-    boolean hasNextSample();
+    boolean hasNextResource();
 
     List<String> getHeaderValues();
 
-    List<String> getBioSampleAttributes();
+    List<String> getResourceMetadata();
 }

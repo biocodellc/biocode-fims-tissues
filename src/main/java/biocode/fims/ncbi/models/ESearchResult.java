@@ -12,16 +12,16 @@ import java.util.List;
 public class ESearchResult {
 
     private int count;
-    private int retMax;
-    private int retStart;
+    private int retrievalMax;
+    private int retrievalStart;
     private List<String> idList;
 
     private ESearchResult(){}
 
-    public ESearchResult(int count, int retMax, int retStart, List<String> idList) {
+    public ESearchResult(int count, int retrievalMax, int retrievalStart, List<String> idList) {
         this.count = count;
-        this.retMax = retMax;
-        this.retStart = retStart;
+        this.retrievalMax = retrievalMax;
+        this.retrievalStart = retrievalStart;
         this.idList = idList;
     }
 
@@ -30,13 +30,13 @@ public class ESearchResult {
     }
 
     @JsonProperty("retmax")
-    public int getRetMax() {
-        return retMax;
+    public int getRetrievalMax() {
+        return retrievalMax;
     }
 
     @JsonProperty("retstart")
-    public int getRetStart() {
-        return retStart;
+    public int getRetrievalStart() {
+        return retrievalStart;
     }
 
     @JsonProperty("idlist")

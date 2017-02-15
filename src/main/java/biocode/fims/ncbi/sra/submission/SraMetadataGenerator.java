@@ -1,4 +1,4 @@
-package biocode.fims.fastq.sra;
+package biocode.fims.ncbi.sra.submission;
 
 import biocode.fims.exceptions.SraCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
@@ -45,17 +45,6 @@ public class SraMetadataGenerator {
         } catch (IOException e) {
             throw new FimsRuntimeException(SraCode.METADATA_FILE_CREATION_FAILED, 500);
         }
-
-//        try (LineNumberReader lineNumberReader = new LineNumberReader(new FileReader(metadataFile))) {
-//            lineNumberReader.skip(Long.MAX_VALUE);
-//
-//            if (lineNumberReader.getLineNumber() == 0) {
-//                throw new FimsRuntimeException(SraCode.MISSING_FASTQ_METADATA, 400);
-//            }
-//
-//        } catch (IOException e) {
-//            throw new FimsRuntimeException(SraCode.METADATA_FILE_CREATION_FAILED, 500);
-//        }
 
         return metadataFile;
     }
