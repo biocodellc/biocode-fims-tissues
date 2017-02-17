@@ -1,5 +1,7 @@
 package biocode.fims.ncbi.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.persistence.oxm.annotations.XmlPath;
 
 import javax.xml.bind.annotation.*;
@@ -18,6 +20,7 @@ public class BioSample {
     @XmlAttribute
     private String accession;
 
+    @JsonIgnore
     @XmlPath("Attributes/Attribute[@attribute_name='bcid']/text()")
     private String bcid;
 
@@ -26,6 +29,7 @@ public class BioSample {
 
     @XmlPath("Links/Link[@target='bioproject']/@label")
     private String bioProjectAccession;
+    @JsonProperty("experiment")
     private SraExperimentPackage sraExperimentPackage;
 
     private BioSample() {

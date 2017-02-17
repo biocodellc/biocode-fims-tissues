@@ -1,6 +1,7 @@
 package biocode.fims.fastq;
 
 import biocode.fims.fimsExceptions.FimsRuntimeException;
+import biocode.fims.ncbi.models.BioSample;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
@@ -22,6 +23,7 @@ public class FastqMetadata implements Serializable {
     private String instrumentModel;
     private String designDescription;
     private List<String> filenames;
+    private BioSample bioSample;
 
 
     public static class FASTQMetadataBuilder {
@@ -93,7 +95,7 @@ public class FastqMetadata implements Serializable {
     }
 
     // needed for jackson
-    FastqMetadata() {}
+    private FastqMetadata() {}
 
     private FastqMetadata(FASTQMetadataBuilder builder) {
         this.libraryStrategy = builder.libraryStrategy;
@@ -170,7 +172,13 @@ public class FastqMetadata implements Serializable {
         this.filenames = filenames;
     }
 
+    public BioSample getBioSample() {
+        return bioSample;
+    }
 
+    public void setBioSample(BioSample bioSample) {
+        this.bioSample = bioSample;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -186,8 +194,9 @@ public class FastqMetadata implements Serializable {
         if (!getPlatform().equals(that.getPlatform())) return false;
         if (!getInstrumentModel().equals(that.getInstrumentModel())) return false;
         if (!getDesignDescription().equals(that.getDesignDescription())) return false;
-        return !getFilenames().equals(that.getFilenames());
-
+        if (getFilenames() != null ? !getFilenames().equals(that.getFilenames()) : that.getFilenames() != null)
+            return false;
+        return getBioSample() != null ? getBioSample().equals(that.getBioSample()) : that.getBioSample() == null;
     }
 
     @Override
@@ -199,7 +208,8 @@ public class FastqMetadata implements Serializable {
         result = 31 * result + getPlatform().hashCode();
         result = 31 * result + getInstrumentModel().hashCode();
         result = 31 * result + getDesignDescription().hashCode();
-        result = 31 * result + getFilenames().hashCode();
+        result = 31 * result + (getFilenames() != null ? getFilenames().hashCode() : 0);
+        result = 31 * result + (getBioSample() != null ? getBioSample().hashCode() : 0);
         return result;
     }
 
