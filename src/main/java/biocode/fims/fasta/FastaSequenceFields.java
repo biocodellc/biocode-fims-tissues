@@ -1,6 +1,6 @@
 package biocode.fims.fasta;
 
-import biocode.fims.query.JsonFieldTransform;
+import biocode.fims.query.writers.JsonFieldTransform;
 
 import java.util.List;
 

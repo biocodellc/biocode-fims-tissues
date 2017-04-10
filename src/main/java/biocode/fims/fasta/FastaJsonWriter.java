@@ -2,13 +2,12 @@ package biocode.fims.fasta;
 
 import biocode.fims.fimsExceptions.errorCodes.FileCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
-import biocode.fims.query.JsonFieldTransform;
-import biocode.fims.query.JsonWriter;
+import biocode.fims.query.writers.JsonFieldTransform;
+import biocode.fims.query.writers.JsonWriter;
 import biocode.fims.settings.PathManager;
 import biocode.fims.utils.FileUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import org.apache.commons.lang.StringUtils;
