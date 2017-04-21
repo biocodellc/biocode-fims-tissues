@@ -88,7 +88,7 @@ public class FastaJsonWriter implements JsonWriter {
 
                         fastaFileMap.computeIfAbsent(uniqueKey, k -> new ArrayList<>());
 
-                        fastaFileMap.get(uniqueKey).add(new SequenceData(identifier, (ObjectNode) sequenceNode));
+                        fastaFileMap.get(uniqueKey).add(new SequenceData(identifier, (ObjectNode) sequenceNode, (ObjectNode) resource));
 
                     }
 
@@ -164,7 +164,12 @@ public class FastaJsonWriter implements JsonWriter {
                 StringBuilder metadataBuilder = new StringBuilder();
 
                 for (JsonFieldTransform field : fastaSequenceFields.getMetadata()) {
-                    JsonNode fieldNode = s.getSequenceNode().at(field.getPath());
+                    // metadata can be in the sequenceNode or the resourceNode
+                    JsonNode fieldNode = s.getResourceNode().at(field.getPath());
+
+                    if (fieldNode.isMissingNode()) {
+                        fieldNode = s.getSequenceNode().at(field.getPath());
+                    }
 
                     if (!fieldNode.isMissingNode()) {
                         metadataBuilder.append(" [");
@@ -191,10 +196,12 @@ public class FastaJsonWriter implements JsonWriter {
     private class SequenceData {
         private final String identifier;
         private final ObjectNode sequenceNode;
+        private final ObjectNode resourceNode;
 
-        private SequenceData(String identifier, ObjectNode sequenceNode) {
+        private SequenceData(String identifier, ObjectNode sequenceNode, ObjectNode resourceNode) {
             this.identifier = identifier;
             this.sequenceNode = sequenceNode;
+            this.resourceNode = resourceNode;
         }
 
         String getIdentifier() {
@@ -203,6 +210,10 @@ public class FastaJsonWriter implements JsonWriter {
 
         ObjectNode getSequenceNode() {
             return sequenceNode;
+        }
+
+        ObjectNode getResourceNode() {
+            return resourceNode;
         }
     }
 }
