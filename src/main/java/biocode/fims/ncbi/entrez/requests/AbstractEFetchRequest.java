@@ -33,7 +33,7 @@ public class AbstractEFetchRequest<T> extends AbstractEntrezRequest<T> implement
         super(SERVICE_PATH, client, "POST", responseClass);
         registerDefaultClientFeatures(client);
 
-        setQueryParams(getDefaultQueryParams(db));
+        setDefaultQueryParams(db);
         setHttpEntity(getDefaultHttpEntity(ids));
         setAccepts(MediaType.APPLICATION_ATOM_XML_TYPE);
     }
@@ -50,16 +50,13 @@ public class AbstractEFetchRequest<T> extends AbstractEntrezRequest<T> implement
         return Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE);
     }
 
-    private Map<String, Object[]> getDefaultQueryParams(String db) {
+    private void setDefaultQueryParams(String db) {
         Assert.hasText(db, "Required parameter db must not be empty");
 
-        Map<String, Object[]> queryParams = new HashMap<>();
-        queryParams.put(EntrezQueryParams.DB.getName(), new Object[]{db});
-        queryParams.put(EntrezQueryParams.RETRIEVAL_MODE.getName(), new Object[]{RET_MODE});
-        queryParams.put(EntrezQueryParams.RETRIEVAL_START.getName(), new Object[]{currentPage});
-        queryParams.put(EntrezQueryParams.RETRIEVAL_MAX.getName(), new Object[]{RET_MAX});
-
-        return queryParams;
+        this.addQueryParam(EntrezQueryParams.DB.getName(), db);
+        this.addQueryParam(EntrezQueryParams.RETRIEVAL_MODE.getName(), RET_MODE);
+        this.addQueryParam(EntrezQueryParams.RETRIEVAL_START.getName(), currentPage);
+        this.addQueryParam(EntrezQueryParams.RETRIEVAL_MAX.getName(), RET_MAX);
     }
 
     private void registerDefaultClientFeatures(Client client) {

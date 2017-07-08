@@ -9,7 +9,7 @@ if (hasProperty("biocodeFimsCommonsDir")) {
     project(":biocode-fims-commons").projectDir = file(biocodeFimsCommonsDir)
 }
 
-if (hasProperty("biocodeFimsFusekiDir")) {
-    include ":biocode-fims-fuseki"
-    project(":biocode-fims-fuseki").projectDir = file(biocodeFimsFusekiDir)
-}
+//if (hasProperty("biocodeFimsFusekiDir")) {
+//    include ":biocode-fims-fuseki"
+//    project(":biocode-fims-fuseki").projectDir = file(biocodeFimsFusekiDir)
+//}

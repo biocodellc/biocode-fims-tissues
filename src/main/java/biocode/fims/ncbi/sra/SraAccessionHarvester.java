@@ -1,5 +1,6 @@
 package biocode.fims.ncbi.sra;
 
+import biocode.fims.application.config.FimsProperties;
 import biocode.fims.entities.Project;
 import biocode.fims.entities.Resource;
 import biocode.fims.fastq.FastqMetadata;
@@ -9,7 +10,6 @@ import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.ncbi.entrez.BioSampleRepository;
 import biocode.fims.ncbi.models.BioSample;
 import biocode.fims.service.ProjectService;
-import biocode.fims.settings.SettingsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,24 +31,24 @@ public class SraAccessionHarvester {
     private final BioSampleRepository bioSampleRepository;
     private final FastqMetadataRepository fastqMetadataRepository;
     private final ProjectService projectService;
-    private final SettingsManager settingsManager;
+    private final FimsProperties props;
 
     private List<Resource> resources;
 
     @Autowired
     public SraAccessionHarvester(FastqMetadataRepository fastqMetadataRepository, BioSampleRepository bioSampleRepository,
-                                 ProjectService projectService, SettingsManager settingsManager) {
+                                 ProjectService projectService, FimsProperties props) {
         Assert.notNull(bioSampleRepository);
         Assert.notNull(fastqMetadataRepository);
         this.projectService = projectService;
-        this.settingsManager = settingsManager;
+        this.props = props;
         this.fastqMetadataRepository = fastqMetadataRepository;
         this.bioSampleRepository = bioSampleRepository;
     }
 
     @Scheduled(cron = "0 0 1 * * *")
     public void harvestForAllProjects() {
-        List<Project> projects = projectService.getProjects(settingsManager.retrieveValue("appRoot"));
+        List<Project> projects = projectService.getProjects(props.appRoot());
 
         for (Project project: projects) {
             harvest(project.getProjectId());

@@ -22,20 +22,20 @@ public class ESearchRequestImpl extends AbstractEntrezRequest<ESearchResponse> i
 
     public ESearchRequestImpl(String db, String term, Client client) {
         super(SERVICE_PATH, client, "GET", biocode.fims.ncbi.models.ESearchResponse.class);
-        setQueryParams(getDefaultQueryParams(db, term));
+        addDefaultQueryParams(db, term);
         setAccepts(MediaType.APPLICATION_JSON_TYPE);
     }
 
-    private Map<String, Object[]> getDefaultQueryParams(String db, String term) {
+    private Map<String, Object[]> addDefaultQueryParams(String db, String term) {
         Assert.hasText(db, "Required parameter db must not be empty");
         Assert.hasText(term, "Required parameter term must not be empty");
 
         Map<String, Object[]> queryParams = new HashMap<>();
-        queryParams.put(EntrezQueryParams.DB.getName(), new Object[]{db});
-        queryParams.put(EntrezQueryParams.TERM.getName(), new Object[]{term});
-        queryParams.put(EntrezQueryParams.RETRIEVAL_MODE.getName(), new Object[]{RET_MODE});
-        queryParams.put(EntrezQueryParams.RETRIEVAL_START.getName(), new Object[]{currentPage});
-        queryParams.put(EntrezQueryParams.RETRIEVAL_MAX.getName(), new Object[]{RET_MAX});
+        addQueryParam(EntrezQueryParams.DB.getName(), db);
+        addQueryParam(EntrezQueryParams.TERM.getName(), term);
+        addQueryParam(EntrezQueryParams.RETRIEVAL_MODE.getName(), RET_MODE);
+        addQueryParam(EntrezQueryParams.RETRIEVAL_START.getName(), currentPage);
+        addQueryParam(EntrezQueryParams.RETRIEVAL_MAX.getName(), RET_MAX);
 
         return queryParams;
     }

@@ -10,13 +10,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath "org.biocode:gradle-fims:1.1.5"
+        classpath "org.biocode:gradle-fims:1.1.8"
     }
 }
 
 apply plugin: "org.biocode.fims-app"
 
-ext.fimsCommonsVersion = "0.2.1"
+ext.fimsCommonsVersion = "0.2.8"
 ext.fimsFusekiVersion = "0.3.0"
 
 fims {
@@ -53,7 +53,7 @@ dependencies {
     server group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.7'
 
     compile composite.resolveDependency("org.biocode:biocode-fims-commons:${fimsCommonsVersion}", "biocode-fims-commons")
-    compile composite.resolveDependency("org.biocode:biocode-fims-fuseki:${fimsFusekiVersion}", "biocode-fims-fuseki")
+//    compile composite.resolveDependency("org.biocode:biocode-fims-fuseki:${fimsFusekiVersion}", "biocode-fims-fuseki")
 
     testCompile "junit:junit-dep:4.10"
     testCompile 'org.mockito:mockito-all:1.9.5'

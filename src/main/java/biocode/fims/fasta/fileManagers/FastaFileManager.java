@@ -1,10 +1,11 @@
 package biocode.fims.fasta.fileManagers;
 
+import biocode.fims.application.config.FimsProperties;
 import biocode.fims.bcid.ResourceTypes;
 import biocode.fims.digester.Attribute;
 import biocode.fims.digester.Entity;
 import biocode.fims.digester.Mapping;
-import biocode.fims.entities.Bcid;
+import biocode.fims.entities.BcidTmp;
 import biocode.fims.entities.Expedition;
 import biocode.fims.fasta.FastaData;
 import biocode.fims.fileManagers.AuxilaryFileManager;
@@ -14,7 +15,6 @@ import biocode.fims.run.ProcessController;
 import biocode.fims.service.BcidService;
 import biocode.fims.service.ExpeditionService;
 import biocode.fims.settings.PathManager;
-import biocode.fims.settings.SettingsManager;
 import biocode.fims.utils.FileUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -46,7 +46,7 @@ public class FastaFileManager implements AuxilaryFileManager {
     public static final String DATASET_RESOURCE_SUB_TYPE = "Fasta";
 
     private final FastaPersistenceManager persistenceManager;
-    private final SettingsManager settingsManager;
+    private final FimsProperties props;
     private final BcidService bcidService;
     private final ExpeditionService expeditionService;
 
@@ -55,10 +55,10 @@ public class FastaFileManager implements AuxilaryFileManager {
     private List<FastaData> fastaDataList = new ArrayList<>();
     private Entity entity;
 
-    public FastaFileManager(FastaPersistenceManager persistenceManager, SettingsManager settingsManager,
+    public FastaFileManager(FastaPersistenceManager persistenceManager, FimsProperties props,
                             BcidService bcidService, ExpeditionService expeditionService) {
         this.persistenceManager = persistenceManager;
-        this.settingsManager = settingsManager;
+        this.props = props;
         this.bcidService = bcidService;
         this.expeditionService = expeditionService;
     }
@@ -148,14 +148,14 @@ public class FastaFileManager implements AuxilaryFileManager {
                 File inputFile = new File(fastaData.getFilename());
                 String ext = FileUtils.getExtension(inputFile.getName(), null);
                 String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fasta." + ext;
-                File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
+                File outputFile = PathManager.createUniqueFile(filename, props.serverRoot());
 
                 try {
 
                     Files.copy(inputFile.toPath(), outputFile.toPath());
 
-                    Bcid bcid = new Bcid.BcidBuilder(ResourceTypes.DATASET_RESOURCE_TYPE)
-                            .ezidRequest(Boolean.parseBoolean(settingsManager.retrieveValue("ezidRequests")))
+                    BcidTmp bcid = new BcidTmp.BcidBuilder(ResourceTypes.DATASET_RESOURCE_TYPE)
+                            .ezidRequest(props.ezidRequests())
                             .title("Fasta Dataset: " + processController.getExpeditionCode())
                             .subResourceType(DATASET_RESOURCE_SUB_TYPE)
                             .finalCopy(processController.getFinalCopy())

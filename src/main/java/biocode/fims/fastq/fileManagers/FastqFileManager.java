@@ -1,11 +1,12 @@
 package biocode.fims.fastq.fileManagers;
 
+import biocode.fims.application.config.FimsProperties;
 import biocode.fims.bcid.ResourceTypes;
 import biocode.fims.digester.Entity;
 import biocode.fims.digester.Field;
 import biocode.fims.digester.Mapping;
 import biocode.fims.digester.Validation;
-import biocode.fims.entities.Bcid;
+import biocode.fims.entities.BcidTmp;
 import biocode.fims.entities.Expedition;
 import biocode.fims.fastq.FastqMetadata;
 import biocode.fims.fileManagers.AuxilaryFileManager;
@@ -16,8 +17,6 @@ import biocode.fims.run.ProcessController;
 import biocode.fims.service.BcidService;
 import biocode.fims.service.ExpeditionService;
 import biocode.fims.settings.PathManager;
-import biocode.fims.settings.SettingsManager;
-import biocode.fims.utils.FileUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -28,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -48,7 +46,7 @@ public class FastqFileManager implements AuxilaryFileManager {
     private final FastqPersistenceManager persistenceManager;
     private final ExpeditionService expeditionService;
     private final BcidService bcidService;
-    private final SettingsManager settingsManager;
+    private final FimsProperties props;
 
     private ProcessController processController;
     private String filename;
@@ -56,11 +54,11 @@ public class FastqFileManager implements AuxilaryFileManager {
     private FastqMetadata fastqMetadata;
 
     public FastqFileManager(FastqPersistenceManager persistenceManager, ExpeditionService expeditionService,
-                            BcidService bcidService, SettingsManager settingsManager) {
+                            BcidService bcidService, FimsProperties props) {
         this.persistenceManager = persistenceManager;
         this.expeditionService = expeditionService;
         this.bcidService = bcidService;
-        this.settingsManager = settingsManager;
+        this.props = props;
     }
 
     @Override
@@ -138,13 +136,13 @@ public class FastqFileManager implements AuxilaryFileManager {
         if (!resourceFastqMetadataObjects.isEmpty()) {
             try {
                 String filename = processController.getProjectId() + "_" + processController.getExpeditionCode() + "_fastq_metadata.json";
-                File outputFile = PathManager.createUniqueFile(filename, settingsManager.retrieveValue("serverRoot"));
+                File outputFile = PathManager.createUniqueFile(filename, props.serverRoot());
 
                 SpringObjectMapper objectMapper = new SpringObjectMapper();
                 objectMapper.writeValue(outputFile, resourceFastqMetadataObjects);
 
-                Bcid bcid = new Bcid.BcidBuilder(ResourceTypes.DATASET_RESOURCE_TYPE)
-                        .ezidRequest(Boolean.parseBoolean(settingsManager.retrieveValue("ezidRequests")))
+                BcidTmp bcid = new BcidTmp.BcidBuilder(ResourceTypes.DATASET_RESOURCE_TYPE)
+                        .ezidRequest(props.ezidRequests())
                         .title("Fastq Metadata: " + processController.getExpeditionCode())
                         .subResourceType(DATASET_RESOURCE_SUB_TYPE)
                         .finalCopy(processController.getFinalCopy())
