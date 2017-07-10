@@ -160,6 +160,7 @@ public class FastaFileManager implements AuxilaryFileManager {
                             .subResourceType(DATASET_RESOURCE_SUB_TYPE)
                             .finalCopy(processController.getFinalCopy())
                             .sourceFile(filename)
+                            .webAddress(props.datasetResolverTarget())
                             .build();
 
                     bcidService.create(bcid, processController.getUserId());
