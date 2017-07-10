@@ -16,7 +16,7 @@ buildscript {
 
 apply plugin: "org.biocode.fims-app"
 
-ext.fimsCommonsVersion = "0.2.9"
+ext.fimsCommonsVersion = "0.2.10"
 ext.fimsFusekiVersion = "0.3.0"
 
 fims {
