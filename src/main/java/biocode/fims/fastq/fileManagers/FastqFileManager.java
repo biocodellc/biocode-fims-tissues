@@ -39,8 +39,8 @@ public class FastqFileManager implements AuxilaryFileManager {
     public static final String CONCEPT_ALIAS = "fastqMetadata";
 
     public static final String NAME = "fastq";
-    public static final String PAIRED_FILE_1_PATTERN = "^{resourceId}(\\.|_).*1.*\\.(fq|fastq)$";
-    public static final String PAIRED_FILE_2_PATTERN = "^{resourceId}(\\.|_).*2.*\\.(fq|fastq)$";
+    public static final String PAIRED_FILE_1_PATTERN = "^{resourceId}(\\.|_).*1.*\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$";
+    public static final String PAIRED_FILE_2_PATTERN = "^{resourceId}(\\.|_).*2.*\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$";
     public static final String SINGLE_FILE_PATTERN = "^{resourceId}\\.(fq|fastq)$";
 
     private final FastqPersistenceManager persistenceManager;
