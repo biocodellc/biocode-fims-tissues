@@ -38,9 +38,7 @@ import static biocode.fims.digester.FastaEntity.MARKER_URI;
  */
 public class FastaReader implements DataReader {
     public static final String CONCEPT_ALIAS_KEY = "conceptAlias";
-    // TODO what happens if I support a txt file here? will it conflict with the TabReader?
-    // I think EXTS must be unique over all enabled DataReaders
-    public static final List<String> EXTS = Arrays.asList("fasta", "fa", "mpfa", "fna", "fas");
+    public static final List<String> EXTS = Arrays.asList("fasta", "fa", "mpfa", "fna", "fas", "txt");
 
     protected File file;
     protected ProjectConfig config;

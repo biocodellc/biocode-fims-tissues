@@ -21,14 +21,12 @@ import java.util.*;
  */
 public class FastaQueryWriter implements QueryWriter {
     private final QueryResult queryResult;
-    private final ProjectConfig config;
     private final Entity parentEntity;
     private final String uniqueKey;
     private final String parentUniqueKey;
 
     public FastaQueryWriter(QueryResult queryResult, ProjectConfig config) {
         // TODO pass in parentRecords & list of columns to write out as metadata
-        this.config = config;
         if (!(queryResult.entity() instanceof FastaEntity)) {
             throw new FimsRuntimeException(FastaWriteCode.INVALID_ENTITY, 500, queryResult.entity().type());
         }
