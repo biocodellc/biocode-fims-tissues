@@ -26,9 +26,12 @@ public class FastqEntity extends ChildEntity {
     }
 
     private void init() {
-        for (FastqProps p :FastqProps.values()) {
-            if (getAttribute(p.value()) == null) {
+        for (FastqProps p : FastqProps.values()) {
+            Attribute a = getAttribute(p.value());
+            if (a == null) {
                 addAttribute(new Attribute(p.value(), p.value()));
+            } else {
+                a.setUri(p.value());
             }
         }
         // only a single fastq record is allowed / parent record

@@ -33,7 +33,7 @@ public class FastqLibraryLayoutRule extends AbstractRule {
         Assert.notNull(recordSet);
 
         if (recordSet.parent() == null) {
-            throw new IllegalStateException("FastqEntity \"" + recordSet.entity().getConceptAlias() + "\" is a child queryEntity, but the RecordSet.parent() was null");
+            throw new IllegalStateException("FastqEntity \"" + recordSet.entity().getConceptAlias() + "\" is a child entity, but the RecordSet.parent() was null");
         }
 
         for (Record r : recordSet.records()) {

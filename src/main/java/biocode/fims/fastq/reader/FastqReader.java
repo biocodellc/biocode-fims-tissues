@@ -1,10 +1,8 @@
 package biocode.fims.fastq.reader;
 
 import biocode.fims.digester.Entity;
-import biocode.fims.digester.FastaEntity;
-import biocode.fims.exceptions.FastaReaderCode;
 import biocode.fims.exceptions.FastqReaderCode;
-import biocode.fims.fasta.FastaRecord;
+import biocode.fims.fastq.FastqProps;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.fimsExceptions.ServerErrorException;
@@ -25,8 +23,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static biocode.fims.digester.FastaEntity.MARKER_KEY;
-import static biocode.fims.digester.FastaEntity.MARKER_URI;
 import static biocode.fims.fastq.FastqProps.LIBRARY_LAYOUT;
 
 /**
@@ -36,16 +32,15 @@ import static biocode.fims.fastq.FastqProps.LIBRARY_LAYOUT;
  * This Reader expects the following RecordMetadata:
  *
  *     - {@link FastqReader.CONCEPT_ALIAS_KEY}
+ *     - {@link FastqProps.LIBRARY_LAYOUT.value()}
  *
  */
 public class FastqReader implements DataReader {
-    public static final String CONCEPT_ALIAS_KEY = "conceptAlias";
-    public static final List<String> EXTS = Arrays.asList("txt");
+    private static final String CONCEPT_ALIAS_KEY = "conceptAlias";
+    private static final List<String> EXTS = Arrays.asList("txt");
 
-//    public static final Pattern PAIRED_FILE_PATTERN = Pattern.compile("^(parentId)(\\.|_).*(1|2).*\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
-//    public static final Pattern PAIRED_FILE_2_PATTERN = Pattern.compile("^(parentId)(\\.|_).*2.*\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
-//    public static final Pattern SINGLE_FILE_PATTERN = Pattern.compile("^(parentId)\\.(fq|fastq)$");
-    public static final Pattern ID_PATTERN = Pattern.compile("^(parentId)(\\.|_).*$");
+    private static final Pattern SINGLE_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
+    private static final Pattern PAIRED_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(\\.|_.*1|2)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
 
     protected File file;
     protected ProjectConfig config;
@@ -53,7 +48,7 @@ public class FastqReader implements DataReader {
     private List<RecordSet> recordSets;
     private Map<String, List<String>> filenames;
     private String parentUniqueKeyUri;
-//    private String libraryLayout;
+    private Pattern pattern;
 
     /**
      * This is only to be used for passing the class into the DataReaderFactory
@@ -70,12 +65,16 @@ public class FastqReader implements DataReader {
         this.recordMetadata = recordMetadata;
 
         // so we know which one we are dealing with
-        if (!recordMetadata.has(CONCEPT_ALIAS_KEY)) {
-//                !recordMetadata.has(LIBRARY_LAYOUT.value())) {
+        if (!recordMetadata.has(CONCEPT_ALIAS_KEY) ||
+                !recordMetadata.has(LIBRARY_LAYOUT.value())) {
             throw new FimsRuntimeException(DataReaderCode.MISSING_METADATA, 500);
         }
 
-//        this.libraryLayout = ((String) recordMetadata.get(LIBRARY_LAYOUT.value())).toLowerCase();
+        if (((String) recordMetadata.get(LIBRARY_LAYOUT.value())).equalsIgnoreCase("single")) {
+            this.pattern = SINGLE_ID_PATTERN;
+        } else {
+            this.pattern = PAIRED_ID_PATTERN;
+        }
     }
 
     @Override
@@ -116,7 +115,7 @@ public class FastqReader implements DataReader {
         List<Record> fastaRecords = new ArrayList<>();
 
         for (Map.Entry<String, List<String>> entry: filenames.entrySet()) {
-            // TODO what is entry.key() for failed matches
+            // TODO what is entry.key() for failed matches -- should be null
             fastaRecords.add(
                     new FastqRecord(parentUniqueKeyUri, entry.getKey(), entry.getValue(), recordMetadata)
             );
@@ -134,13 +133,15 @@ public class FastqReader implements DataReader {
             String line;
 
             while (!StringUtils.isBlank(line = br.readLine())) {
-                Matcher matcher = ID_PATTERN.matcher(line);
+                Matcher matcher = pattern.matcher(line);
 
-                matcher.matches();
-                String id = matcher.group(0);
+                if (matcher.matches()) {
+                    String id = matcher.group(1);
 
-                // TODO what happens if matcher.matches() fails?
-                recordFilenames.computeIfAbsent(id, k -> new ArrayList<>()).add(line);
+                    recordFilenames.computeIfAbsent(id, k -> new ArrayList<>()).add(line);
+                } else {
+                    recordFilenames.computeIfAbsent(line, k -> new ArrayList<>()).add(line);
+                }
             }
         } catch (IOException e) {
             throw new ServerErrorException(e);

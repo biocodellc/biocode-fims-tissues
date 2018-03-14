@@ -22,9 +22,9 @@ public class FastqFilenamesRule extends AbstractRule {
     private static final String MISSING_GROUP_MESSAGE = "Missing fastq filenames";
     private static final String INVALID_GROUP_MESSAGE = "Invalid fastq filenames";
 
-    public static final Pattern PAIRED_FILE1_PATTERN = Pattern.compile("^(parentId)(\\.|_).*1.*\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
-    public static final Pattern PAIRED_FILE2_PATTERN = Pattern.compile("^(parentId)(\\.|_).*2.*\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
-    public static final Pattern SINGLE_FILE_PATTERN = Pattern.compile("^(parentId)\\.(fq|fastq)$");
+    private static final Pattern PAIRED_FILE1_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(\\.|_.*1)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
+    private static final Pattern PAIRED_FILE2_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(\\.|_.*2)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
+    private static final Pattern SINGLE_FILE_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
 
     public FastqFilenamesRule() {
         super(RuleLevel.ERROR);
@@ -40,7 +40,7 @@ public class FastqFilenamesRule extends AbstractRule {
         Assert.notNull(recordSet);
 
         if (recordSet.parent() == null) {
-            throw new IllegalStateException("FastqEntity \"" + recordSet.entity().getConceptAlias() + "\" is a child queryEntity, but the RecordSet.parent() was null");
+            throw new IllegalStateException("FastqEntity \"" + recordSet.entity().getConceptAlias() + "\" is a child entity, but the RecordSet.parent() was null");
         }
 
         String idKey = recordSet.parent().entity().getUniqueKey();

@@ -9,6 +9,7 @@ import biocode.fims.ncbi.models.BioSample;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,7 +22,6 @@ import static biocode.fims.fastq.FastqProps.*;
 public class FastqRecord extends GenericRecord {
 
     private List<String> filenames;
-    // TODO update/set this
     private BioSample bioSample;
 
     public FastqRecord(String parentUniqueKeyUri, String identifier, List<String> filenames, RecordMetadata recordMetadata) {
@@ -98,13 +98,17 @@ public class FastqRecord extends GenericRecord {
 
     @Override
     public Map<String, String> properties() {
-        Map<String, String> properties = super.properties();
+        Map<String, String> properties = new HashMap<>(super.properties());
         properties.put(FILENAMES.value(), filenamesAsString());
-        properties.put("bioSample", JacksonUtil.toString(bioSample));
+        if (bioSample != null) {
+            properties.put("bioSample", JacksonUtil.toString(bioSample));
+        }
         return properties;
     }
 
     private String filenamesAsString() {
+        if (filenames.size() == 0) return "";
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.writeValueAsString(filenames);
@@ -120,12 +124,14 @@ public class FastqRecord extends GenericRecord {
         if (!(o instanceof FastqRecord)) return false;
         if (!super.equals(o)) return false;
         FastqRecord that = (FastqRecord) o;
-        return Objects.equals(filenames, that.filenames);
+        return Objects.equals(filenames, that.filenames) &&
+                Objects.equals(bioSample, that.bioSample);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), filenames);
+
+        return Objects.hash(super.hashCode(), filenames, bioSample);
     }
 }
 
