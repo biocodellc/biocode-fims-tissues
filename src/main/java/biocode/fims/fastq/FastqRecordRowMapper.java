@@ -1,10 +1,10 @@
 package biocode.fims.fastq;
 
 import biocode.fims.models.dataTypes.JacksonUtil;
+import biocode.fims.models.records.FimsRowMapper;
 import biocode.fims.ncbi.models.BioSample;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * @author rjewing
  */
-public class FastqRecordRowMapper implements RowMapper<FastqRecord> {
+public class FastqRecordRowMapper implements FimsRowMapper<FastqRecord> {
     private final static JavaType TYPE;
 
     static {
@@ -24,8 +24,8 @@ public class FastqRecordRowMapper implements RowMapper<FastqRecord> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public FastqRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
-        String data = rs.getString("data");
+    public FastqRecord mapRow(ResultSet rs, int rowNum, String dataLabel) throws SQLException {
+        String data = rs.getString(dataLabel);
 
         try {
             Map<String, String> properties = (Map<String, String>) JacksonUtil.fromString(data, TYPE);
@@ -39,6 +39,10 @@ public class FastqRecordRowMapper implements RowMapper<FastqRecord> {
         } catch (Exception e) {
             throw new SQLException(e);
         }
+    }
 
+    @Override
+    public FastqRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return mapRow(rs, rowNum, "data");
     }
 }
