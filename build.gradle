@@ -34,6 +34,7 @@ repositories {
 // need to evaluate childProjects first so we can add the childProject server dependencies to the server configuration
 evaluationDependsOnChildren()
 
+
 dependencies {
     server 'org.apache.jena:jena-arq:2.9.1'
     server 'com.googlecode.json-simple:json-simple:1.1.1'
