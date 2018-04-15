@@ -1,7 +1,7 @@
 rootProject.name = 'biocode-fims-sequences'
 
 if (hasProperty("gradleFimsDir") && file(gradleFimsDir).exists()) {
-    includeBuild gradleFimsDir
+//    includeBuild gradleFimsDir
 }
 
 if (hasProperty("biocodeFimsCommonsDir")) {
