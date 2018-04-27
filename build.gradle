@@ -16,7 +16,7 @@ buildscript {
 
 apply plugin: "org.biocode.fims-app"
 
-ext.fimsCommonsVersion = "1.0.0-beta.1"
+ext.fimsCommonsVersion = "1.0.0-beta.2"
 
 fims {
     maven {
