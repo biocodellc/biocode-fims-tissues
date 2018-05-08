@@ -17,11 +17,10 @@ public class SraMetadataGenerator {
     /**
      * generates a sra metadata file from the provided {@link SraMetadataMapper}
      * @param mapper
-     * @param outputDirectory
      * @return
      */
-    public static File generateFile(SraMetadataMapper mapper, String outputDirectory) {
-        File metadataFile = PathManager.createUniqueFile("sra-metadata.tsv", outputDirectory);
+    public static File generateFile(SraMetadataMapper mapper) {
+        File metadataFile = PathManager.createUniqueFile("sra-metadata.tsv", System.getProperty("java.io.tmpdir"));
 
         try (FileWriter fw = new FileWriter(metadataFile)) {
             List<String> headers = mapper.getHeaderValues();

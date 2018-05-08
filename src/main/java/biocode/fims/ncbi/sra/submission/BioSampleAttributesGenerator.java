@@ -20,11 +20,10 @@ public class BioSampleAttributesGenerator {
     /**
      * generates a bioSample attributes file from the provided {@link BioSampleMapper}
      * @param mapper {@link BioSampleMapper} implementation
-     * @param outputDirectory
      * @return
      */
-    public static File generateFile(BioSampleMapper mapper, String outputDirectory) {
-        File attributesFile = PathManager.createUniqueFile("bioSample-attributes.tsv", outputDirectory);
+    public static File generateFile(BioSampleMapper mapper) {
+        File attributesFile = PathManager.createUniqueFile("bioSample-attributes.tsv", System.getProperty("java.io.tmpdir"));
 
         try (FileWriter fw = new FileWriter(attributesFile)) {
 

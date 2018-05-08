@@ -29,11 +29,15 @@ public class FastqRecordRowMapper implements FimsRowMapper<FastqRecord> {
 
         try {
             Map<String, String> properties = (Map<String, String>) JacksonUtil.fromString(data, TYPE);
-            BioSample bioSample = JacksonUtil.fromString(properties.remove("bioSample"), BioSample.class);
+            BioSample bioSample = null;
+            if (properties.get("bioSample") != null) {
+                bioSample = JacksonUtil.fromString(properties.remove("bioSample"), BioSample.class);
+            }
             List<String> filenames = JacksonUtil.fromString(properties.remove("filenames"), List.class);
 
             FastqRecord r = new FastqRecord(properties, filenames, false);
-            r.setBioSample(bioSample);
+            if (bioSample != null)
+                r.setBioSample(bioSample);
 
             return r;
         } catch (Exception e) {
