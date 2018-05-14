@@ -26,15 +26,14 @@ import static biocode.fims.digester.FastaEntity.MARKER_URI;
 /**
  * DataReader implementation for Fasta files. Currently only the identifiers and the sequences
  * are read from the file
- *
+ * <p>
  * TODO: read in additional metadata provided for a each sequence ex. ">ALC111 organism="new findings" genus="alpha"
- *
- *
+ * <p>
+ * <p>
  * This Reader expects the following RecordMetadata:
- *
- *     - {@link FastaReader.CONCEPT_ALIAS_KEY}
- *     - {@link FastaEntity.MARKER_KEY}
- *
+ * <p>
+ * - {@link FastaReader.CONCEPT_ALIAS_KEY}
+ * - {@link FastaEntity.MARKER_KEY}
  */
 public class FastaReader implements DataReader {
     public static final String CONCEPT_ALIAS_KEY = "conceptAlias";
@@ -83,7 +82,7 @@ public class FastaReader implements DataReader {
     }
 
     @Override
-    public List<RecordSet> getRecordSets() {
+    public List<RecordSet> getRecordSets(int projectId, String expeditionCode) {
         if (recordSets == null) {
             Entity entity = this.config.entity((String) recordMetadata.remove(CONCEPT_ALIAS_KEY));
             Entity parentEntity = this.config.entity(entity.getParentEntity());

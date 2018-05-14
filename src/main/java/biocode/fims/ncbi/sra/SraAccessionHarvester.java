@@ -79,7 +79,7 @@ public class SraAccessionHarvester {
                         }
 
                         Dataset d = generateUpdateDataset(parentResults, queryResults.getResult(e.getConceptAlias()), bioSamples);
-                        recordRepository.save(d, project.getProjectId(), expedition.getExpeditionId());
+                        recordRepository.saveDataset(d, project.getProjectId(), expedition.getExpeditionId());
                     });
         });
     }

@@ -1,9 +1,11 @@
 package biocode.fims.fastq;
 
+import biocode.fims.digester.EntityProps;
+
 /**
  * @author rjewing
  */
-public enum FastqProps {
+public enum FastqProps implements EntityProps {
     LIBRARY_STRATEGY("libraryStrategy"),
     LIBRARY_SOURCE("librarySource"),
     LIBRARY_SELECTION("librarySelection"),
@@ -19,6 +21,7 @@ public enum FastqProps {
         this.val = val;
     }
 
+    @Override
     public String value() {
         return val;
     }

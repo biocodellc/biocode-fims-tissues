@@ -88,7 +88,7 @@ public class FastqReader implements DataReader {
     }
 
     @Override
-    public List<RecordSet> getRecordSets() {
+    public List<RecordSet> getRecordSets(int projectId, String expeditionCode) {
         if (recordSets == null) {
             Entity entity = this.config.entity((String) recordMetadata.remove(CONCEPT_ALIAS_KEY));
             Entity parentEntity = this.config.entity(entity.getParentEntity());

@@ -23,7 +23,7 @@ public class ESearchRequestImpl extends AbstractEntrezRequest<ESearchResponse> i
     public ESearchRequestImpl(String db, String term, Client client) {
         super(SERVICE_PATH, client, "GET", biocode.fims.ncbi.models.ESearchResponse.class);
         addDefaultQueryParams(db, term);
-        setAccepts(MediaType.APPLICATION_JSON_TYPE);
+        setAccepts(MediaType.APPLICATION_JSON);
     }
 
     private Map<String, Object[]> addDefaultQueryParams(String db, String term) {

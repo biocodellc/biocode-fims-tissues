@@ -35,7 +35,7 @@ public class AbstractEFetchRequest<T> extends AbstractEntrezRequest<T> implement
 
         setDefaultQueryParams(db);
         setHttpEntity(getDefaultHttpEntity(ids));
-        setAccepts(MediaType.APPLICATION_ATOM_XML_TYPE);
+        setAccepts(MediaType.APPLICATION_ATOM_XML);
     }
 
     private Entity getDefaultHttpEntity(List<String> ids) {

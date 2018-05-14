@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.util.StdConverter;
  * @author rjewing
  */
 @JsonDeserialize(converter = FastqEntity.FastqEntitySanitizer.class)
-public class FastqEntity extends ChildEntity {
+public class FastqEntity extends PropEntity<FastqProps> {
     private static final String CONCEPT_URI = "urn:fastqMetadata";
     public static final String TYPE = "Fastq";
 
@@ -17,23 +17,16 @@ public class FastqEntity extends ChildEntity {
 
 
     private FastqEntity() { // needed for EntityTypeIdResolver
-        super();
+        super(FastqProps.class);
     }
 
     public FastqEntity(String conceptAlias) {
-        super(conceptAlias, CONCEPT_URI);
-        init();
+        super(FastqProps.class, conceptAlias, CONCEPT_URI);
     }
 
-    private void init() {
-        for (FastqProps p : FastqProps.values()) {
-            Attribute a = getAttribute(p.value());
-            if (a == null) {
-                addAttribute(new Attribute(p.value(), p.value()));
-            } else {
-                a.setUri(p.value());
-            }
-        }
+    @Override
+    protected void init() {
+        super.init();
         // only a single fastq record is allowed / parent record
         setUniqueKey(null);
         recordType = FastqRecord.class;
@@ -52,16 +45,6 @@ public class FastqEntity extends ChildEntity {
      * class used to verify FastqEntity data integrity after deserialization. This is necessary
      * so we don't overwrite the default values during deserialization.
      */
-    public static class FastqEntitySanitizer extends StdConverter<FastqEntity, FastqEntity> {
-        public FastqEntitySanitizer() {
-            super();
-        }
-
-        @Override
-        public FastqEntity convert(FastqEntity value) {
-            value.init();
-            return value;
-        }
-    }
+    static class FastqEntitySanitizer extends PropEntitySanitizer<FastqEntity> {}
 }
 
