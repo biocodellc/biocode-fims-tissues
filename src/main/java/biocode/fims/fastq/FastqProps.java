@@ -13,7 +13,8 @@ public enum FastqProps implements EntityProps {
     PLATFORM("platform"),
     INSTRUMENT_MODEL("instrumentModel"),
     DESIGN_DESCRIPTION("designDescription"),
-    FILENAMES("filenames");
+    FILENAMES("filenames"),
+    BIOSAMPLE("bioSample"); // TODO should we mark this attribute as hidden or none editable
 
     private final String val;
 
