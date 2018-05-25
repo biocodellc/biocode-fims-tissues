@@ -1,5 +1,8 @@
 package biocode.fims.ncbi.sra;
 
+import biocode.fims.application.config.FimsProperties;
+import biocode.fims.bcid.Identifier;
+import biocode.fims.digester.Entity;
 import biocode.fims.digester.FastqEntity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.models.Project;
@@ -23,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static biocode.fims.bcid.Identifier.ROOT_IDENTIFIER;
+
 /**
  * class for harvesting accession's for fimMetadata resource sequences submitted the NCBI SRA database
  *
@@ -34,10 +39,12 @@ public class SraAccessionHarvester {
     private final BioSampleRepository bioSampleRepository;
     private final ProjectService projectService;
     private final RecordRepository recordRepository;
+    private final FimsProperties props;
 
     @Autowired
     public SraAccessionHarvester(RecordRepository recordRepository, BioSampleRepository bioSampleRepository,
-                                 ProjectService projectService) {
+                                 ProjectService projectService, FimsProperties props) {
+        this.props = props;
         Assert.notNull(bioSampleRepository);
         Assert.notNull(recordRepository);
         this.projectService = projectService;
@@ -59,18 +66,19 @@ public class SraAccessionHarvester {
                     .filter(e -> e.type().equals(FastqEntity.TYPE))
                     .forEach(e -> {
                         String q = "_select_:" +
-                                e.getParentEntity() +
+                                e.getConceptAlias() +
                                 " not _exists_:bioSample and _expedition_:" +
                                 expedition.getExpeditionCode();
 
                         Query query = Query.factory(project, e.getConceptAlias(), q);
                         QueryResults queryResults = recordRepository.query(query);
 
-                        QueryResult parentResults = queryResults.getResult(e.getParentEntity());
+                        Entity parentEntity = project.getProjectConfig().entity(e.getParentEntity());
 
-                        String rootIdentifier = parentResults.rootIdentifier();
-                        List<String> bcidsToQuery = parentResults.get(false).stream()
-                                .map(r -> rootIdentifier + r.get(parentResults.entity().getUniqueKey()))
+                        QueryResult result = queryResults.getResult(e.getConceptAlias());
+
+                        List<String> bcidsToQuery = result.records().stream()
+                                .map(r -> r.get(ROOT_IDENTIFIER) + r.get(parentEntity.getUniqueKeyURI()))
                                 .collect(Collectors.toList());
                         List<BioSample> bioSamples = bioSampleRepository.getBioSamples(bcidsToQuery);
 
@@ -78,23 +86,20 @@ public class SraAccessionHarvester {
                             return;
                         }
 
-                        Dataset d = generateUpdateDataset(parentResults, queryResults.getResult(e.getConceptAlias()), bioSamples);
+                        Dataset d = generateUpdateDataset(result, parentEntity.getUniqueKeyURI(), bioSamples);
                         recordRepository.saveDataset(d, project.getProjectId(), expedition.getExpeditionId());
                     });
         });
     }
 
-    private Dataset generateUpdateDataset(QueryResult parentResults, QueryResult fastqResults, List<BioSample> bioSamples) {
-        String parentUniqueKey = parentResults.entity().getUniqueKey();
-        String rootIdentifier = parentResults.rootIdentifier();
-
-        RecordSet recordSet = new RecordSet(parentResults.entity(), false);
+    private Dataset generateUpdateDataset(QueryResult fastqResults, String parentUniqueKeyURI, List<BioSample> bioSamples) {
+        RecordSet recordSet = new RecordSet(fastqResults.entity(), false);
 
         for (BioSample bioSample : bioSamples) {
-            String parentIdentifier = bioSample.getBcid().replace(rootIdentifier, "");
+            String parentIdentifier = new Identifier(bioSample.getBcid(), props.divider()).getSuffix();
 
             for (Record record : fastqResults.records()) {
-                if (parentIdentifier.equals(record.get(parentUniqueKey))) {
+                if (parentIdentifier.equals(record.get(parentUniqueKeyURI))) {
                     FastqRecord r = (FastqRecord) record;
                     r.setBioSample(bioSample);
                     recordSet.add(r);

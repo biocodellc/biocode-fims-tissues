@@ -16,6 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import java.io.*;
 import java.util.*;
 
+import static biocode.fims.bcid.Identifier.ROOT_IDENTIFIER;
+
 /**
  * @author RJ Ewing
  */
@@ -96,8 +98,7 @@ public class FastaQueryWriter implements QueryWriter {
             for (Map<String, String> record : records) {
                 writer.write(">");
 
-                String identifier = queryResult.rootIdentifier();
-                if (!identifier.endsWith("/")) identifier += "/";
+                String identifier = record.get(ROOT_IDENTIFIER);
                 identifier += queryResult.entity().buildChildIdentifier(
                         record.get(parentUniqueKey),
                         record.get(uniqueKey)
