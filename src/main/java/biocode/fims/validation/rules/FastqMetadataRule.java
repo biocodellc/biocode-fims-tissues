@@ -1,6 +1,6 @@
 package biocode.fims.validation.rules;
 
-import biocode.fims.digester.Entity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.models.records.Record;
 import biocode.fims.models.records.RecordSet;
@@ -92,7 +92,7 @@ public class FastqMetadataRule extends AbstractRule {
     private boolean inList(String listAlias, String value) {
         if (value == null) return false;
 
-        biocode.fims.digester.List list = config.findList(listAlias);
+        biocode.fims.projectConfig.models.List list = config.findList(listAlias);
 
         // don't throw an exception if the list isn't defined
         if (list == null) {

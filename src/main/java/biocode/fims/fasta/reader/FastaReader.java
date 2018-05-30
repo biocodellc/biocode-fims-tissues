@@ -1,7 +1,6 @@
 package biocode.fims.fasta.reader;
 
-import biocode.fims.digester.Entity;
-import biocode.fims.digester.FastaEntity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.exceptions.FastaReaderCode;
 import biocode.fims.fasta.FastaRecord;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
@@ -20,8 +19,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static biocode.fims.digester.FastaEntity.MARKER_KEY;
-import static biocode.fims.digester.FastaEntity.MARKER_URI;
+import static biocode.fims.projectConfig.models.FastaEntity.MARKER_KEY;
+import static biocode.fims.projectConfig.models.FastaEntity.MARKER_URI;
 
 /**
  * DataReader implementation for Fasta files. Currently only the identifiers and the sequences

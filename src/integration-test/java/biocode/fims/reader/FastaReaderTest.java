@@ -1,10 +1,8 @@
 package biocode.fims.reader;
 
-import biocode.fims.digester.Attribute;
-import biocode.fims.digester.Entity;
+import biocode.fims.projectConfig.models.Attribute;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.exceptions.FastaReaderCode;
-import biocode.fims.digester.FastaEntity;
-import biocode.fims.fasta.FastaRecord;
 import biocode.fims.fasta.reader.FastaDataReaderType;
 import biocode.fims.fasta.reader.FastaReader;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
@@ -12,13 +10,16 @@ import biocode.fims.models.records.Record;
 import biocode.fims.models.records.RecordMetadata;
 import biocode.fims.models.records.RecordSet;
 import biocode.fims.projectConfig.ProjectConfig;
+import biocode.fims.projectConfig.models.FastaEntity;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
 
-import static biocode.fims.digester.FastaEntity.*;
+import static biocode.fims.projectConfig.models.FastaEntity.MARKER_KEY;
+import static biocode.fims.projectConfig.models.FastaEntity.MARKER_URI;
+import static biocode.fims.projectConfig.models.FastaEntity.SEQUENCE_URI;
 import static org.junit.Assert.*;
 
 /**

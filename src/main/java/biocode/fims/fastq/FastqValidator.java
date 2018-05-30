@@ -1,6 +1,6 @@
 package biocode.fims.fastq;
 
-import biocode.fims.digester.Entity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.models.records.RecordSet;
 import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.validation.RecordValidator;

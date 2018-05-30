@@ -1,6 +1,6 @@
 package biocode.fims.validation.rules;
 
-import biocode.fims.digester.Entity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.models.records.Record;
 import biocode.fims.models.records.RecordSet;
@@ -8,10 +8,7 @@ import biocode.fims.validation.messages.EntityMessages;
 import biocode.fims.validation.messages.Message;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**

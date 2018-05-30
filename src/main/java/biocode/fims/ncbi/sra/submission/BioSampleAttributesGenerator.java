@@ -2,7 +2,7 @@ package biocode.fims.ncbi.sra.submission;
 
 import biocode.fims.exceptions.SraCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
-import biocode.fims.settings.PathManager;
+import biocode.fims.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -23,7 +23,7 @@ public class BioSampleAttributesGenerator {
      * @return
      */
     public static File generateFile(BioSampleMapper mapper) {
-        File attributesFile = PathManager.createUniqueFile("bioSample-attributes.tsv", System.getProperty("java.io.tmpdir"));
+        File attributesFile = FileUtils.createUniqueFile("bioSample-attributes.tsv", System.getProperty("java.io.tmpdir"));
 
         try (FileWriter fw = new FileWriter(attributesFile)) {
 

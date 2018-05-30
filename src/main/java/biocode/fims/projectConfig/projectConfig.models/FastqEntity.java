@@ -1,9 +1,8 @@
-package biocode.fims.digester;
+package biocode.fims.projectConfig.models;
 
 import biocode.fims.fastq.FastqProps;
 import biocode.fims.fastq.FastqRecord;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
 
 /**
  * @author rjewing

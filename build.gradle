@@ -41,7 +41,6 @@ dependencies {
     server group: 'org.springframework', name: 'spring-context', version: '4.3.4.RELEASE'
     server 'org.springframework:spring-jdbc:4.3.14.RELEASE'
     server 'commons-lang:commons-lang:2.6'
-    server group: 'org.elasticsearch.client', name: 'transport', version: '5.0.0'
 
     server group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.25'
     server('org.glassfish.jersey.ext:jersey-spring3:2.25') {
@@ -52,7 +51,7 @@ dependencies {
     server group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.4'
 
     // required for elasticsearch
-    server group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.7'
+//    server group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.7'
 
     compile composite.resolveDependency("org.biocode:biocode-fims-commons:${fimsCommonsVersion}", ":biocode-fims-commons")
 

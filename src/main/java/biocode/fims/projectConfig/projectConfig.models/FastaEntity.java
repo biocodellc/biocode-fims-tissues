@@ -1,14 +1,8 @@
-package biocode.fims.digester;
+package biocode.fims.projectConfig.models;
 
 import biocode.fims.fasta.FastaRecord;
-import biocode.fims.fimsExceptions.FimsRuntimeException;
-import biocode.fims.fimsExceptions.errorCodes.ConfigCode;
-import biocode.fims.projectConfig.ProjectConfig;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author rjewing

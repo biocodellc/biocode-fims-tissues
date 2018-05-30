@@ -5,7 +5,8 @@ import biocode.fims.models.records.RecordMetadata;
 
 import java.util.Map;
 
-import static biocode.fims.digester.FastaEntity.SEQUENCE_URI;
+import static biocode.fims.projectConfig.models.FastaEntity.SEQUENCE_URI;
+
 
 /**
  * @author rjewing

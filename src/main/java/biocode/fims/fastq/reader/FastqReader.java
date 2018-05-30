@@ -1,6 +1,6 @@
 package biocode.fims.fastq.reader;
 
-import biocode.fims.digester.Entity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.exceptions.FastqReaderCode;
 import biocode.fims.fastq.FastqProps;
 import biocode.fims.fastq.FastqRecord;

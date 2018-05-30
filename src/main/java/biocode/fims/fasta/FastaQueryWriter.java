@@ -1,15 +1,14 @@
 package biocode.fims.fasta;
 
-import biocode.fims.digester.Entity;
-import biocode.fims.digester.FastaEntity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.exceptions.FastaWriteCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.fimsExceptions.errorCodes.FileCode;
 import biocode.fims.fimsExceptions.errorCodes.QueryCode;
 import biocode.fims.projectConfig.ProjectConfig;
+import biocode.fims.projectConfig.models.FastaEntity;
 import biocode.fims.query.QueryResult;
 import biocode.fims.query.writers.QueryWriter;
-import biocode.fims.settings.PathManager;
 import biocode.fims.utils.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -89,7 +88,7 @@ public class FastaQueryWriter implements QueryWriter {
 
     private File writeMarkerFile(List<Map<String, String>> records, String marker) {
         String filename = StringUtils.isBlank(marker) ? "output.fasta" : marker + ".fasta";
-        File file = PathManager.createFile(filename, System.getProperty("java.io.tmpdir"));
+        File file = FileUtils.createFile(filename, System.getProperty("java.io.tmpdir"));
 
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(file)))) {

@@ -1,17 +1,16 @@
 package biocode.fims.fasta;
 
-import biocode.fims.digester.Entity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.models.records.RecordSet;
 import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.validation.RecordValidator;
 import biocode.fims.validation.ValidatorInstantiator;
 import biocode.fims.validation.rules.*;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static biocode.fims.digester.FastaEntity.SEQUENCE_KEY;
+import static biocode.fims.projectConfig.models.FastaEntity.SEQUENCE_KEY;
+
 
 /**
  * @author rjewing

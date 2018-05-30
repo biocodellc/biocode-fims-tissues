@@ -2,14 +2,14 @@ package biocode.fims.ncbi.sra;
 
 import biocode.fims.application.config.FimsProperties;
 import biocode.fims.bcid.Identifier;
-import biocode.fims.digester.Entity;
-import biocode.fims.digester.FastqEntity;
+import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.models.Project;
 import biocode.fims.models.records.Record;
 import biocode.fims.models.records.RecordSet;
 import biocode.fims.ncbi.entrez.BioSampleRepository;
 import biocode.fims.ncbi.models.BioSample;
+import biocode.fims.projectConfig.models.FastqEntity;
 import biocode.fims.query.QueryResult;
 import biocode.fims.query.QueryResults;
 import biocode.fims.query.dsl.Query;
