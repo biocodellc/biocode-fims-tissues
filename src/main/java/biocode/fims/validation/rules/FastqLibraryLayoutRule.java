@@ -36,7 +36,7 @@ public class FastqLibraryLayoutRule extends AbstractRule {
             throw new IllegalStateException("FastqEntity \"" + recordSet.entity().getConceptAlias() + "\" is a child entity, but the RecordSet.parent() was null");
         }
 
-        for (Record r : recordSet.records()) {
+        for (Record r : recordSet.recordsToPersist()) {
             FastqRecord record = (FastqRecord) r;
 
             if (!VALID_LAYOUTS.contains(record.libraryLayout())) {

@@ -44,7 +44,7 @@ public class FastqFilenamesRule extends AbstractRule {
 
         boolean isValid = true;
 
-        for (Record r : recordSet.records()) {
+        for (Record r : recordSet.recordsToPersist()) {
             FastqRecord record = (FastqRecord) r;
 
             String id = record.get(idKey);

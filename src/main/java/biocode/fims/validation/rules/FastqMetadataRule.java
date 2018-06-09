@@ -41,7 +41,7 @@ public class FastqMetadataRule extends AbstractRule {
 
         String idKey = recordSet.parent().entity().getUniqueKey();
 
-        for (Record r : recordSet.records()) {
+        for (Record r : recordSet.recordsToPersist()) {
             FastqRecord record = (FastqRecord) r;
 
             if (!inList("libraryStrategy", record.libraryStrategy())) {
