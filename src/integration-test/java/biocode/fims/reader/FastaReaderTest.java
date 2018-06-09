@@ -67,7 +67,7 @@ public class FastaReaderTest {
         rm.add(MARKER_KEY, "CO1");
         DataReader reader = new FastaReader(file, getConfig(), rm);
 
-        List<RecordSet> recordSets = reader.getRecordSets(0, null);
+        List<RecordSet> recordSets = reader.getRecordSets();
 
         assertEquals(1, recordSets.size());
 
@@ -93,7 +93,7 @@ public class FastaReaderTest {
         DataReader reader = new FastaReader(file, getConfig(), rm);
 
         try {
-            reader.getRecordSets(0, null);
+            reader.getRecordSets();
             fail();
         } catch (FimsRuntimeException e) {
             assertEquals(FastaReaderCode.NO_DATA, e.getErrorCode());
