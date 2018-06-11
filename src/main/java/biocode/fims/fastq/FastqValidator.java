@@ -35,7 +35,9 @@ public class FastqValidator extends RecordValidator {
         requiredValueRule.addColumn(parentEntity.getUniqueKey());
 
         for (FastqProps p : FastqProps.values()) {
-            requiredValueRule.addColumn(p.value());
+            if (p != FastqProps.BIOSAMPLE) {
+                requiredValueRule.addColumn(p.value());
+            }
         }
 
         rules.add(new ValidParentIdentifiersRule());
