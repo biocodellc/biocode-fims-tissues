@@ -26,6 +26,7 @@ public class FastqRecordRowMapper implements FimsRowMapper<FastqRecord> {
     @Override
     public FastqRecord mapRow(ResultSet rs, int rowNum, String dataLabel) throws SQLException {
         String data = rs.getString(dataLabel);
+        if (data == null) return null;
 
         try {
             Map<String, String> properties = (Map<String, String>) JacksonUtil.fromString(data, TYPE);
