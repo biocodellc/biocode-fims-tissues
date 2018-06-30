@@ -1,5 +1,6 @@
 package biocode.fims.reader;
 
+import biocode.fims.fasta.FastaProps;
 import biocode.fims.projectConfig.models.Attribute;
 import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.exceptions.FastaReaderCode;
@@ -17,9 +18,6 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
-import static biocode.fims.projectConfig.models.FastaEntity.MARKER_KEY;
-import static biocode.fims.projectConfig.models.FastaEntity.MARKER_URI;
-import static biocode.fims.projectConfig.models.FastaEntity.SEQUENCE_URI;
 import static org.junit.Assert.*;
 
 /**
@@ -64,7 +62,7 @@ public class FastaReaderTest {
 
         RecordMetadata rm = new RecordMetadata(FastaDataReaderType.READER_TYPE, false);
         rm.add(FastaReader.CONCEPT_ALIAS_KEY, "fastaEntity");
-        rm.add(MARKER_KEY, "CO1");
+        rm.add(FastaProps.MARKER.value(), "CO1");
         DataReader reader = new FastaReader(file, getConfig(), rm);
 
         List<RecordSet> recordSets = reader.getRecordSets();
@@ -77,8 +75,8 @@ public class FastaReaderTest {
 
             for (Record r: set.records()) {
                 assertNotNull(r.get(PARENT_UNIQUE_KEY));
-                assertEquals("CO1", r.get(MARKER_URI));
-                assertFalse("missing sequence", r.get(SEQUENCE_URI).trim().equals(""));
+                assertEquals("CO1", r.get(FastaProps.MARKER.value()));
+                assertFalse("missing sequence", r.get(FastaProps.SEQUENCE.value()).trim().equals(""));
             }
         }
     }
@@ -89,7 +87,7 @@ public class FastaReaderTest {
 
         RecordMetadata rm = new RecordMetadata(FastaDataReaderType.READER_TYPE, false);
         rm.add(FastaReader.CONCEPT_ALIAS_KEY, "fastaEntity");
-        rm.add(MARKER_KEY, "CO1");
+        rm.add(FastaProps.MARKER.value(), "CO1");
         DataReader reader = new FastaReader(file, getConfig(), rm);
 
         try {

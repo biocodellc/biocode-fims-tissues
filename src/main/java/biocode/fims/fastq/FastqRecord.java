@@ -28,6 +28,8 @@ public class FastqRecord extends GenericRecord {
         super();
         this.filenames = filenames;
         properties.put(parentUniqueKeyUri, identifier);
+        // only a single fastq record is allowed / parent record
+        properties.put(FastqProps.IDENTIFIER.value(), identifier);
 
         for (Map.Entry e : recordMetadata.metadata().entrySet()) {
             properties.put((String) e.getKey(), (String) e.getValue());

@@ -1,5 +1,6 @@
 package biocode.fims.fasta.reader;
 
+import biocode.fims.fasta.FastaProps;
 import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.exceptions.FastaReaderCode;
 import biocode.fims.fasta.FastaRecord;
@@ -19,8 +20,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static biocode.fims.projectConfig.models.FastaEntity.MARKER_KEY;
-import static biocode.fims.projectConfig.models.FastaEntity.MARKER_URI;
 
 /**
  * DataReader implementation for Fasta files. Currently only the identifiers and the sequences
@@ -32,7 +31,7 @@ import static biocode.fims.projectConfig.models.FastaEntity.MARKER_URI;
  * This Reader expects the following RecordMetadata:
  * <p>
  * - {@link FastaReader.CONCEPT_ALIAS_KEY}
- * - {@link FastaEntity.MARKER_KEY}
+ * - {@link FastaProps.MARKER}
  */
 public class FastaReader implements DataReader {
     public static final String CONCEPT_ALIAS_KEY = "conceptAlias";
@@ -58,14 +57,14 @@ public class FastaReader implements DataReader {
         this.config = projectConfig;
         this.recordMetadata = recordMetadata;
 
-        if (!recordMetadata.has(MARKER_URI) && recordMetadata.has(MARKER_KEY)) {
+        if (!recordMetadata.has(FastaProps.MARKER.value()) && recordMetadata.has(FastaProps.MARKER.value())) {
             recordMetadata.add(
-                    MARKER_URI, recordMetadata.remove(MARKER_KEY)
+                    FastaProps.MARKER.value(), recordMetadata.remove(FastaProps.MARKER.value())
             );
         }
         // so we know which one we are dealing with
         if (!recordMetadata.has(CONCEPT_ALIAS_KEY) ||
-                !recordMetadata.has(MARKER_URI)) {
+                !recordMetadata.has(FastaProps.MARKER.value())) {
             throw new FimsRuntimeException(DataReaderCode.MISSING_METADATA, 500);
         }
     }

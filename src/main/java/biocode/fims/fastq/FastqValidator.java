@@ -40,6 +40,7 @@ public class FastqValidator extends RecordValidator {
             }
         }
 
+        rules.add(new UniqueValueRule(FastqProps.IDENTIFIER.value(), RuleLevel.ERROR));
         rules.add(new ValidParentIdentifiersRule());
         rules.add(new FastqLibraryLayoutRule());
         rules.add(new FastqFilenamesRule());

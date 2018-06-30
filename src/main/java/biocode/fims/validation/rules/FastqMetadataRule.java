@@ -81,7 +81,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
         }
 
-        return hasError();
+        return !hasError();
     }
 
     @Override

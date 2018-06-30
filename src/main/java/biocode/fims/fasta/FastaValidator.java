@@ -9,8 +9,6 @@ import biocode.fims.validation.rules.*;
 
 import java.util.Set;
 
-import static biocode.fims.projectConfig.models.FastaEntity.SEQUENCE_KEY;
-
 
 /**
  * @author rjewing
@@ -28,7 +26,11 @@ public class FastaValidator extends RecordValidator {
         Entity entity = recordSet.entity();
 
         RequiredValueRule requiredValueRule = entity.getRule(RequiredValueRule.class, RuleLevel.ERROR);
-        requiredValueRule.addColumn(SEQUENCE_KEY);
+        requiredValueRule.addColumn(FastaProps.SEQUENCE.value());
+        requiredValueRule.addColumn(FastaProps.IDENTIFIER.value());
+
+        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), RuleLevel.ERROR);
+        entity.addRule(uniqueValueRule);
     }
 
     public static class FastaValidatorInstantiator implements ValidatorInstantiator {

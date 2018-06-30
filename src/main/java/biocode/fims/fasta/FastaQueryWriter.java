@@ -76,7 +76,7 @@ public class FastaQueryWriter implements QueryWriter {
         Map<String, List<Map<String, String>>> fastaFileMap = new HashMap<>();
 
         for (Map<String, String> record : queryResult.get(false)) {
-            String marker = record.get(FastaEntity.MARKER_KEY);
+            String marker = record.get(FastaProps.MARKER.value());
 
             fastaFileMap
                     .computeIfAbsent(marker, k -> new ArrayList<>())
@@ -98,14 +98,11 @@ public class FastaQueryWriter implements QueryWriter {
                 writer.write(">");
 
                 String identifier = record.get(ROOT_IDENTIFIER);
-                identifier += queryResult.entity().buildChildIdentifier(
-                        record.get(parentUniqueKey),
-                        record.get(uniqueKey)
-                );
+                identifier += record.get(uniqueKey);
                 writer.write(identifier);
 
                 writer.write(" [marker = ");
-                writer.write(record.get(FastaEntity.MARKER_KEY));
+                writer.write(record.get(FastaProps.MARKER.value()));
                 writer.write("] [");
                 writer.write(parentUniqueKey);
                 writer.write(" = ");
@@ -114,7 +111,7 @@ public class FastaQueryWriter implements QueryWriter {
 
                 // TODO add more metadata (locality, genus, species) once networks are implemented
 
-                writer.write(record.get(FastaEntity.SEQUENCE_KEY));
+                writer.write(record.get(FastaProps.SEQUENCE.value()));
                 writer.write("\n");
             }
 

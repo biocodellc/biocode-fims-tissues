@@ -26,8 +26,8 @@ public class FastqEntity extends PropEntity<FastqProps> {
     @Override
     protected void init() {
         super.init();
-        // only a single fastq record is allowed / parent record
-        setUniqueKey(null);
+        getAttribute(FastqProps.IDENTIFIER.value()).setInternal(true);
+        setUniqueKey(FastqProps.IDENTIFIER.value());
         recordType = FastqRecord.class;
 
         // note: default rules are set in the FastqValidator
