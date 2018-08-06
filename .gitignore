@@ -3,6 +3,7 @@ src/main/web/app/components/auth/clientId.js
 *.iml
 *.props
 *.properties
+!gradle/wrapper/gradle-wrapper.properties
 dist/*
 build/*
 classes/*

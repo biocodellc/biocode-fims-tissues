@@ -2,7 +2,7 @@ package biocode.fims.ncbi.sra.submission;
 
 import biocode.fims.exceptions.SraCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
-import biocode.fims.settings.PathManager;
+import biocode.fims.utils.FileUtils;
 
 import java.io.*;
 import java.util.List;
@@ -17,11 +17,10 @@ public class SraMetadataGenerator {
     /**
      * generates a sra metadata file from the provided {@link SraMetadataMapper}
      * @param mapper
-     * @param outputDirectory
      * @return
      */
-    public static File generateFile(SraMetadataMapper mapper, String outputDirectory) {
-        File metadataFile = PathManager.createUniqueFile("sra-metadata.tsv", outputDirectory);
+    public static File generateFile(SraMetadataMapper mapper) {
+        File metadataFile = FileUtils.createUniqueFile("sra-metadata.tsv", System.getProperty("java.io.tmpdir"));
 
         try (FileWriter fw = new FileWriter(metadataFile)) {
             List<String> headers = mapper.getHeaderValues();
