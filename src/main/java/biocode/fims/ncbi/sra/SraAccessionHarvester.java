@@ -26,8 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static biocode.fims.bcid.Identifier.ROOT_IDENTIFIER;
-
 /**
  * class for harvesting accession's for fimMetadata resource sequences submitted the NCBI SRA database
  *
@@ -78,7 +76,7 @@ public class SraAccessionHarvester {
                         QueryResult result = queryResults.getResult(e.getConceptAlias());
 
                         List<String> bcidsToQuery = result.records().stream()
-                                .map(r -> r.get(ROOT_IDENTIFIER) + r.get(parentEntity.getUniqueKeyURI()))
+                                .map(r -> r.rootIdentifier() + r.get(parentEntity.getUniqueKeyURI()))
                                 .collect(Collectors.toList());
                         List<BioSample> bioSamples = bioSampleRepository.getBioSamples(bcidsToQuery);
 

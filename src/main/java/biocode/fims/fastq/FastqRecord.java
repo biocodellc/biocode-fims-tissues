@@ -44,8 +44,8 @@ public class FastqRecord extends GenericRecord {
 //        }
     }
 
-    public FastqRecord(Map<String, String> properties, List<String> filenames, boolean shouldPersist) {
-        super(properties, shouldPersist);
+    public FastqRecord(Map<String, String> properties, List<String> filenames, String rootIdentifier, int projectId, String expeditionCode, boolean shouldPersist) {
+        super(properties, rootIdentifier, projectId, expeditionCode, shouldPersist);
         this.filenames = filenames;
     }
 
