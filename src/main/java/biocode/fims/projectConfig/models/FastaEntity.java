@@ -38,6 +38,11 @@ public class FastaEntity extends PropEntity<FastaProps> {
         return TYPE;
     }
 
+    @Override
+    public boolean getUniqueAcrossProject() {
+        return false;
+    }
+
     /**
      * class used to verify FastaEntity data integrity after deserialization. This is necessary
      * so we don't overwrite the default values during deserialization.

@@ -29,7 +29,7 @@ public class FastaValidator extends RecordValidator {
         requiredValueRule.addColumn(FastaProps.SEQUENCE.value());
         requiredValueRule.addColumn(FastaProps.IDENTIFIER.value());
 
-        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), RuleLevel.ERROR);
+        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), entity.getUniqueAcrossProject(), RuleLevel.ERROR);
         entity.addRule(uniqueValueRule);
     }
 
