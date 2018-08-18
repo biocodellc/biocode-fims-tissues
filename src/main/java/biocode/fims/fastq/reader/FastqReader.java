@@ -132,7 +132,8 @@ public class FastqReader implements DataReader {
             BufferedReader br = new BufferedReader(input);
             String line;
 
-            while (!StringUtils.isBlank(line = br.readLine())) {
+            while ((line = br.readLine()) != null) {
+                if (line.trim().equals("")) continue;;
                 Matcher matcher = pattern.matcher(line);
 
                 if (matcher.matches()) {
