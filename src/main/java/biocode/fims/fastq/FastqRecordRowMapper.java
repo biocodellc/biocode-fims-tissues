@@ -1,7 +1,7 @@
 package biocode.fims.fastq;
 
 import biocode.fims.models.dataTypes.JacksonUtil;
-import biocode.fims.models.records.FimsRowMapper;
+import biocode.fims.records.FimsRowMapper;
 import biocode.fims.ncbi.models.BioSample;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;

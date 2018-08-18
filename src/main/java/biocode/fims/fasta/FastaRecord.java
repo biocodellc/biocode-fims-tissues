@@ -1,7 +1,7 @@
 package biocode.fims.fasta;
 
-import biocode.fims.models.records.GenericRecord;
-import biocode.fims.models.records.RecordMetadata;
+import biocode.fims.records.GenericRecord;
+import biocode.fims.records.RecordMetadata;
 
 import java.util.Map;
 
