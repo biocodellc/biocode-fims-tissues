@@ -40,6 +40,11 @@ public class FastqEntity extends PropEntity<FastqProps> {
         return TYPE;
     }
 
+    @Override
+    public boolean getUniqueAcrossProject() {
+        return false;
+    }
+
     /**
      * class used to verify FastqEntity data integrity after deserialization. This is necessary
      * so we don't overwrite the default values during deserialization.

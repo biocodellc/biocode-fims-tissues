@@ -15,15 +15,12 @@ import org.apache.commons.lang.StringUtils;
 import java.io.*;
 import java.util.*;
 
-import static biocode.fims.bcid.Identifier.ROOT_IDENTIFIER;
-
 /**
  * @author RJ Ewing
  */
 public class FastaQueryWriter implements QueryWriter {
     private final QueryResult queryResult;
     private final Entity parentEntity;
-    private final String uniqueKey;
     private final String parentUniqueKey;
 
     public FastaQueryWriter(QueryResult queryResult, ProjectConfig config) {
@@ -38,7 +35,6 @@ public class FastaQueryWriter implements QueryWriter {
         }
 
         parentEntity = config.entity(queryResult.entity().getParentEntity());
-        uniqueKey = queryResult.entity().getUniqueKey();
         parentUniqueKey = parentEntity.getUniqueKey();
     }
 
@@ -97,8 +93,7 @@ public class FastaQueryWriter implements QueryWriter {
             for (Map<String, String> record : records) {
                 writer.write(">");
 
-                String identifier = record.get(ROOT_IDENTIFIER);
-                identifier += record.get(uniqueKey);
+                String identifier = record.get("bcid");
                 writer.write(identifier);
 
                 writer.write(" [marker = ");

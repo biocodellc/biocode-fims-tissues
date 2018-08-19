@@ -7,9 +7,9 @@ import biocode.fims.fastq.FastqRecord;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.fimsExceptions.ServerErrorException;
 import biocode.fims.fimsExceptions.errorCodes.DataReaderCode;
-import biocode.fims.models.records.Record;
-import biocode.fims.models.records.RecordMetadata;
-import biocode.fims.models.records.RecordSet;
+import biocode.fims.records.Record;
+import biocode.fims.records.RecordMetadata;
+import biocode.fims.records.RecordSet;
 import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.reader.DataReader;
 import org.apache.commons.lang.StringUtils;
@@ -39,8 +39,8 @@ public class FastqReader implements DataReader {
     private static final String CONCEPT_ALIAS_KEY = "conceptAlias";
     private static final List<String> EXTS = Arrays.asList("txt");
 
-    private static final Pattern SINGLE_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
-    private static final Pattern PAIRED_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)([\\.|_]+.*[12]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
+    private static final Pattern SINGLE_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAIRED_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)([\\.|_]+.*[12]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$", Pattern.CASE_INSENSITIVE);
 
     protected File file;
     protected ProjectConfig config;
@@ -132,7 +132,8 @@ public class FastqReader implements DataReader {
             BufferedReader br = new BufferedReader(input);
             String line;
 
-            while (!StringUtils.isBlank(line = br.readLine())) {
+            while ((line = br.readLine()) != null) {
+                if (line.trim().equals("")) continue;;
                 Matcher matcher = pattern.matcher(line);
 
                 if (matcher.matches()) {

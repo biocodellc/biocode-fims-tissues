@@ -1,7 +1,7 @@
 package biocode.fims.fastq;
 
 import biocode.fims.projectConfig.models.Entity;
-import biocode.fims.models.records.RecordSet;
+import biocode.fims.records.RecordSet;
 import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.validation.RecordValidator;
 import biocode.fims.validation.ValidatorInstantiator;
@@ -40,7 +40,7 @@ public class FastqValidator extends RecordValidator {
             }
         }
 
-        rules.add(new UniqueValueRule(FastqProps.IDENTIFIER.value(), RuleLevel.ERROR));
+        rules.add(new UniqueValueRule(FastqProps.IDENTIFIER.value(), entity.getUniqueAcrossProject(), RuleLevel.ERROR));
         rules.add(new ValidParentIdentifiersRule());
         rules.add(new FastqLibraryLayoutRule());
         rules.add(new FastqFilenamesRule());

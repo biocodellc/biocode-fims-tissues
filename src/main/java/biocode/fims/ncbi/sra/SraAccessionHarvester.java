@@ -5,8 +5,8 @@ import biocode.fims.bcid.Identifier;
 import biocode.fims.projectConfig.models.Entity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.models.Project;
-import biocode.fims.models.records.Record;
-import biocode.fims.models.records.RecordSet;
+import biocode.fims.records.Record;
+import biocode.fims.records.RecordSet;
 import biocode.fims.ncbi.entrez.BioSampleRepository;
 import biocode.fims.ncbi.models.BioSample;
 import biocode.fims.projectConfig.models.FastqEntity;
@@ -25,8 +25,6 @@ import org.springframework.util.Assert;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static biocode.fims.bcid.Identifier.ROOT_IDENTIFIER;
 
 /**
  * class for harvesting accession's for fimMetadata resource sequences submitted the NCBI SRA database
@@ -78,7 +76,7 @@ public class SraAccessionHarvester {
                         QueryResult result = queryResults.getResult(e.getConceptAlias());
 
                         List<String> bcidsToQuery = result.records().stream()
-                                .map(r -> r.get(ROOT_IDENTIFIER) + r.get(parentEntity.getUniqueKeyURI()))
+                                .map(r -> r.rootIdentifier() + r.get(parentEntity.getUniqueKeyURI()))
                                 .collect(Collectors.toList());
                         List<BioSample> bioSamples = bioSampleRepository.getBioSamples(bcidsToQuery);
 

@@ -3,8 +3,8 @@ package biocode.fims.fastq;
 import biocode.fims.exceptions.FastqReaderCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.models.dataTypes.JacksonUtil;
-import biocode.fims.models.records.GenericRecord;
-import biocode.fims.models.records.RecordMetadata;
+import biocode.fims.records.GenericRecord;
+import biocode.fims.records.RecordMetadata;
 import biocode.fims.ncbi.models.BioSample;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,8 +44,8 @@ public class FastqRecord extends GenericRecord {
 //        }
     }
 
-    public FastqRecord(Map<String, String> properties, List<String> filenames, boolean shouldPersist) {
-        super(properties, shouldPersist);
+    public FastqRecord(Map<String, String> properties, List<String> filenames, String rootIdentifier, int projectId, String expeditionCode, boolean shouldPersist) {
+        super(properties, rootIdentifier, projectId, expeditionCode, shouldPersist);
         this.filenames = filenames;
     }
 

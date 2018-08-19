@@ -1,7 +1,7 @@
 package biocode.fims.fasta;
 
 import biocode.fims.projectConfig.models.Entity;
-import biocode.fims.models.records.RecordSet;
+import biocode.fims.records.RecordSet;
 import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.validation.RecordValidator;
 import biocode.fims.validation.ValidatorInstantiator;
@@ -29,7 +29,7 @@ public class FastaValidator extends RecordValidator {
         requiredValueRule.addColumn(FastaProps.SEQUENCE.value());
         requiredValueRule.addColumn(FastaProps.IDENTIFIER.value());
 
-        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), RuleLevel.ERROR);
+        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), entity.getUniqueAcrossProject(), RuleLevel.ERROR);
         entity.addRule(uniqueValueRule);
     }
 
