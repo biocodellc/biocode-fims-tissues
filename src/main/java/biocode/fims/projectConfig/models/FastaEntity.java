@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.util.StdConverter;
 @JsonDeserialize(converter = FastaEntity.FastaEntitySanitizer.class)
 public class FastaEntity extends PropEntity<FastaProps> {
     private static final String CONCEPT_URI = "urn:fastaSequence";
-    private static final String TYPE = "Fasta";
+    public static final String TYPE = "Fasta";
 
 
     private FastaEntity() { // needed for EntityTypeIdResolver

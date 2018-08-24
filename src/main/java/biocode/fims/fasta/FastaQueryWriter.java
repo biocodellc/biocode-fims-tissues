@@ -45,7 +45,7 @@ public class FastaQueryWriter implements QueryWriter {
      * @return
      */
     @Override
-    public File write() {
+    public List<File> write() {
         Map<String, List<Map<String, String>>> recordsMap = sortByMarker();
         List<File> sequenceFiles = new ArrayList<>();
 
@@ -55,17 +55,7 @@ public class FastaQueryWriter implements QueryWriter {
             );
         }
 
-        if (sequenceFiles.size() == 1) {
-            return sequenceFiles.get(0);
-        } else {
-            Map<String, File> fastaFileMap = new HashMap<>();
-
-            for (File fastaFile : sequenceFiles) {
-                fastaFileMap.put(fastaFile.getName(), fastaFile);
-            }
-
-            return FileUtils.zip(fastaFileMap, System.getProperty("java.io.tmpdir"));
-        }
+        return sequenceFiles;
     }
 
     private Map<String, List<Map<String, String>>> sortByMarker() {
