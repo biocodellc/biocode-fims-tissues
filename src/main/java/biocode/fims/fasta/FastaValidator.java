@@ -19,19 +19,6 @@ public class FastaValidator extends RecordValidator {
         super(config);
     }
 
-    @Override
-    protected void addDefaultRules(Set<Rule> rules, RecordSet recordSet) {
-        super.addDefaultRules(rules, recordSet);
-
-        Entity entity = recordSet.entity();
-
-        RequiredValueRule requiredValueRule = entity.getRule(RequiredValueRule.class, RuleLevel.ERROR);
-        requiredValueRule.addColumn(FastaProps.SEQUENCE.value());
-        requiredValueRule.addColumn(FastaProps.IDENTIFIER.value());
-
-        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), entity.getUniqueAcrossProject(), RuleLevel.ERROR);
-        entity.addRule(uniqueValueRule);
-    }
 
     public static class FastaValidatorInstantiator implements ValidatorInstantiator {
         @Override

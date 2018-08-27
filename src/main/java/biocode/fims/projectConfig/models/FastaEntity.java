@@ -2,6 +2,10 @@ package biocode.fims.projectConfig.models;
 
 import biocode.fims.fasta.FastaProps;
 import biocode.fims.fasta.FastaRecord;
+import biocode.fims.projectConfig.ProjectConfig;
+import biocode.fims.validation.rules.RequiredValueRule;
+import biocode.fims.validation.rules.RuleLevel;
+import biocode.fims.validation.rules.UniqueValueRule;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 
@@ -43,10 +47,22 @@ public class FastaEntity extends PropEntity<FastaProps> {
         return false;
     }
 
+    @Override
+    public void addDefaultRules(ProjectConfig config) {
+        super.addDefaultRules(config);
+        RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
+        requiredValueRule.addColumn(FastaProps.SEQUENCE.value());
+        requiredValueRule.addColumn(FastaProps.IDENTIFIER.value());
+
+        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), getUniqueAcrossProject(), RuleLevel.ERROR);
+        addRule(uniqueValueRule);
+    }
+
     /**
      * class used to verify FastaEntity data integrity after deserialization. This is necessary
      * so we don't overwrite the default values during deserialization.
      */
-    static class FastaEntitySanitizer extends PropEntitySanitizer<FastaEntity> {}
+    static class FastaEntitySanitizer extends PropEntitySanitizer<FastaEntity> {
+    }
 }
 

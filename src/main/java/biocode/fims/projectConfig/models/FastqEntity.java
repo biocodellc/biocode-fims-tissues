@@ -2,7 +2,11 @@ package biocode.fims.projectConfig.models;
 
 import biocode.fims.fastq.FastqProps;
 import biocode.fims.fastq.FastqRecord;
+import biocode.fims.projectConfig.ProjectConfig;
+import biocode.fims.validation.rules.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import java.util.LinkedHashSet;
 
 /**
  * @author rjewing
@@ -43,6 +47,34 @@ public class FastqEntity extends PropEntity<FastqProps> {
     @Override
     public boolean getUniqueAcrossProject() {
         return false;
+    }
+
+    @Override
+    public void addDefaultRules(ProjectConfig config) {
+        RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
+
+        if (requiredValueRule == null) {
+            requiredValueRule = new RequiredValueRule(new LinkedHashSet<>(), RuleLevel.ERROR);
+            addRule(requiredValueRule);
+        }
+
+        Entity parentEntity = config.entity(getParentEntity());
+
+        requiredValueRule.addColumn(parentEntity.getUniqueKey());
+
+        for (FastqProps p : FastqProps.values()) {
+            if (p != FastqProps.BIOSAMPLE) {
+                requiredValueRule.addColumn(p.value());
+            }
+        }
+
+        addRule(new UniqueValueRule(FastqProps.IDENTIFIER.value(), getUniqueAcrossProject(), RuleLevel.ERROR));
+        addRule(new ValidParentIdentifiersRule());
+        addRule(new FastqLibraryLayoutRule());
+        addRule(new FastqFilenamesRule());
+        addRule(new FastqMetadataRule());
+
+        // validate all parent records have a FastqRecord???
     }
 
     /**
