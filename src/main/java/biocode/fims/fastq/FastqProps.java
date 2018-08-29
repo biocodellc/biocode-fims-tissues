@@ -1,6 +1,6 @@
 package biocode.fims.fastq;
 
-import biocode.fims.projectConfig.models.EntityProps;
+import biocode.fims.config.models.EntityProps;
 
 /**
  * @author rjewing

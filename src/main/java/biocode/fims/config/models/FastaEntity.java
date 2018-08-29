@@ -1,13 +1,14 @@
-package biocode.fims.projectConfig.models;
+package biocode.fims.config.models;
 
+import biocode.fims.config.Config;
 import biocode.fims.fasta.FastaProps;
 import biocode.fims.fasta.FastaRecord;
-import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.validation.rules.RequiredValueRule;
 import biocode.fims.validation.rules.RuleLevel;
 import biocode.fims.validation.rules.UniqueValueRule;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
+
+import java.util.LinkedHashSet;
 
 /**
  * @author rjewing
@@ -48,9 +49,15 @@ public class FastaEntity extends PropEntity<FastaProps> {
     }
 
     @Override
-    public void addDefaultRules(ProjectConfig config) {
+    public void addDefaultRules(Config config) {
         super.addDefaultRules(config);
         RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
+
+        if (requiredValueRule == null) {
+            requiredValueRule = new RequiredValueRule(new LinkedHashSet<>(), RuleLevel.ERROR);
+            addRule(requiredValueRule);
+        }
+
         requiredValueRule.addColumn(FastaProps.SEQUENCE.value());
         requiredValueRule.addColumn(FastaProps.IDENTIFIER.value());
 

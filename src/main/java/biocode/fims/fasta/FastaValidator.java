@@ -1,13 +1,8 @@
 package biocode.fims.fasta;
 
-import biocode.fims.projectConfig.models.Entity;
-import biocode.fims.records.RecordSet;
-import biocode.fims.projectConfig.ProjectConfig;
+import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.validation.RecordValidator;
 import biocode.fims.validation.ValidatorInstantiator;
-import biocode.fims.validation.rules.*;
-
-import java.util.Set;
 
 
 /**

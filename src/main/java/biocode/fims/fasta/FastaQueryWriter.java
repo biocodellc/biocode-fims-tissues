@@ -1,12 +1,12 @@
 package biocode.fims.fasta;
 
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Entity;
+import biocode.fims.config.models.FastaEntity;
+import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.exceptions.FastaWriteCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.fimsExceptions.errorCodes.FileCode;
 import biocode.fims.fimsExceptions.errorCodes.QueryCode;
-import biocode.fims.projectConfig.ProjectConfig;
-import biocode.fims.projectConfig.models.FastaEntity;
 import biocode.fims.query.QueryResult;
 import biocode.fims.query.writers.QueryWriter;
 import biocode.fims.utils.FileUtils;

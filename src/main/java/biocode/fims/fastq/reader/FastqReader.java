@@ -1,6 +1,6 @@
 package biocode.fims.fastq.reader;
 
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Entity;
 import biocode.fims.exceptions.FastqReaderCode;
 import biocode.fims.fastq.FastqProps;
 import biocode.fims.fastq.FastqRecord;
@@ -10,9 +10,8 @@ import biocode.fims.fimsExceptions.errorCodes.DataReaderCode;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordMetadata;
 import biocode.fims.records.RecordSet;
-import biocode.fims.projectConfig.ProjectConfig;
+import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.reader.DataReader;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.util.Assert;
 
 import java.io.BufferedReader;

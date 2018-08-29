@@ -1,8 +1,9 @@
-package biocode.fims.projectConfig.models;
+package biocode.fims.config.models;
 
+import biocode.fims.config.Config;
+import biocode.fims.config.network.NetworkConfig;
 import biocode.fims.fastq.FastqProps;
 import biocode.fims.fastq.FastqRecord;
-import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.validation.rules.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -50,7 +51,7 @@ public class FastqEntity extends PropEntity<FastqProps> {
     }
 
     @Override
-    public void addDefaultRules(ProjectConfig config) {
+    public void addDefaultRules(Config config) {
         RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
 
         if (requiredValueRule == null) {
@@ -58,9 +59,10 @@ public class FastqEntity extends PropEntity<FastqProps> {
             addRule(requiredValueRule);
         }
 
-        Entity parentEntity = config.entity(getParentEntity());
-
-        requiredValueRule.addColumn(parentEntity.getUniqueKey());
+        if (!(config instanceof NetworkConfig)) {
+            Entity parentEntity = config.entity(getParentEntity());
+            requiredValueRule.addColumn(parentEntity.getUniqueKey());
+        }
 
         for (FastqProps p : FastqProps.values()) {
             if (p != FastqProps.BIOSAMPLE) {
@@ -81,6 +83,7 @@ public class FastqEntity extends PropEntity<FastqProps> {
      * class used to verify FastqEntity data integrity after deserialization. This is necessary
      * so we don't overwrite the default values during deserialization.
      */
-    static class FastqEntitySanitizer extends PropEntitySanitizer<FastqEntity> {}
+    static class FastqEntitySanitizer extends PropEntitySanitizer<FastqEntity> {
+    }
 }
 

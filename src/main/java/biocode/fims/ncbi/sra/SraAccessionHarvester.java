@@ -2,14 +2,14 @@ package biocode.fims.ncbi.sra;
 
 import biocode.fims.application.config.FimsProperties;
 import biocode.fims.bcid.Identifier;
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Entity;
+import biocode.fims.config.models.FastqEntity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.models.Project;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordSet;
 import biocode.fims.ncbi.entrez.BioSampleRepository;
 import biocode.fims.ncbi.models.BioSample;
-import biocode.fims.projectConfig.models.FastqEntity;
 import biocode.fims.query.QueryResult;
 import biocode.fims.query.QueryResults;
 import biocode.fims.query.dsl.Query;
@@ -59,13 +59,15 @@ public class SraAccessionHarvester {
 
     private void harvest(Project project) {
 
+        // TODO rewrite to fetch in a single query, then update by expeditionCode or possibly implement a bulk update
         project.getExpeditions().forEach(expedition -> {
             project.getProjectConfig().entities().stream()
                     .filter(e -> e.type().equals(FastqEntity.TYPE))
                     .forEach(e -> {
-                        String q = "_select_:" +
-                                e.getConceptAlias() +
-                                " not _exists_:bioSample and _expedition_:" +
+//                        String q = "_select_:" +
+//                                e.getConceptAlias() +
+//                                " not _exists_:bioSample and _expeditions_:" +
+                        String q = "not _exists_:bioSample and _expeditions_:" +
                                 expedition.getExpeditionCode();
 
                         Query query = Query.factory(project, e.getConceptAlias(), q);
