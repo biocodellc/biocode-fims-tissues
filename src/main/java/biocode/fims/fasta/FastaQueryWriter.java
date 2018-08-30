@@ -1,5 +1,6 @@
 package biocode.fims.fasta;
 
+import biocode.fims.config.Config;
 import biocode.fims.config.models.Entity;
 import biocode.fims.config.models.FastaEntity;
 import biocode.fims.config.project.ProjectConfig;
@@ -23,7 +24,7 @@ public class FastaQueryWriter implements QueryWriter {
     private final Entity parentEntity;
     private final String parentUniqueKey;
 
-    public FastaQueryWriter(QueryResult queryResult, ProjectConfig config) {
+    public FastaQueryWriter(QueryResult queryResult, Config config) {
         // TODO pass in parentRecords & list of columns to write out as metadata
         if (!(queryResult.entity() instanceof FastaEntity)) {
             throw new FimsRuntimeException(FastaWriteCode.INVALID_ENTITY, 500, queryResult.entity().type());
