@@ -3,7 +3,9 @@ package biocode.fims.config.models;
 import biocode.fims.config.Config;
 import biocode.fims.fasta.FastaProps;
 import biocode.fims.fasta.FastaRecord;
+import biocode.fims.models.dataTypes.JacksonUtil;
 import biocode.fims.validation.rules.RequiredValueRule;
+import biocode.fims.validation.rules.Rule;
 import biocode.fims.validation.rules.RuleLevel;
 import biocode.fims.validation.rules.UniqueValueRule;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -63,6 +65,33 @@ public class FastaEntity extends PropEntity<FastaProps> {
 
         UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), getUniqueAcrossProject(), RuleLevel.ERROR);
         addRule(uniqueValueRule);
+    }
+
+
+    @Override
+    public Entity clone() {
+        FastaEntity entity = new FastaEntity(getConceptAlias());
+
+        getRules().forEach(r -> {
+            // TODO create a Rule method clone()
+            // hacky way to make a copy of the rule
+            Rule newR = JacksonUtil.fromString(
+                    JacksonUtil.toString(r),
+                    r.getClass()
+            );
+            entity.addRule(newR);
+        });
+        getAttributes().forEach(a -> entity.addAttribute(a.clone()));
+
+        entity.setParentEntity(getParentEntity());
+        entity.recordType = recordType;
+
+        entity.setWorksheet(getWorksheet());
+        entity.setUniqueKey(getUniqueKey());
+        entity.setUniqueAcrossProject(getUniqueAcrossProject());
+        entity.setHashed(isHashed());
+
+        return entity;
     }
 
     /**

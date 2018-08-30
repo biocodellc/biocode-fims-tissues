@@ -4,6 +4,7 @@ import biocode.fims.config.Config;
 import biocode.fims.config.network.NetworkConfig;
 import biocode.fims.fastq.FastqProps;
 import biocode.fims.fastq.FastqRecord;
+import biocode.fims.models.dataTypes.JacksonUtil;
 import biocode.fims.validation.rules.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -77,6 +78,32 @@ public class FastqEntity extends PropEntity<FastqProps> {
         addRule(new FastqMetadataRule());
 
         // validate all parent records have a FastqRecord???
+    }
+
+    @Override
+    public Entity clone() {
+        FastqEntity entity = new FastqEntity(getConceptAlias());
+
+        getRules().forEach(r -> {
+            // TODO create a Rule method clone()
+            // hacky way to make a copy of the rule
+            Rule newR = JacksonUtil.fromString(
+                    JacksonUtil.toString(r),
+                    r.getClass()
+            );
+            entity.addRule(newR);
+        });
+        getAttributes().forEach(a -> entity.addAttribute(a.clone()));
+
+        entity.setParentEntity(getParentEntity());
+        entity.recordType = recordType;
+
+        entity.setWorksheet(getWorksheet());
+        entity.setUniqueKey(getUniqueKey());
+        entity.setUniqueAcrossProject(getUniqueAcrossProject());
+        entity.setHashed(isHashed());
+
+        return entity;
     }
 
     /**
