@@ -21,6 +21,8 @@ public class EntrezApiService {
 
     /**
      * TODO maybe query by date to limit results from ncbi
+     * ex date filter from 04/2018 - present (date can be any portion (2018, 2018/04)):
+     *     &term=bcid[Attribute Name] AND ("2018/04"[Publication Date] : "3000"[Publication Date])
      * <p>
      * get a list of {@link biocode.fims.ncbi.models.BioSample#id}s that have a "bcid" attribute from the NCBI BioSample
      * database

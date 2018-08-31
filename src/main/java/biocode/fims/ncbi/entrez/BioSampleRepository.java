@@ -4,22 +4,29 @@ import biocode.fims.ncbi.models.BioSample;
 import biocode.fims.ncbi.models.SraExperimentPackage;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * @author rjewing
  */
 public class BioSampleRepository {
     private final EntrezApiService entrez;
+    private List<BioSample> bioSamples;
+    private Instant lastFetched;
 
     public BioSampleRepository(EntrezApiService entrez) {
         Assert.notNull(entrez);
         this.entrez = entrez;
     }
 
+    /**
+     * BioSamples are cached for 1 hour from ncbi
+     *
+     * @param bcids
+     * @return
+     */
     public List<BioSample> getBioSamples(List<String> bcids) {
         if (bcids.isEmpty()) {
             return new ArrayList<>();
@@ -41,12 +48,19 @@ public class BioSampleRepository {
     }
 
     private List<BioSample> getBioSamplesForBcids(List<String> bcids) {
-        List<String> bioSampleIds = entrez.getBioSampleIdsWithBcidAttribute();
-        if (bioSampleIds.isEmpty()) {
-            return new ArrayList<>();
-        }
+        // cache bioSamples for 1 hour
+        if (bioSamples == null || Instant.now().minus(1, ChronoUnit.HOURS).isAfter(lastFetched)) {
+            List<String> bioSampleIds = entrez.getBioSampleIdsWithBcidAttribute();
 
-        List<BioSample> bioSamples = entrez.getBioSamplesFromIds(bioSampleIds);
+            if (bioSampleIds.isEmpty()) {
+                bioSamples = new ArrayList<>();
+                lastFetched = Instant.now();
+                return bioSamples;
+            }
+
+            bioSamples = entrez.getBioSamplesFromIds(bioSampleIds);
+            lastFetched = Instant.now();
+        }
 
         return filterBioSamplesMatchingBcids(bioSamples, bcids);
 
