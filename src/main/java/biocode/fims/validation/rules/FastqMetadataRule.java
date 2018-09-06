@@ -46,6 +46,7 @@ public class FastqMetadataRule extends AbstractRule {
 
             if (!inList("libraryStrategy", record.libraryStrategy())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.libraryStrategy() + "\" for \"libraryStrategy\"")
@@ -53,6 +54,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList("librarySource", record.librarySource())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.librarySource() + "\" for \"librarySource\"")
@@ -60,6 +62,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList("librarySelection", record.librarySelection())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.librarySelection() + "\" for \"librarySelection\"")
@@ -67,6 +70,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList("platform", record.platform())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.platform() + "\" for \"platform\"")
@@ -74,6 +78,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList(record.platform(), record.instrumentModel())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.instrumentModel() + "\" for \"instrumentModel\"")

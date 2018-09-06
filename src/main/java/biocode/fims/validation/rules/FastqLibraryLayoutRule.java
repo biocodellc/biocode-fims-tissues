@@ -50,6 +50,8 @@ public class FastqLibraryLayoutRule extends AbstractRule {
                         level()
                 );
 
+                if (level().equals(RuleLevel.ERROR)) recordSet.recordsToPersist().forEach(Record::setError);
+
                 setError();
                 return false;
             }

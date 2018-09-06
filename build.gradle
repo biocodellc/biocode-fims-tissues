@@ -45,7 +45,7 @@ dependencies {
     server group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.27'
     server group: 'org.glassfish.jersey.ext', name: 'jersey-spring4', version: '2.27'
 
-    server group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.4'
+    server group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 
     compile composite.resolveDependency("org.biocode:biocode-fims-commons:${fimsCommonsVersion}", ":biocode-fims-commons")
 
