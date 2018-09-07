@@ -11,7 +11,7 @@ import biocode.fims.fimsExceptions.errorCodes.QueryCode;
 import biocode.fims.query.QueryResult;
 import biocode.fims.query.writers.QueryWriter;
 import biocode.fims.utils.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.*;
