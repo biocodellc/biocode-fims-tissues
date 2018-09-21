@@ -35,6 +35,8 @@ public class FastaEntity extends PropEntity<FastaProps> {
         super.init();
         getAttribute(FastaProps.IDENTIFIER.value()).setInternal(true);
         setUniqueKey(FastaProps.IDENTIFIER.value());
+        getAttribute(FastaProps.SEQUENCE.value()).setInternal(true);
+        getAttribute(FastaProps.MARKER.value()).setInternal(true);
         recordType = FastaRecord.class;
 
         // note: default rules are set in the FastaValidator

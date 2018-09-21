@@ -34,6 +34,9 @@ public class FastqEntity extends PropEntity<FastqProps> {
         super.init();
         getAttribute(FastqProps.IDENTIFIER.value()).setInternal(true);
         setUniqueKey(FastqProps.IDENTIFIER.value());
+        getAttribute(FastqProps.FILENAMES.value()).setInternal(true);
+        getAttribute(FastqProps.BIOSAMPLE.value()).setInternal(true);
+
         recordType = FastqRecord.class;
 
         // note: default rules are set in the FastqValidator
