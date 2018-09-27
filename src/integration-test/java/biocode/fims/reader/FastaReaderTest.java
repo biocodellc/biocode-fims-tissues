@@ -1,8 +1,11 @@
 package biocode.fims.reader;
 
+import biocode.fims.config.models.DefaultEntity;
+import biocode.fims.config.models.FastaEntity;
+import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.fasta.FastaProps;
-import biocode.fims.projectConfig.models.Attribute;
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Attribute;
+import biocode.fims.config.models.Entity;
 import biocode.fims.exceptions.FastaReaderCode;
 import biocode.fims.fasta.reader.FastaDataReaderType;
 import biocode.fims.fasta.reader.FastaReader;
@@ -10,8 +13,6 @@ import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordMetadata;
 import biocode.fims.records.RecordSet;
-import biocode.fims.projectConfig.ProjectConfig;
-import biocode.fims.projectConfig.models.FastaEntity;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -101,7 +102,7 @@ public class FastaReaderTest {
     private ProjectConfig getConfig() {
         ProjectConfig config = new ProjectConfig();
 
-        Entity parentEntity = new Entity("parent", "urn:parentEntity");
+        Entity parentEntity = new DefaultEntity("parent", "urn:parentEntity");
         parentEntity.setUniqueKey(PARENT_UNIQUE_KEY);
         config.addEntity(parentEntity);
         Entity fastaEntity = new FastaEntity("fastaEntity");

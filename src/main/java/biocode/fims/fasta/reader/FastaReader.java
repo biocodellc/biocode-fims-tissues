@@ -1,7 +1,8 @@
 package biocode.fims.fasta.reader;
 
+import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.fasta.FastaProps;
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Entity;
 import biocode.fims.exceptions.FastaReaderCode;
 import biocode.fims.fasta.FastaRecord;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
@@ -10,7 +11,6 @@ import biocode.fims.fimsExceptions.errorCodes.DataReaderCode;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordMetadata;
 import biocode.fims.records.RecordSet;
-import biocode.fims.projectConfig.ProjectConfig;
 import biocode.fims.reader.DataReader;
 import org.springframework.util.Assert;
 

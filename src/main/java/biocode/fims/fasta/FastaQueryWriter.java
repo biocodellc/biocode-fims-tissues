@@ -1,16 +1,17 @@
 package biocode.fims.fasta;
 
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.Config;
+import biocode.fims.config.models.Entity;
+import biocode.fims.config.models.FastaEntity;
+import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.exceptions.FastaWriteCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.fimsExceptions.errorCodes.FileCode;
 import biocode.fims.fimsExceptions.errorCodes.QueryCode;
-import biocode.fims.projectConfig.ProjectConfig;
-import biocode.fims.projectConfig.models.FastaEntity;
 import biocode.fims.query.QueryResult;
 import biocode.fims.query.writers.QueryWriter;
 import biocode.fims.utils.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -23,7 +24,7 @@ public class FastaQueryWriter implements QueryWriter {
     private final Entity parentEntity;
     private final String parentUniqueKey;
 
-    public FastaQueryWriter(QueryResult queryResult, ProjectConfig config) {
+    public FastaQueryWriter(QueryResult queryResult, Config config) {
         // TODO pass in parentRecords & list of columns to write out as metadata
         if (!(queryResult.entity() instanceof FastaEntity)) {
             throw new FimsRuntimeException(FastaWriteCode.INVALID_ENTITY, 500, queryResult.entity().type());
@@ -45,7 +46,7 @@ public class FastaQueryWriter implements QueryWriter {
      * @return
      */
     @Override
-    public File write() {
+    public List<File> write() {
         Map<String, List<Map<String, String>>> recordsMap = sortByMarker();
         List<File> sequenceFiles = new ArrayList<>();
 
@@ -55,17 +56,7 @@ public class FastaQueryWriter implements QueryWriter {
             );
         }
 
-        if (sequenceFiles.size() == 1) {
-            return sequenceFiles.get(0);
-        } else {
-            Map<String, File> fastaFileMap = new HashMap<>();
-
-            for (File fastaFile : sequenceFiles) {
-                fastaFileMap.put(fastaFile.getName(), fastaFile);
-            }
-
-            return FileUtils.zip(fastaFileMap, System.getProperty("java.io.tmpdir"));
-        }
+        return sequenceFiles;
     }
 
     private Map<String, List<Map<String, String>>> sortByMarker() {

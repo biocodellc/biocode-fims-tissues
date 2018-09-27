@@ -1,12 +1,12 @@
 package biocode.fims.validation.rules;
 
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Entity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordSet;
 import biocode.fims.validation.messages.EntityMessages;
 import biocode.fims.validation.messages.Message;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -46,6 +46,7 @@ public class FastqMetadataRule extends AbstractRule {
 
             if (!inList("libraryStrategy", record.libraryStrategy())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.libraryStrategy() + "\" for \"libraryStrategy\"")
@@ -53,6 +54,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList("librarySource", record.librarySource())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.librarySource() + "\" for \"librarySource\"")
@@ -60,6 +62,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList("librarySelection", record.librarySelection())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.librarySelection() + "\" for \"librarySelection\"")
@@ -67,6 +70,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList("platform", record.platform())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.platform() + "\" for \"platform\"")
@@ -74,6 +78,7 @@ public class FastqMetadataRule extends AbstractRule {
             }
             if (!inList(record.platform(), record.instrumentModel())) {
                 setError();
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         GROUP_MESSAGE,
                         new Message("\"" + r.get(idKey) + "\" has an invalid value: \"" + record.instrumentModel() + "\" for \"instrumentModel\"")
@@ -92,7 +97,7 @@ public class FastqMetadataRule extends AbstractRule {
     private boolean inList(String listAlias, String value) {
         if (value == null) return false;
 
-        biocode.fims.projectConfig.models.List list = config.findList(listAlias);
+        biocode.fims.config.models.List list = config.findList(listAlias);
 
         // don't throw an exception if the list isn't defined
         if (list == null) {

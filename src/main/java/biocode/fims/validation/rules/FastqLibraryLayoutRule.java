@@ -1,6 +1,6 @@
 package biocode.fims.validation.rules;
 
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Entity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordSet;
@@ -49,6 +49,8 @@ public class FastqLibraryLayoutRule extends AbstractRule {
                         ),
                         level()
                 );
+
+                if (level().equals(RuleLevel.ERROR)) recordSet.recordsToPersist().forEach(Record::setError);
 
                 setError();
                 return false;

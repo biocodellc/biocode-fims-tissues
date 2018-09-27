@@ -1,6 +1,6 @@
 package biocode.fims.validation.rules;
 
-import biocode.fims.projectConfig.models.Entity;
+import biocode.fims.config.models.Entity;
 import biocode.fims.fastq.FastqRecord;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordSet;
@@ -53,6 +53,7 @@ public class FastqFilenamesRule extends AbstractRule {
 
             if (!isPaired && record.filenames().size() != 1 || isPaired && record.filenames().size() != 2) {
                 isValid = false;
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         MISSING_GROUP_MESSAGE,
                         new Message("\"" + id + "\" should have " + ((isPaired) ? "2" : "1") + " files, but found " + record.filenames().size())
@@ -68,6 +69,7 @@ public class FastqFilenamesRule extends AbstractRule {
                     found2 = true;
                 } else if (isPaired || !isPaired && !SINGLE_FILE_PATTERN.matcher(f).matches()) {
                     isValid = false;
+                    if (level().equals(RuleLevel.ERROR)) r.setError();
                     messages.addErrorMessage(
                             INVALID_GROUP_MESSAGE,
                             new Message("\"" + f + "\" does not match the correct naming format")
@@ -76,6 +78,7 @@ public class FastqFilenamesRule extends AbstractRule {
             }
 
             if (isPaired && (!found1 || !found2)) {
+                if (level().equals(RuleLevel.ERROR)) r.setError();
                 messages.addErrorMessage(
                         INVALID_GROUP_MESSAGE,
                         new Message("\"" + id + "\" is missing 1 or both files")
