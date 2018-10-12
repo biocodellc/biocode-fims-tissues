@@ -26,7 +26,7 @@ public class FastaQueryWriter implements QueryWriter {
 
     public FastaQueryWriter(QueryResult queryResult, Config config) {
         // TODO pass in parentRecords & list of columns to write out as metadata
-        if (!(queryResult.entity() instanceof FastaEntity)) {
+        if (!(Objects.equals(queryResult.entity().type(), FastaEntity.TYPE))) {
             throw new FimsRuntimeException(FastaWriteCode.INVALID_ENTITY, 500, queryResult.entity().type());
         }
         this.queryResult = queryResult;
@@ -92,7 +92,7 @@ public class FastaQueryWriter implements QueryWriter {
                 writer.write("] [");
                 writer.write(parentUniqueKey);
                 writer.write(" = ");
-                writer.write(record.get(parentUniqueKey));
+                writer.write(record.getOrDefault(parentUniqueKey, ""));
                 writer.write("]\n");
 
                 // TODO add more metadata (locality, genus, species) once networks are implemented
