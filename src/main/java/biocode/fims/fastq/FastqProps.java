@@ -24,7 +24,12 @@ public enum FastqProps implements EntityProps {
     }
 
     @Override
-    public String value() {
+    public String uri() {
+        return val;
+    }
+
+    @Override
+    public String column() {
         return val;
     }
 

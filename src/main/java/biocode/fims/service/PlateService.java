@@ -4,6 +4,7 @@ import biocode.fims.application.config.FimsProperties;
 import biocode.fims.bcid.BcidBuilder;
 import biocode.fims.config.models.Attribute;
 import biocode.fims.config.models.Entity;
+import biocode.fims.config.models.TissueEntity;
 import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.fimsExceptions.BadRequestException;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
@@ -110,7 +111,7 @@ public class PlateService {
 
     private Entity getTissueEntity(Project project) {
         ProjectConfig config = project.getProjectConfig();
-        Entity entity = config.entity(TISSUE_ENTITY);
+        Entity entity = config.entity(TissueEntity.CONCEPT_ALIAS);
 
         if (entity == null) {
             throw new BadRequestException("Project does not contain a \"" + TISSUE_ENTITY + "\" entity");

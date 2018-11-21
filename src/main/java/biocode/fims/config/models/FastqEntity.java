@@ -32,10 +32,10 @@ public class FastqEntity extends PropEntity<FastqProps> {
     @Override
     protected void init() {
         super.init();
-        getAttribute(FastqProps.IDENTIFIER.value()).setInternal(true);
-        setUniqueKey(FastqProps.IDENTIFIER.value());
-        getAttribute(FastqProps.FILENAMES.value()).setInternal(true);
-        getAttribute(FastqProps.BIOSAMPLE.value()).setInternal(true);
+        getAttribute(FastqProps.IDENTIFIER.column()).setInternal(true);
+        setUniqueKey(FastqProps.IDENTIFIER.column());
+        getAttribute(FastqProps.FILENAMES.column()).setInternal(true);
+        getAttribute(FastqProps.BIOSAMPLE.column()).setInternal(true);
 
         recordType = FastqRecord.class;
 
@@ -70,11 +70,11 @@ public class FastqEntity extends PropEntity<FastqProps> {
 
         for (FastqProps p : FastqProps.values()) {
             if (p != FastqProps.BIOSAMPLE) {
-                requiredValueRule.addColumn(p.value());
+                requiredValueRule.addColumn(p.column());
             }
         }
 
-        addRule(new UniqueValueRule(FastqProps.IDENTIFIER.value(), getUniqueAcrossProject(), RuleLevel.ERROR));
+        addRule(new UniqueValueRule(FastqProps.IDENTIFIER.column(), getUniqueAcrossProject(), RuleLevel.ERROR));
         addRule(new ValidParentIdentifiersRule());
         addRule(new FastqLibraryLayoutRule());
         addRule(new FastqFilenamesRule());
@@ -85,28 +85,7 @@ public class FastqEntity extends PropEntity<FastqProps> {
 
     @Override
     public Entity clone() {
-        FastqEntity entity = new FastqEntity(getConceptAlias());
-
-        getRules().forEach(r -> {
-            // TODO create a Rule method clone()
-            // hacky way to make a copy of the rule
-            Rule newR = JacksonUtil.fromString(
-                    JacksonUtil.toString(r),
-                    r.getClass()
-            );
-            entity.addRule(newR);
-        });
-        getAttributes().forEach(a -> entity.addAttribute(a.clone()));
-
-        entity.setParentEntity(getParentEntity());
-        entity.recordType = recordType;
-
-        entity.setWorksheet(getWorksheet());
-        entity.setUniqueKey(getUniqueKey());
-        entity.setUniqueAcrossProject(getUniqueAcrossProject());
-        entity.setHashed(isHashed());
-
-        return entity;
+        return clone(new FastqEntity(getConceptAlias()));
     }
 
     /**

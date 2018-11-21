@@ -57,14 +57,14 @@ public class FastaReader implements DataReader {
         this.config = projectConfig;
         this.recordMetadata = recordMetadata;
 
-        if (!recordMetadata.has(FastaProps.MARKER.value()) && recordMetadata.has(FastaProps.MARKER.value())) {
+        if (!recordMetadata.has(FastaProps.MARKER.uri()) && recordMetadata.has(FastaProps.MARKER.uri())) {
             recordMetadata.add(
-                    FastaProps.MARKER.value(), recordMetadata.remove(FastaProps.MARKER.value())
+                    FastaProps.MARKER.uri(), recordMetadata.remove(FastaProps.MARKER.uri())
             );
         }
         // so we know which one we are dealing with
         if (!recordMetadata.has(CONCEPT_ALIAS_KEY) ||
-                !recordMetadata.has(FastaProps.MARKER.value())) {
+                !recordMetadata.has(FastaProps.MARKER.uri())) {
             throw new FimsRuntimeException(DataReaderCode.MISSING_METADATA, 500);
         }
     }

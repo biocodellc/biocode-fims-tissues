@@ -13,10 +13,10 @@ public class FastaRecord extends GenericRecord {
 
     public FastaRecord(String parentUniqueKeyUri, String identifier, String sequence, RecordMetadata recordMetadata) {
         super();
-        properties.put(FastaProps.SEQUENCE.value(), sequence);
+        properties.put(FastaProps.SEQUENCE.uri(), sequence);
         properties.put(parentUniqueKeyUri, identifier);
 
-        properties.put(FastaProps.IDENTIFIER.value(), identifier + "_" + recordMetadata.get(FastaProps.MARKER.value()));
+        properties.put(FastaProps.IDENTIFIER.uri(), identifier + "_" + recordMetadata.get(FastaProps.MARKER.uri()));
         for (Map.Entry e : recordMetadata.metadata().entrySet()) {
             properties.put((String) e.getKey(), (String) e.getValue());
         }
