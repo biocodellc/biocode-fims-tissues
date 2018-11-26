@@ -62,7 +62,7 @@ public class Plate {
         this.rows.put(plateRow, row);
     }
 
-    public void addRecord(String well, Record record) {
+    private void addRecord(String well, Record record) {
         Matcher matcher = WELL_PATTERN.matcher(well);
 
         if (!matcher.matches()) {

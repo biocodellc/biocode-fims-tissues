@@ -77,23 +77,19 @@ public class TissueEntity extends PropEntity<TissueProps> {
         if (!(config instanceof NetworkConfig)) {
             addRule(new ValidForURIRule(getUniqueKey(), RuleLevel.ERROR));
 
-            if (isChildEntity()) {
-                RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
+            RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
 
-                if (requiredValueRule == null) {
-                    requiredValueRule = new RequiredValueRule(new LinkedHashSet<>(), RuleLevel.ERROR);
-                    addRule(requiredValueRule);
-                }
-
-                Entity parentEntity = config.entity(getParentEntity());
-                requiredValueRule.addColumn(parentEntity.getUniqueKey());
+            if (requiredValueRule == null) {
+                requiredValueRule = new RequiredValueRule(new LinkedHashSet<>(), RuleLevel.ERROR);
+                addRule(requiredValueRule);
             }
+
+            Entity parentEntity = config.entity(getParentEntity());
+            requiredValueRule.addColumn(parentEntity.getUniqueKey());
             addRule(new UniqueValueRule(getUniqueKey(), getUniqueAcrossProject(), RuleLevel.ERROR));
         }
 
-        if (isChildEntity()) {
-            addRule(new ValidParentIdentifiersRule());
-        }
+        addRule(new ValidParentIdentifiersRule());
     }
 
 
@@ -104,6 +100,11 @@ public class TissueEntity extends PropEntity<TissueProps> {
         entity.setGenerateID(isGenerateID());
 
         return entity;
+    }
+
+    @Override
+    public boolean canReload() {
+        return true;
     }
 
     /**

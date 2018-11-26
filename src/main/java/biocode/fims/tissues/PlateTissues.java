@@ -27,7 +27,7 @@ public class PlateTissues {
     private Map<MultiKey, List<Record>> newTissues;
     private Map<MultiKey, List<Record>> existingTissues;
 
-    public PlateTissues(Builder builder) {
+    private PlateTissues(Builder builder) {
         this.plate = builder.plate;
         this.project = builder.project;
         this.newTissues = builder.newTissues;
