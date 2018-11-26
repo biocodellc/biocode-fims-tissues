@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -54,13 +56,29 @@ public class TissueConverter implements DataConverter {
 
         existingTissuesByParentId = new HashMap<>();
         existingTissuesByHash = new HashMap<>();
+        Map<String, Integer> existingTissuesByParentIdCount = new HashMap<>();
+        
         getExistingRecords(recordSet, networkId, parentKey).stream()
                 .filter(r -> !r.get(TissueProps.IDENTIFIER.uri()).equals(""))
                 .forEach(r -> {
                     String parentID = r.get(parentKey);
-                    int count = existingTissuesByParentId.getOrDefault(parentID, 0);
-                    count += 1;
-                    existingTissuesByParentId.put(parentID, count);
+
+                    // we get the max here so we don't create duplicates if a tissue has been deleted
+                    // if id is of form parentIdentifier.[0-9] we parse the digit and update max if
+                    // necessary
+                    int count = existingTissuesByParentIdCount.getOrDefault(parentID, 0);
+                    int max = existingTissuesByParentId.getOrDefault(parentID, count);
+
+                    if (count > max) max = count;
+
+                    Pattern p = Pattern.compile(parentID + "\\.(\\d+)");
+                    Matcher matcher = p.matcher(r.get(TissueProps.IDENTIFIER.uri()));
+                    if (matcher.matches()) {
+                        Integer i = Integer.parseInt(matcher.group(1));
+                        if (i > max) max = i;
+                    }
+                    existingTissuesByParentIdCount.put(parentID, ++count);
+                    existingTissuesByParentId.put(parentID, max);
 
                     Map<String, String> props = new HashMap<>(r.properties());
                     props.remove(TissueProps.IDENTIFIER.uri());
