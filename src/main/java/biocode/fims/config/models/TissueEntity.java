@@ -1,13 +1,10 @@
 package biocode.fims.config.models;
 
 import biocode.fims.config.Config;
-import biocode.fims.models.dataTypes.JacksonUtil;
+import biocode.fims.config.network.NetworkConfig;
 import biocode.fims.records.GenericRecord;
 import biocode.fims.tissues.TissueProps;
-import biocode.fims.validation.rules.RequiredValueRule;
-import biocode.fims.validation.rules.Rule;
-import biocode.fims.validation.rules.RuleLevel;
-import biocode.fims.validation.rules.UniqueValueRule;
+import biocode.fims.validation.rules.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.HashMap;
@@ -37,10 +34,7 @@ public class TissueEntity extends PropEntity<TissueProps> {
     protected void init() {
         super.init();
         getAttribute(TissueProps.IDENTIFIER.column());
-//        setUniqueKey(TissueProps.IDENTIFIER.column());
         recordType = GenericRecord.class;
-
-        // note: default rules are set in the TissueValidator
     }
 
     public boolean isGenerateID() {
@@ -70,24 +64,36 @@ public class TissueEntity extends PropEntity<TissueProps> {
 
     @Override
     public void setAdditionalProps(Map<String, Object> props) {
+        if (props == null) return;
         generateID = (boolean) props.getOrDefault(GENERATE_ID_KEY, false);
     }
 
     @Override
     public void addDefaultRules(Config config) {
-        super.addDefaultRules(config);
-//        RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
-//
-//        if (requiredValueRule == null) {
-//            requiredValueRule = new RequiredValueRule(new LinkedHashSet<>(), RuleLevel.ERROR);
-//            addRule(requiredValueRule);
-//        }
-//
-//        requiredValueRule.addColumn(TissueProps.SEQUENCE.value());
-//        requiredValueRule.addColumn(TissueProps.IDENTIFIER.value());
-//
-//        UniqueValueRule uniqueValueRule = new UniqueValueRule(TissueProps.IDENTIFIER.value(), getUniqueAcrossProject(), RuleLevel.ERROR);
-//        addRule(uniqueValueRule);
+        addRule(new ValidDataTypeFormatRule());
+
+        // don't add the following rules to the network config b/c the projects configs
+        // may choose to use a different uniqueKey the defined in the network
+        if (!(config instanceof NetworkConfig)) {
+            addRule(new ValidForURIRule(getUniqueKey(), RuleLevel.ERROR));
+
+            if (isChildEntity()) {
+                RequiredValueRule requiredValueRule = getRule(RequiredValueRule.class, RuleLevel.ERROR);
+
+                if (requiredValueRule == null) {
+                    requiredValueRule = new RequiredValueRule(new LinkedHashSet<>(), RuleLevel.ERROR);
+                    addRule(requiredValueRule);
+                }
+
+                Entity parentEntity = config.entity(getParentEntity());
+                requiredValueRule.addColumn(parentEntity.getUniqueKey());
+            }
+            addRule(new UniqueValueRule(getUniqueKey(), getUniqueAcrossProject(), RuleLevel.ERROR));
+        }
+
+        if (isChildEntity()) {
+            addRule(new ValidParentIdentifiersRule());
+        }
     }
 
 
