@@ -107,6 +107,21 @@ public class TissueEntity extends PropEntity<TissueProps> {
         return true;
     }
 
+    @Override
+    public boolean isValid(Config config) {
+        if (!super.isValid(config)) return false;
+
+        // only generateID if entity is on the same worksheet as the parent entity
+        if (generateID) {
+            Entity parent = config.entity(getParentEntity());
+            if (parent == null || !parent.hasWorksheet() || !parent.getWorksheet().equals(getWorksheet())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * class used to verify TissueEntity data integrity after deserialization. This is necessary
      * so we don't overwrite the default values during deserialization.
