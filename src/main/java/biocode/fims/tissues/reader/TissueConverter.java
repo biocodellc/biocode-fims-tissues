@@ -132,7 +132,8 @@ public class TissueConverter implements DataConverter {
                     r.set(TissueProps.IDENTIFIER.uri(), existingRecord.get(TissueProps.IDENTIFIER.uri()));
                     newRecordSet.add(r);
                 }
-
+            } else {
+                newRecordSet.add(r);
             }
         }
 
