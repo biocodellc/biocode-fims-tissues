@@ -50,46 +50,46 @@ public class TissueConverter implements DataConverter {
         TissueEntity tissueEntity = (TissueEntity) recordSet.entity();
         if (!tissueEntity.isGenerateID()) return recordSet;
 
-
         String parent = tissueEntity.getParentEntity();
         parentKey = config.entity(parent).getUniqueKeyURI();
 
         existingTissuesByParentId = new HashMap<>();
         existingTissuesByHash = new HashMap<>();
         Map<String, Integer> existingTissuesByParentIdCount = new HashMap<>();
-        
-        getExistingRecords(recordSet, networkId, parentKey).stream()
-                .filter(r -> !r.get(TissueProps.IDENTIFIER.uri()).equals(""))
-                .forEach(r -> {
-                    String parentID = r.get(parentKey);
 
-                    // we get the max here so we don't create duplicates if a tissue has been deleted
-                    // if id is of form parentIdentifier.[0-9] we parse the digit and update max if
-                    // necessary
-                    int count = existingTissuesByParentIdCount.getOrDefault(parentID, 0);
-                    int max = existingTissuesByParentId.getOrDefault(parentID, count);
+        if (!recordSet.reload()) {
+            getExistingRecords(recordSet, networkId, parentKey).stream()
+                    .filter(r -> !r.get(TissueProps.IDENTIFIER.uri()).equals(""))
+                    .forEach(r -> {
+                        String parentID = r.get(parentKey);
 
-                    if (count > max) max = count;
+                        // we get the max here so we don't create duplicates if a tissue has been deleted
+                        // if id is of form parentIdentifier.[0-9] we parse the digit and update max if
+                        // necessary
+                        int count = existingTissuesByParentIdCount.getOrDefault(parentID, 0);
+                        int max = existingTissuesByParentId.getOrDefault(parentID, count);
 
-                    Pattern p = Pattern.compile(parentID + "\\.(\\d+)");
-                    Matcher matcher = p.matcher(r.get(TissueProps.IDENTIFIER.uri()));
-                    if (matcher.matches()) {
-                        Integer i = Integer.parseInt(matcher.group(1));
-                        if (i > max) max = i;
-                    }
-                    existingTissuesByParentIdCount.put(parentID, ++count);
-                    existingTissuesByParentId.put(parentID, max);
+                        if (!recordSet.reload() && count > max) max = count;
 
-                    Map<String, String> props = new HashMap<>(r.properties());
-                    props.remove(TissueProps.IDENTIFIER.uri());
+                        Pattern p = Pattern.compile(parentID + "\\.(\\d+)");
+                        Matcher matcher = p.matcher(r.get(TissueProps.IDENTIFIER.uri()));
+                        if (matcher.matches()) {
+                            Integer i = Integer.parseInt(matcher.group(1));
+                            if (i > max) max = i;
+                        }
+                        existingTissuesByParentIdCount.put(parentID, ++count);
+                        existingTissuesByParentId.put(parentID, max);
 
-                    Record record = new GenericRecord(props);
-                    // store record hashes w/o tissueID so we can compare values before generating the tissue
-                    existingTissuesByHash.put(RecordHasher.hash(record), r);
-                });
+                        Map<String, String> props = new HashMap<>(r.properties());
+                        props.remove(TissueProps.IDENTIFIER.uri());
 
-        updateRecords(recordSet);
-        return recordSet;
+                        Record record = new GenericRecord(props);
+                        // store record hashes w/o tissueID so we can compare values before generating the tissue
+                        existingTissuesByHash.put(RecordHasher.hash(record), r);
+                    });
+        }
+
+        return updateRecords(recordSet);
     }
 
     /**
@@ -97,7 +97,15 @@ public class TissueConverter implements DataConverter {
      *
      * @param recordSet
      */
-    private void updateRecords(RecordSet recordSet) {
+    private RecordSet updateRecords(RecordSet recordSet) {
+
+        Map<String, Boolean> createdTissues = new HashMap<>();
+
+        List<Record> records = recordSet.records().stream()
+                .filter(r -> !r.persist())
+                .collect(Collectors.toList());
+
+        RecordSet newRecordSet = new RecordSet(recordSet.entity(), records, recordSet.reload());
 
         for (Record r : recordSet.recordsToPersist()) {
 
@@ -106,21 +114,29 @@ public class TissueConverter implements DataConverter {
                 // if we have an existing tissue w/ a matching hash, then this
                 // is treated as an update to the existing tissue, otherwise
                 // we create a identifier for the new tissue
+                String parentID = r.get(parentKey);
                 String hash = RecordHasher.hash(r);
                 Record existingRecord = existingTissuesByHash.get(hash);
                 if (existingRecord == null) {
-                    String parentID = r.get(parentKey);
                     int count = existingTissuesByParentId.getOrDefault(parentID, 0);
                     count += 1;
 
                     r.set(TissueProps.IDENTIFIER.uri(), parentID + "." + count);
                     existingTissuesByParentId.put(parentID, count);
-                } else {
+                    existingTissuesByHash.put(hash, r);
+                    createdTissues.put(hash, true);
+                    newRecordSet.add(r);
+                } else if (!(createdTissues.containsKey(hash) && r.properties().size() == 1 && !parentID.equals(""))) {
+                    // we want to exclude any duplicate tissues which contain only parentID
+                    // this will happen if a duplicate sample is placed on a spreadsheet
                     r.set(TissueProps.IDENTIFIER.uri(), existingRecord.get(TissueProps.IDENTIFIER.uri()));
+                    newRecordSet.add(r);
                 }
 
             }
         }
+
+        return newRecordSet;
     }
 
     /**
