@@ -31,7 +31,7 @@ import static biocode.fims.fastq.FastqProps.LIBRARY_LAYOUT;
  * This Reader expects the following RecordMetadata:
  *
  *     - {@link FastqReader.CONCEPT_ALIAS_KEY}
- *     - {@link FastqProps.LIBRARY_LAYOUT.value()}
+ *     - {@link FastqProps.LIBRARY_LAYOUT.uri()}
  *
  */
 public class FastqReader implements DataReader {
@@ -65,11 +65,11 @@ public class FastqReader implements DataReader {
 
         // so we know which one we are dealing with
         if (!recordMetadata.has(CONCEPT_ALIAS_KEY) ||
-                !recordMetadata.has(LIBRARY_LAYOUT.value())) {
+                !recordMetadata.has(LIBRARY_LAYOUT.uri())) {
             throw new FimsRuntimeException(DataReaderCode.MISSING_METADATA, 500);
         }
 
-        if (((String) recordMetadata.get(LIBRARY_LAYOUT.value())).equalsIgnoreCase("single")) {
+        if (((String) recordMetadata.get(LIBRARY_LAYOUT.uri())).equalsIgnoreCase("single")) {
             this.pattern = SINGLE_ID_PATTERN;
         } else {
             this.pattern = PAIRED_ID_PATTERN;

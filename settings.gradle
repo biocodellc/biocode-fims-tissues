@@ -1,4 +1,4 @@
-rootProject.name = 'biocode-fims-sequences'
+rootProject.name = 'biocode-fims-tissues'
 
 if (hasProperty("gradleFimsDir") && file(gradleFimsDir).exists()) {
     includeBuild gradleFimsDir

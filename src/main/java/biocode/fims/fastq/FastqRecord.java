@@ -29,7 +29,7 @@ public class FastqRecord extends GenericRecord {
         this.filenames = filenames;
         properties.put(parentUniqueKeyUri, identifier);
         // only a single fastq record is allowed / parent record
-        properties.put(FastqProps.IDENTIFIER.value(), identifier);
+        properties.put(FastqProps.IDENTIFIER.uri(), identifier);
 
         for (Map.Entry e : recordMetadata.metadata().entrySet()) {
             properties.put((String) e.getKey(), (String) e.getValue());
@@ -50,31 +50,31 @@ public class FastqRecord extends GenericRecord {
     }
 
     public String libraryStrategy() {
-        return properties.get(LIBRARY_STRATEGY.value());
+        return properties.get(LIBRARY_STRATEGY.uri());
     }
 
     public String librarySource() {
-        return properties.get(LIBRARY_SOURCE.value());
+        return properties.get(LIBRARY_SOURCE.uri());
     }
 
     public String librarySelection() {
-        return properties.get(LIBRARY_SELECTION.value());
+        return properties.get(LIBRARY_SELECTION.uri());
     }
 
     public String libraryLayout() {
-        return properties.get(LIBRARY_LAYOUT.value());
+        return properties.get(LIBRARY_LAYOUT.uri());
     }
 
     public String platform() {
-        return properties.get(PLATFORM.value());
+        return properties.get(PLATFORM.uri());
     }
 
     public String instrumentModel() {
-        return properties.get(INSTRUMENT_MODEL.value());
+        return properties.get(INSTRUMENT_MODEL.uri());
     }
 
     public String designDescription() {
-        return properties.get(DESIGN_DESCRIPTION.value());
+        return properties.get(DESIGN_DESCRIPTION.uri());
     }
 
     public List<String> filenames() {
@@ -92,7 +92,7 @@ public class FastqRecord extends GenericRecord {
 
     @Override
     public String get(String property) {
-        if (Objects.equals(property, FILENAMES.value())) {
+        if (Objects.equals(property, FILENAMES.uri())) {
             return filenamesAsString();
         }
         return super.get(property);
@@ -101,9 +101,9 @@ public class FastqRecord extends GenericRecord {
     @Override
     public Map<String, String> properties() {
         Map<String, String> properties = new HashMap<>(super.properties());
-        properties.put(FILENAMES.value(), filenamesAsString());
+        properties.put(FILENAMES.uri(), filenamesAsString());
         if (bioSample != null) {
-            properties.put(FastqProps.BIOSAMPLE.value(), JacksonUtil.toString(bioSample));
+            properties.put(FastqProps.BIOSAMPLE.uri(), JacksonUtil.toString(bioSample));
         }
         return properties;
     }

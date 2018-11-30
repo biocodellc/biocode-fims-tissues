@@ -33,10 +33,10 @@ public class FastaEntity extends PropEntity<FastaProps> {
     @Override
     protected void init() {
         super.init();
-        getAttribute(FastaProps.IDENTIFIER.value()).setInternal(true);
-        setUniqueKey(FastaProps.IDENTIFIER.value());
-        getAttribute(FastaProps.SEQUENCE.value()).setInternal(true);
-        getAttribute(FastaProps.MARKER.value()).setInternal(true);
+        getAttribute(FastaProps.IDENTIFIER.column()).setInternal(true);
+        setUniqueKey(FastaProps.IDENTIFIER.column());
+        getAttribute(FastaProps.SEQUENCE.column()).setInternal(true);
+        getAttribute(FastaProps.MARKER.column()).setInternal(true);
         recordType = FastaRecord.class;
 
         // note: default rules are set in the FastaValidator
@@ -62,38 +62,17 @@ public class FastaEntity extends PropEntity<FastaProps> {
             addRule(requiredValueRule);
         }
 
-        requiredValueRule.addColumn(FastaProps.SEQUENCE.value());
-        requiredValueRule.addColumn(FastaProps.IDENTIFIER.value());
+        requiredValueRule.addColumn(FastaProps.SEQUENCE.column());
+        requiredValueRule.addColumn(FastaProps.IDENTIFIER.column());
 
-        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.value(), getUniqueAcrossProject(), RuleLevel.ERROR);
+        UniqueValueRule uniqueValueRule = new UniqueValueRule(FastaProps.IDENTIFIER.column(), getUniqueAcrossProject(), RuleLevel.ERROR);
         addRule(uniqueValueRule);
     }
 
 
     @Override
     public Entity clone() {
-        FastaEntity entity = new FastaEntity(getConceptAlias());
-
-        getRules().forEach(r -> {
-            // TODO create a Rule method clone()
-            // hacky way to make a copy of the rule
-            Rule newR = JacksonUtil.fromString(
-                    JacksonUtil.toString(r),
-                    r.getClass()
-            );
-            entity.addRule(newR);
-        });
-        getAttributes().forEach(a -> entity.addAttribute(a.clone()));
-
-        entity.setParentEntity(getParentEntity());
-        entity.recordType = recordType;
-
-        entity.setWorksheet(getWorksheet());
-        entity.setUniqueKey(getUniqueKey());
-        entity.setUniqueAcrossProject(getUniqueAcrossProject());
-        entity.setHashed(isHashed());
-
-        return entity;
+        return clone(new FastaEntity(getConceptAlias()));
     }
 
     /**

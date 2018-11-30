@@ -63,7 +63,7 @@ public class FastaReaderTest {
 
         RecordMetadata rm = new RecordMetadata(FastaDataReaderType.READER_TYPE, false);
         rm.add(FastaReader.CONCEPT_ALIAS_KEY, "fastaEntity");
-        rm.add(FastaProps.MARKER.value(), "CO1");
+        rm.add(FastaProps.MARKER.uri(), "CO1");
         DataReader reader = new FastaReader(file, getConfig(), rm);
 
         List<RecordSet> recordSets = reader.getRecordSets();
@@ -76,8 +76,8 @@ public class FastaReaderTest {
 
             for (Record r: set.records()) {
                 assertNotNull(r.get(PARENT_UNIQUE_KEY));
-                assertEquals("CO1", r.get(FastaProps.MARKER.value()));
-                assertFalse("missing sequence", r.get(FastaProps.SEQUENCE.value()).trim().equals(""));
+                assertEquals("CO1", r.get(FastaProps.MARKER.uri()));
+                assertFalse("missing sequence", r.get(FastaProps.SEQUENCE.uri()).trim().equals(""));
             }
         }
     }
@@ -88,7 +88,7 @@ public class FastaReaderTest {
 
         RecordMetadata rm = new RecordMetadata(FastaDataReaderType.READER_TYPE, false);
         rm.add(FastaReader.CONCEPT_ALIAS_KEY, "fastaEntity");
-        rm.add(FastaProps.MARKER.value(), "CO1");
+        rm.add(FastaProps.MARKER.uri(), "CO1");
         DataReader reader = new FastaReader(file, getConfig(), rm);
 
         try {
