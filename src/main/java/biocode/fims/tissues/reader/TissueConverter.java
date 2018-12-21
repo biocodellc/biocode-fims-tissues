@@ -1,5 +1,6 @@
 package biocode.fims.tissues.reader;
 
+import biocode.fims.config.models.Entity;
 import biocode.fims.config.models.TissueEntity;
 import biocode.fims.config.project.ProjectConfig;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
@@ -48,7 +49,12 @@ public class TissueConverter implements DataConverter {
         }
 
         TissueEntity tissueEntity = (TissueEntity) recordSet.entity();
-        if (!tissueEntity.isGenerateID()) return recordSet;
+
+        if (!tissueEntity.isGenerateEmptyTissue()) {
+            recordSet = removeEmptyTissues(recordSet);
+        }
+
+        if (!tissueEntity.isGenerateID() || recordSet.recordsToPersist().size() == 0) return recordSet;
 
         String parent = tissueEntity.getParentEntity();
         parentKey = config.entity(parent).getUniqueKeyURI();
@@ -58,6 +64,8 @@ public class TissueConverter implements DataConverter {
         Map<String, Integer> existingTissuesByParentIdCount = new HashMap<>();
 
         if (!recordSet.reload()) {
+            // recordSet needs to be effectively final
+            RecordSet finalRecordSet = recordSet;
             getExistingRecords(recordSet, networkId, parentKey).stream()
                     .filter(r -> !r.get(TissueProps.IDENTIFIER.uri()).equals(""))
                     .forEach(r -> {
@@ -69,7 +77,7 @@ public class TissueConverter implements DataConverter {
                         int count = existingTissuesByParentIdCount.getOrDefault(parentID, 0);
                         int max = existingTissuesByParentId.getOrDefault(parentID, count);
 
-                        if (!recordSet.reload() && count > max) max = count;
+                        if (!finalRecordSet.reload() && count > max) max = count;
 
                         Pattern p = Pattern.compile(parentID + "\\.(\\d+)");
                         Matcher matcher = p.matcher(r.get(TissueProps.IDENTIFIER.uri()));
@@ -90,6 +98,46 @@ public class TissueConverter implements DataConverter {
         }
 
         return updateRecords(recordSet);
+    }
+
+    /**
+     * A Tissue is considered empty if the tissue contains only the Tissue.uniqueKey and/or the Tissue.parentUniqueKey
+     *
+     * @param recordSet
+     * @return
+     */
+    private RecordSet removeEmptyTissues(RecordSet recordSet) {
+        List<Record> records = recordSet.records().stream()
+                .filter(r -> !r.persist())
+                .collect(Collectors.toList());
+
+        RecordSet newRecordSet = new RecordSet(recordSet.entity(), records, recordSet.reload());
+
+        Entity entity = recordSet.entity();
+        Entity parentEntity = config.entity(entity.getParentEntity());
+        boolean generateID = ((TissueEntity) entity).isGenerateID();
+
+        for (Record r : recordSet.recordsToPersist()) {
+            boolean isEmpty = true;
+            for (Map.Entry<String, String> entry : r.properties().entrySet()) {
+
+                // don't use ID attributes & empty values to determine if a tissue is empty
+                if (entry.getValue().equals("") ||
+                        // if generateID = true & entity.getUniqueKey is present, then we
+                        // should create this tissue
+                        (!generateID && entry.getKey().equals(entity.getUniqueKeyURI())) ||
+                        entry.getKey().equals(parentEntity.getUniqueKeyURI())) {
+                    continue;
+                }
+
+                isEmpty = false;
+                break;
+            }
+
+            if (!isEmpty) newRecordSet.add(r);
+        }
+
+        return newRecordSet;
     }
 
     /**
