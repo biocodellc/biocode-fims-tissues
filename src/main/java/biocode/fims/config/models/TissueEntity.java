@@ -21,8 +21,14 @@ public class TissueEntity extends PropEntity<TissueProps> {
     public static final String TYPE = "Tissue";
 
     private static final String GENERATE_ID_KEY = "generateID";
+    private static final String GENERATE_EMPTY_TISSUE_KEY = "generateEmptyTissue";
 
     private boolean generateID = false;
+    // Will always generate a tissue when on the same sheet as samples
+    // useful for DIPNet project where there may not be any tissue
+    // attributes but the tissue is still needed to tie the fastaSequence
+    // and fastqMetadata to the Sample
+    private boolean generateEmptyTissue = false;
 
 
     public TissueEntity() {
@@ -45,6 +51,14 @@ public class TissueEntity extends PropEntity<TissueProps> {
         this.generateID = generateID;
     }
 
+    public boolean isGenerateEmptyTissue() {
+        return generateEmptyTissue;
+    }
+
+    public void setGenerateEmptyTissue(boolean generateEmptyTissue) {
+        this.generateEmptyTissue = generateEmptyTissue;
+    }
+
     @Override
     public String type() {
         return TYPE;
@@ -59,6 +73,7 @@ public class TissueEntity extends PropEntity<TissueProps> {
     public Map<String, Object> additionalProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(GENERATE_ID_KEY, generateID);
+        props.put(GENERATE_EMPTY_TISSUE_KEY, generateEmptyTissue);
         return props;
     }
 
@@ -66,6 +81,7 @@ public class TissueEntity extends PropEntity<TissueProps> {
     public void setAdditionalProps(Map<String, Object> props) {
         if (props == null) return;
         generateID = (boolean) props.getOrDefault(GENERATE_ID_KEY, false);
+        generateEmptyTissue = (boolean) props.getOrDefault(GENERATE_EMPTY_TISSUE_KEY, false);
     }
 
     @Override
@@ -111,8 +127,8 @@ public class TissueEntity extends PropEntity<TissueProps> {
     public boolean isValid(Config config) {
         if (!super.isValid(config)) return false;
 
-        // only generateID if entity is on the same worksheet as the parent entity
-        if (generateID) {
+        // only generateID or generateEmptyTissue if entity is on the same worksheet as the parent entity
+        if (generateID || generateEmptyTissue) {
             Entity parent = config.entity(getParentEntity());
             if (parent == null || !parent.hasWorksheet() || !parent.getWorksheet().equals(getWorksheet())) {
                 return false;
