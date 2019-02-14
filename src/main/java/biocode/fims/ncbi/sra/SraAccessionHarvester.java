@@ -66,7 +66,7 @@ public class SraAccessionHarvester {
                     // TODO need to make the select query configurable
                     String q = "_select_:Sample not _exists_:bioSample and _projects_:" + project.getProjectId();
 
-                    Query query = Query.factory(project, e.getConceptAlias(), q);
+                    Query query = Query.build(project, e.getConceptAlias(), q);
                     QueryResults queryResults = recordRepository.query(query);
 
                     if (queryResults.isEmpty()) {
