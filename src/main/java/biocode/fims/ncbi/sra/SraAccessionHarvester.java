@@ -1,6 +1,5 @@
 package biocode.fims.ncbi.sra;
 
-import biocode.fims.application.config.FimsProperties;
 import biocode.fims.bcid.Identifier;
 import biocode.fims.config.Config;
 import biocode.fims.config.models.Entity;
@@ -38,11 +37,9 @@ public class SraAccessionHarvester {
     private final BioSampleRepository bioSampleRepository;
     private final ProjectService projectService;
     private final RecordRepository recordRepository;
-    private final FimsProperties props;
 
     public SraAccessionHarvester(RecordRepository recordRepository, BioSampleRepository bioSampleRepository,
-                                 ProjectService projectService, FimsProperties props) {
-        this.props = props;
+                                 ProjectService projectService) {
         Assert.notNull(bioSampleRepository);
         Assert.notNull(recordRepository);
         this.projectService = projectService;
@@ -113,7 +110,7 @@ public class SraAccessionHarvester {
         });
 
         for (BioSample bioSample : bioSamples) {
-            String parentIdentifier = new Identifier(bioSample.getBcid(), props.divider()).getSuffix();
+            String parentIdentifier = new Identifier(bioSample.getBcid()).getSuffix();
 
             FastqRecord record = (FastqRecord) records.get(parentIdentifier);
             record.setBioSample(bioSample);
