@@ -17,7 +17,7 @@ buildscript {
 apply plugin: "org.biocode.fims-app"
 
 if (!project.hasProperty('fimsCommonsVersion')) {
-    ext.fimsCommonsVersion = "2.1.0"
+    ext.fimsCommonsVersion = "2.1.5"
 }
 
 fims {
