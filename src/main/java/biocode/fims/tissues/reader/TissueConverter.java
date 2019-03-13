@@ -75,14 +75,15 @@ public class TissueConverter implements DataConverter {
                         int count = existingTissuesByParentIdCount.getOrDefault(parentID, 0);
                         int max = existingTissuesByParentId.getOrDefault(parentID, count);
 
-                        if (!recordSet.reload() && count > max) max = count;
-
                         Pattern p = Pattern.compile(parentID + "\\.(\\d+)");
                         Matcher matcher = p.matcher(r.get(TissueProps.IDENTIFIER.uri()));
                         if (matcher.matches()) {
                             Integer i = Integer.parseInt(matcher.group(1));
                             if (i > max) max = i;
                         }
+
+                        if (!recordSet.reload() && count >= max) max = count + 1;
+
                         existingTissuesByParentIdCount.put(parentID, ++count);
                         existingTissuesByParentId.put(parentID, max);
 
