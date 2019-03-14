@@ -43,7 +43,7 @@ public class TissueConverter implements DataConverter {
     }
 
     @Override
-    public RecordSet convertRecordSet(RecordSet recordSet, int networkId) {
+    public void convertRecordSet(RecordSet recordSet, int networkId) {
         if (!(recordSet.entity() instanceof TissueEntity)) {
             throw new FimsRuntimeException(DataReaderCode.READ_ERROR, 500);
         }
@@ -51,10 +51,10 @@ public class TissueConverter implements DataConverter {
         TissueEntity tissueEntity = (TissueEntity) recordSet.entity();
 
         if (!tissueEntity.isGenerateEmptyTissue()) {
-            recordSet = removeEmptyTissues(recordSet);
+            removeEmptyTissues(recordSet);
         }
 
-        if (!tissueEntity.isGenerateID() || recordSet.recordsToPersist().size() == 0) return recordSet;
+        if (!tissueEntity.isGenerateID() || recordSet.recordsToPersist().size() == 0) return;
 
         String parent = tissueEntity.getParentEntity();
         parentKey = config.entity(parent).getUniqueKeyURI();
@@ -64,8 +64,6 @@ public class TissueConverter implements DataConverter {
         Map<String, Integer> existingTissuesByParentIdCount = new HashMap<>();
 
         if (!recordSet.reload()) {
-            // recordSet needs to be effectively final
-            RecordSet finalRecordSet = recordSet;
             getExistingRecords(recordSet, networkId, parentKey).stream()
                     .filter(r -> !r.get(TissueProps.IDENTIFIER.uri()).equals(""))
                     .forEach(r -> {
@@ -77,14 +75,15 @@ public class TissueConverter implements DataConverter {
                         int count = existingTissuesByParentIdCount.getOrDefault(parentID, 0);
                         int max = existingTissuesByParentId.getOrDefault(parentID, count);
 
-                        if (!finalRecordSet.reload() && count > max) max = count;
-
                         Pattern p = Pattern.compile(parentID + "\\.(\\d+)");
                         Matcher matcher = p.matcher(r.get(TissueProps.IDENTIFIER.uri()));
                         if (matcher.matches()) {
                             Integer i = Integer.parseInt(matcher.group(1));
                             if (i > max) max = i;
                         }
+
+                        if (!recordSet.reload() && count >= max) max = count + 1;
+
                         existingTissuesByParentIdCount.put(parentID, ++count);
                         existingTissuesByParentId.put(parentID, max);
 
@@ -97,7 +96,7 @@ public class TissueConverter implements DataConverter {
                     });
         }
 
-        return updateRecords(recordSet);
+        updateRecords(recordSet);
     }
 
     /**
@@ -106,19 +105,12 @@ public class TissueConverter implements DataConverter {
      * @param recordSet
      * @return
      */
-    private RecordSet removeEmptyTissues(RecordSet recordSet) {
-        List<Record> records = recordSet.records().stream()
-                .filter(r -> !r.persist())
-                .collect(Collectors.toList());
-
-        RecordSet newRecordSet = new RecordSet(recordSet.entity(), records, recordSet.reload());
-
+    private void removeEmptyTissues(RecordSet recordSet) {
         Entity entity = recordSet.entity();
         Entity parentEntity = config.entity(entity.getParentEntity());
         boolean generateID = ((TissueEntity) entity).isGenerateID();
 
         for (Record r : recordSet.recordsToPersist()) {
-            boolean isEmpty = true;
             for (Map.Entry<String, String> entry : r.properties().entrySet()) {
 
                 // don't use ID attributes & empty values to determine if a tissue is empty
@@ -127,17 +119,11 @@ public class TissueConverter implements DataConverter {
                         // should create this tissue
                         (!generateID && entry.getKey().equals(entity.getUniqueKeyURI())) ||
                         entry.getKey().equals(parentEntity.getUniqueKeyURI())) {
-                    continue;
+                    recordSet.remove(r);
+                    break;
                 }
-
-                isEmpty = false;
-                break;
             }
-
-            if (!isEmpty) newRecordSet.add(r);
         }
-
-        return newRecordSet;
     }
 
     /**
@@ -145,15 +131,9 @@ public class TissueConverter implements DataConverter {
      *
      * @param recordSet
      */
-    private RecordSet updateRecords(RecordSet recordSet) {
+    private void updateRecords(RecordSet recordSet) {
 
         Map<String, Boolean> createdTissues = new HashMap<>();
-
-        List<Record> records = recordSet.records().stream()
-                .filter(r -> !r.persist())
-                .collect(Collectors.toList());
-
-        RecordSet newRecordSet = new RecordSet(recordSet.entity(), records, recordSet.reload());
 
         for (Record r : recordSet.recordsToPersist()) {
 
@@ -165,27 +145,31 @@ public class TissueConverter implements DataConverter {
                 String parentID = r.get(parentKey);
                 String hash = RecordHasher.hash(r);
                 Record existingRecord = existingTissuesByHash.get(hash);
+                Record newTissue = null;
+
                 if (existingRecord == null) {
                     int count = existingTissuesByParentId.getOrDefault(parentID, 0);
                     count += 1;
 
-                    r.set(TissueProps.IDENTIFIER.uri(), parentID + "." + count);
+                    newTissue = r.clone();
+                    newTissue.set(TissueProps.IDENTIFIER.uri(), parentID + "." + count);
+
                     existingTissuesByParentId.put(parentID, count);
-                    existingTissuesByHash.put(hash, r);
+                    existingTissuesByHash.put(hash, newTissue);
                     createdTissues.put(hash, true);
-                    newRecordSet.add(r);
                 } else if (!(createdTissues.containsKey(hash) && r.properties().size() == 1 && !parentID.equals(""))) {
                     // we want to exclude any duplicate tissues which contain only parentID
                     // this will happen if a duplicate sample is placed on a spreadsheet
-                    r.set(TissueProps.IDENTIFIER.uri(), existingRecord.get(TissueProps.IDENTIFIER.uri()));
-                    newRecordSet.add(r);
+                    newTissue = r.clone();
+                    newTissue.set(TissueProps.IDENTIFIER.uri(), existingRecord.get(TissueProps.IDENTIFIER.uri()));
                 }
-            } else {
-                newRecordSet.add(r);
+
+                if (newTissue != null) {
+                    recordSet.remove(r);
+                    recordSet.add(newTissue);
+                }
             }
         }
-
-        return newRecordSet;
     }
 
     /**
@@ -206,7 +190,10 @@ public class TissueConverter implements DataConverter {
                 .distinct()
                 .collect(Collectors.toList());
 
-        return tissueRepository.getTissues(networkId, recordSet.projectId(), recordSet.conceptAlias(), parentIdentifiers);
+        return tissueRepository.getTissues(networkId, recordSet.projectId(), recordSet.conceptAlias(), parentIdentifiers)
+                .parallelStream()
+                .filter(t -> Objects.equals(recordSet.expeditionCode(), t.expeditionCode()))
+                .collect(Collectors.toList());
     }
 
     @Override

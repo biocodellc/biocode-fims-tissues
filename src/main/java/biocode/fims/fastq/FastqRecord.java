@@ -4,6 +4,7 @@ import biocode.fims.exceptions.FastqReaderCode;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.models.dataTypes.JacksonUtil;
 import biocode.fims.records.GenericRecord;
+import biocode.fims.records.Record;
 import biocode.fims.records.RecordMetadata;
 import biocode.fims.ncbi.models.BioSample;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -106,6 +107,13 @@ public class FastqRecord extends GenericRecord {
             properties.put(FastqProps.BIOSAMPLE.uri(), JacksonUtil.toString(bioSample));
         }
         return properties;
+    }
+
+    @Override
+    public Record clone() {
+        FastqRecord newRecord = new FastqRecord(new HashMap<>(properties), filenames, rootIdentifier(), projectId(), expeditionCode(), persist());
+        newRecord.bioSample = bioSample;
+        return newRecord;
     }
 
     private String filenamesAsString() {
