@@ -111,6 +111,7 @@ public class TissueConverter implements DataConverter {
         boolean generateID = ((TissueEntity) entity).isGenerateID();
 
         for (Record r : recordSet.recordsToPersist()) {
+            boolean isEmpty = true;
             for (Map.Entry<String, String> entry : r.properties().entrySet()) {
 
                 // don't use ID attributes & empty values to determine if a tissue is empty
@@ -119,10 +120,14 @@ public class TissueConverter implements DataConverter {
                         // should create this tissue
                         (!generateID && entry.getKey().equals(entity.getUniqueKeyURI())) ||
                         entry.getKey().equals(parentEntity.getUniqueKeyURI())) {
-                    recordSet.remove(r);
-                    break;
+                    continue;
                 }
+
+                isEmpty = false;
+                break;
             }
+
+            if (isEmpty) recordSet.remove(r);
         }
     }
 

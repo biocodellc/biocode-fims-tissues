@@ -61,7 +61,7 @@ public class SraAccessionHarvester {
                 .filter(e -> e.type().equals(FastqEntity.TYPE))
                 .forEach(e -> {
                     // TODO need to make the select query configurable
-                    String q = "_select_:Sample not _exists_:bioSample and _projects_:" + project.getProjectId();
+                    String q = "_select_:[Sample,Tissue] not _exists_:bioSample and _projects_:" + project.getProjectId();
 
                     Query query = Query.build(project, e.getConceptAlias(), q);
                     QueryResults queryResults = recordRepository.query(query);
