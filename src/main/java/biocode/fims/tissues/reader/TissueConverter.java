@@ -87,7 +87,7 @@ public class TissueConverter implements DataConverter {
                         existingTissuesByParentIdCount.put(parentID, ++count);
                         existingTissuesByParentId.put(parentID, max);
 
-                        Map<String, String> props = new HashMap<>(r.properties());
+                        Map<String, Object> props = new HashMap<>(r.properties());
                         props.remove(TissueProps.IDENTIFIER.uri());
 
                         Record record = new GenericRecord(props);
@@ -112,7 +112,7 @@ public class TissueConverter implements DataConverter {
 
         for (Record r : recordSet.recordsToPersist()) {
             boolean isEmpty = true;
-            for (Map.Entry<String, String> entry : r.properties().entrySet()) {
+            for (Map.Entry<String, Object> entry : r.properties().entrySet()) {
 
                 // don't use ID attributes & empty values to determine if a tissue is empty
                 if (entry.getValue().equals("") ||

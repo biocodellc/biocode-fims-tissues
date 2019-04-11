@@ -1,5 +1,6 @@
 package biocode.fims.ncbi.models;
 
+import biocode.fims.models.dataTypes.JacksonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.persistence.oxm.annotations.XmlPath;
@@ -69,5 +70,10 @@ public class BioSample {
 
     public void setSraExperimentPackage(SraExperimentPackage sraExperimentPackage) {
         this.sraExperimentPackage = sraExperimentPackage;
+    }
+
+    @Override
+    public String toString() {
+        return JacksonUtil.toString(this);
     }
 }

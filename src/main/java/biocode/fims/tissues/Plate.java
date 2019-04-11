@@ -49,9 +49,9 @@ public class Plate {
         int i = 0;
         for (Object props : (List) value) {
             if (props != null) {
-                Map<String, String> properties = new HashMap<>();
+                Map<String, Object> properties = new HashMap<>();
                 for (Map.Entry<String, Object> e : ((Map<String, Object>) props).entrySet()) {
-                    properties.put(e.getKey(), String.valueOf(e.getValue()));
+                    properties.put(e.getKey(), e.getValue());
 
                 }
                 row[i] = new GenericRecord(properties);

@@ -47,10 +47,10 @@ public class FastaQueryWriter implements QueryWriter {
      */
     @Override
     public List<File> write() {
-        Map<String, List<Map<String, String>>> recordsMap = sortByMarker();
+        Map<String, List<Map<String, Object>>> recordsMap = sortByMarker();
         List<File> sequenceFiles = new ArrayList<>();
 
-        for (Map.Entry<String, List<Map<String, String>>> entry : recordsMap.entrySet()) {
+        for (Map.Entry<String, List<Map<String, Object>>> entry : recordsMap.entrySet()) {
             sequenceFiles.add(
                     writeMarkerFile(entry.getValue(), entry.getKey())
             );
@@ -59,11 +59,11 @@ public class FastaQueryWriter implements QueryWriter {
         return sequenceFiles;
     }
 
-    private Map<String, List<Map<String, String>>> sortByMarker() {
-        Map<String, List<Map<String, String>>> fastaFileMap = new HashMap<>();
+    private Map<String, List<Map<String, Object>>> sortByMarker() {
+        Map<String, List<Map<String, Object>>> fastaFileMap = new HashMap<>();
 
-        for (Map<String, String> record : queryResult.get(false)) {
-            String marker = record.get(FastaProps.MARKER.uri());
+        for (Map<String, Object> record : queryResult.get(false)) {
+            String marker = String.valueOf(record.get(FastaProps.MARKER.uri()));
 
             fastaFileMap
                     .computeIfAbsent(marker, k -> new ArrayList<>())
@@ -73,7 +73,7 @@ public class FastaQueryWriter implements QueryWriter {
         return fastaFileMap;
     }
 
-    private File writeMarkerFile(List<Map<String, String>> records, String marker) {
+    private File writeMarkerFile(List<Map<String, Object>> records, String marker) {
         String filename = StringUtils.isBlank(marker) ? "output.fasta" : marker + ".fasta";
         File file = FileUtils.createFile(filename, System.getProperty("java.io.tmpdir"));
 
@@ -81,23 +81,23 @@ public class FastaQueryWriter implements QueryWriter {
                 new FileOutputStream(file)))) {
 
 
-            for (Map<String, String> record : records) {
+            for (Map<String, Object> record : records) {
                 writer.write(">");
 
-                String identifier = record.get("bcid");
+                String identifier = String.valueOf(record.get("bcid"));
                 writer.write(identifier);
 
                 writer.write(" [marker = ");
-                writer.write(record.get(FastaProps.MARKER.uri()));
+                writer.write(String.valueOf(record.get(FastaProps.MARKER.uri())));
                 writer.write("] [");
                 writer.write(parentUniqueKey);
                 writer.write(" = ");
-                writer.write(record.getOrDefault(parentUniqueKey, ""));
+                writer.write(String.valueOf(record.getOrDefault(parentUniqueKey, "")));
                 writer.write("]\n");
 
                 // TODO add more metadata (locality, genus, species) once networks are implemented
 
-                writer.write(record.get(FastaProps.SEQUENCE.uri()));
+                writer.write(String.valueOf(record.get(FastaProps.SEQUENCE.uri())));
                 writer.write("\n");
             }
 

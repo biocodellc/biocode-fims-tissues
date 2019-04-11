@@ -20,11 +20,11 @@ public class FastaRecord extends GenericRecord {
 
         properties.put(FastaProps.IDENTIFIER.uri(), generateIdentifier(identifier, (String) recordMetadata.get(FastaProps.MARKER.uri())));
         for (Map.Entry e : recordMetadata.metadata().entrySet()) {
-            properties.put((String) e.getKey(), (String) e.getValue());
+            properties.put((String) e.getKey(), e.getValue());
         }
     }
 
-    public FastaRecord(Map<String, String> properties, String rootIdentifier, int projectId, String expeditionCode, boolean shouldPersist) {
+    public FastaRecord(Map<String, Object> properties, String rootIdentifier, int projectId, String expeditionCode, boolean shouldPersist) {
         super(properties, rootIdentifier, projectId, expeditionCode, shouldPersist);
     }
 

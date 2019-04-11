@@ -21,7 +21,7 @@ public class FastqRecordRowMapper implements FimsRowMapper<FastqRecord> {
     private final static JavaType TYPE;
 
     static {
-        TYPE = TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, String.class);
+        TYPE = TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -35,12 +35,12 @@ public class FastqRecordRowMapper implements FimsRowMapper<FastqRecord> {
         int projectId = rs.getInt(PROJECT_ID.toString());
 
         try {
-            Map<String, String> properties = (Map<String, String>) JacksonUtil.fromString(data, TYPE);
+            Map<String, Object> properties = (Map<String, Object>) JacksonUtil.fromString(data, TYPE);
             BioSample bioSample = null;
             if (properties.get(FastqProps.BIOSAMPLE.uri()) != null) {
-                bioSample = JacksonUtil.fromString(properties.remove(FastqProps.BIOSAMPLE.uri()), BioSample.class);
+                bioSample = JacksonUtil.fromString((String) properties.remove(FastqProps.BIOSAMPLE.uri()), BioSample.class);
             }
-            List<String> filenames = JacksonUtil.fromString(properties.remove("filenames"), List.class);
+            List<String> filenames = JacksonUtil.fromString((String) properties.remove("filenames"), List.class);
 
             FastqRecord r = new FastqRecord(properties, filenames, rootIdentifier, projectId, expeditionCode, false);
             if (bioSample != null)
