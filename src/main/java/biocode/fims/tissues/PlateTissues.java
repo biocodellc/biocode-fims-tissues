@@ -123,7 +123,7 @@ public class PlateTissues {
      * @return new Record instance w/ mapped properties
      */
     private Record transformProperties(Record r) {
-        Map<String, String> props = new HashMap<>();
+        Map<String, Object> props = new HashMap<>();
 
         for (String key : r.properties().keySet()) {
             String uri = entity.getAttributeUri(key);

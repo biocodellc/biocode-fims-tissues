@@ -104,8 +104,8 @@ public class SraAccessionHarvester {
         fastqResults.records().forEach(r -> {
             records.put(r.get(parentUniqueKeyURI), r);
 
-            Map<String, String> parentProps = new HashMap<>();
-            parentProps.put(parentUniqueKeyURI, r.get(parentUniqueKeyURI));
+            Map<String, Object> parentProps = new HashMap<>();
+            parentProps.put(parentUniqueKeyURI, r.getAsObject(parentUniqueKeyURI));
             parentRecordSet.add(new GenericRecord(parentProps));
         });
 

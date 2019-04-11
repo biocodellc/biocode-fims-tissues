@@ -45,37 +45,37 @@ public class FastqRecord extends GenericRecord {
 //        }
     }
 
-    public FastqRecord(Map<String, String> properties, List<String> filenames, String rootIdentifier, int projectId, String expeditionCode, boolean shouldPersist) {
+    public FastqRecord(Map<String, Object> properties, List<String> filenames, String rootIdentifier, int projectId, String expeditionCode, boolean shouldPersist) {
         super(properties, rootIdentifier, projectId, expeditionCode, shouldPersist);
         this.filenames = filenames;
     }
 
     public String libraryStrategy() {
-        return properties.get(LIBRARY_STRATEGY.uri());
+        return get(LIBRARY_STRATEGY.uri());
     }
 
     public String librarySource() {
-        return properties.get(LIBRARY_SOURCE.uri());
+        return get(LIBRARY_SOURCE.uri());
     }
 
     public String librarySelection() {
-        return properties.get(LIBRARY_SELECTION.uri());
+        return get(LIBRARY_SELECTION.uri());
     }
 
     public String libraryLayout() {
-        return properties.get(LIBRARY_LAYOUT.uri());
+        return get(LIBRARY_LAYOUT.uri());
     }
 
     public String platform() {
-        return properties.get(PLATFORM.uri());
+        return get(PLATFORM.uri());
     }
 
     public String instrumentModel() {
-        return properties.get(INSTRUMENT_MODEL.uri());
+        return get(INSTRUMENT_MODEL.uri());
     }
 
     public String designDescription() {
-        return properties.get(DESIGN_DESCRIPTION.uri());
+        return get(DESIGN_DESCRIPTION.uri());
     }
 
     public List<String> filenames() {
@@ -95,23 +95,27 @@ public class FastqRecord extends GenericRecord {
     public String get(String property) {
         if (Objects.equals(property, FILENAMES.uri())) {
             return filenamesAsString();
+        } else if (Objects.equals(property, BIOSAMPLE.uri())) {
+            return JacksonUtil.toString(bioSample);
         }
         return super.get(property);
     }
 
     @Override
-    public Map<String, String> properties() {
-        Map<String, String> properties = new HashMap<>(super.properties());
+    public Map<String, Object> properties() {
+        Map<String, Object> properties = new HashMap<>(super.properties());
         properties.put(FILENAMES.uri(), filenamesAsString());
         if (bioSample != null) {
-            properties.put(FastqProps.BIOSAMPLE.uri(), JacksonUtil.toString(bioSample));
+//            properties.put(FastqProps.BIOSAMPLE.uri(), JacksonUtil.toString(bioSample));
+            properties.put(FastqProps.BIOSAMPLE.uri(), bioSample);
         }
         return properties;
     }
 
     @Override
     public Record clone() {
-        FastqRecord newRecord = new FastqRecord(new HashMap<>(properties), filenames, rootIdentifier(), projectId(), expeditionCode(), persist());
+        FastqRecord newRecord = new FastqRecord(new HashMap<>(), filenames, rootIdentifier(), projectId(), expeditionCode(), persist());
+        newRecord.properties = new HashMap<>(properties);
         newRecord.bioSample = bioSample;
         return newRecord;
     }
