@@ -15,6 +15,7 @@ import biocode.fims.models.User;
 import biocode.fims.query.QueryBuilder;
 import biocode.fims.query.QueryResults;
 import biocode.fims.query.dsl.*;
+import biocode.fims.reader.DataConverterFactory;
 import biocode.fims.records.*;
 import biocode.fims.repositories.RecordRepository;
 import biocode.fims.run.DatasetAuthorizer;
@@ -43,12 +44,14 @@ public class PlateService {
     private final RecordRepository recordRepository;
     private final RecordValidatorFactory validatorFactory;
     private final DatasetAuthorizer datasetAuthorizer;
+    private final DataConverterFactory dataConverterFactory;
     private final FimsProperties props;
 
-    public PlateService(TissueRepository tissueRepository, RecordRepository recordRepository,
+    public PlateService(TissueRepository tissueRepository, RecordRepository recordRepository, DataConverterFactory dataConverterFactory,
                         RecordValidatorFactory validatorFactory, DatasetAuthorizer datasetAuthorizer, FimsProperties props) {
         this.tissueRepository = tissueRepository;
         this.recordRepository = recordRepository;
+        this.dataConverterFactory = dataConverterFactory;
         this.validatorFactory = validatorFactory;
         this.datasetAuthorizer = datasetAuthorizer;
         this.props = props;
@@ -177,6 +180,7 @@ public class PlateService {
                 .user(user)
                 .recordRepository(recordRepository)
                 .validatorFactory(validatorFactory)
+                .dataConverterFactory(dataConverterFactory)
                 .datasetAuthorizer(datasetAuthorizer)
                 .serverDataDir(props.serverRoot())
                 .uploadValid();
