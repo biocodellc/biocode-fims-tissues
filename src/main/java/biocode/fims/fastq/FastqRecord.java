@@ -104,9 +104,8 @@ public class FastqRecord extends GenericRecord {
     @Override
     public Map<String, Object> properties() {
         Map<String, Object> properties = new HashMap<>(super.properties());
-        properties.put(FILENAMES.uri(), filenamesAsString());
+        properties.put(FILENAMES.uri(), filenames);
         if (bioSample != null) {
-//            properties.put(FastqProps.BIOSAMPLE.uri(), JacksonUtil.toString(bioSample));
             properties.put(FastqProps.BIOSAMPLE.uri(), bioSample);
         }
         return properties;
