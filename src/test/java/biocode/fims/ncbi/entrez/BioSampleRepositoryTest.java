@@ -316,7 +316,7 @@ public class BioSampleRepositoryTest {
                 experimentIds.add(bioProjectId + "_" + i);
             }
 
-            when(apiService.getSraExperimentPackageIds(bioProjectId)).thenReturn(experimentIds);
+            when(apiService.getSraExperimentPackageIds(new HashSet<>(Collections.singletonList(bioProjectId)))).thenReturn(experimentIds);
             when(apiService.getSraExperimentPackagesFromIds(experimentIds)).thenReturn(experiments);
         }
 

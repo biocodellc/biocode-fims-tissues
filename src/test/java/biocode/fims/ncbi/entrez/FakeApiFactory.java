@@ -9,6 +9,7 @@ import biocode.fims.ncbi.models.SraEFetchResult;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author rjewing
@@ -87,7 +88,7 @@ class FakeApiFactory implements EntrezApiFactory {
     }
 
     @Override
-    public ESearchRequest getSraESearchRequest(String bioProjectId) {
+    public ESearchRequest getSraESearchRequest(Set<String> bioProjectIds) {
         return new FakeESearchRequest(sraESearchResponse);
     }
 

@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -95,7 +96,7 @@ public class EntrezApiServiceTest {
 
         EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
-        List<String> bioSamples = apiService.getSraExperimentPackageIds("bioProject1");
+        List<String> bioSamples = apiService.getSraExperimentPackageIds(new HashSet<>(Collections.singletonList("bioProject1")));
         assertEquals(5, bioSamples.size());
     }
 
@@ -109,7 +110,7 @@ public class EntrezApiServiceTest {
 
         EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
-        List<String> bioSamples = apiService.getSraExperimentPackageIds("bioProject1");
+        List<String> bioSamples = apiService.getSraExperimentPackageIds(new HashSet<>(Collections.singletonList("bioProject1")));
         assertEquals(25, bioSamples.size());
     }
 
