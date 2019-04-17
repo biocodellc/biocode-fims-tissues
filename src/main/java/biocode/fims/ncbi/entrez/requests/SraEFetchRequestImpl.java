@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class SraEFetchRequestImpl extends AbstractEFetchRequest<SraEFetchResult> implements SraEFetchRequest {
 
-    public SraEFetchRequestImpl(List<String> ids, Client client) {
-        super(NCBIDatabase.SRA.getName(), ids, client, SraEFetchResult.class);
+    public SraEFetchRequestImpl(List<String> ids, String apiKey, Client client) {
+        super(NCBIDatabase.SRA.getName(), ids, apiKey, client, SraEFetchResult.class);
     }
 }

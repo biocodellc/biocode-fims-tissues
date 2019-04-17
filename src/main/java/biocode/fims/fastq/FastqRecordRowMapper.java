@@ -1,12 +1,10 @@
 package biocode.fims.fastq;
 
-import biocode.fims.fasta.FastaProps;
 import biocode.fims.models.dataTypes.JacksonUtil;
 import biocode.fims.records.FimsRowMapper;
 import biocode.fims.ncbi.models.BioSample;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.sun.org.apache.xerces.internal.xs.StringList;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,12 +38,10 @@ public class FastqRecordRowMapper implements FimsRowMapper<FastqRecord> {
             Map<String, Object> properties = (Map<String, Object>) JacksonUtil.fromString(data, TYPE);
             BioSample bioSample = null;
             if (properties.get(FastqProps.BIOSAMPLE.uri()) != null) {
-                Object bioSampleProp = properties.remove(FastqProps.BIOSAMPLE.uri());
-                bioSample = bioSampleProp instanceof String ? JacksonUtil.fromString((String) bioSampleProp, BioSample.class) : JacksonUtil.fromMap((Map<String, ?>) bioSampleProp, BioSample.class);
+                bioSample = JacksonUtil.fromMap((Map<String, ?>) properties.remove(FastqProps.BIOSAMPLE.uri()), BioSample.class);
             }
 
-            Object filenamesProp = properties.remove("filenames");
-            List<String> filenames = filenamesProp instanceof List ? (List<String>) filenamesProp : JacksonUtil.fromString((String) filenamesProp, List.class);
+            List<String> filenames = (List<String>) properties.remove("filenames");
 
             FastqRecord r = new FastqRecord(properties, filenames, rootIdentifier, projectId, expeditionCode, false);
             if (bioSample != null)

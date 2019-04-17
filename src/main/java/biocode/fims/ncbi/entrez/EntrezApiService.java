@@ -6,29 +6,31 @@ import biocode.fims.ncbi.entrez.requests.SraEFetchRequest;
 import biocode.fims.ncbi.models.*;
 import org.springframework.util.Assert;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author rjewing
  */
 public class EntrezApiService {
+    private final int fetchWeeksInPast;
     private EntrezApiFactory apiFactory;
 
-    public EntrezApiService(EntrezApiFactory apiFactory) {
+    public EntrezApiService(EntrezApiFactory apiFactory, int fetchWeeksInPast) {
+        this.fetchWeeksInPast = fetchWeeksInPast;
         Assert.notNull(apiFactory);
         this.apiFactory = apiFactory;
     }
 
     /**
-     * TODO maybe query by date to limit results from ncbi
-     * ex date filter from 04/2018 - present (date can be any portion (2018, 2018/04)):
-     *     &term=bcid[Attribute Name] AND ("2018/04"[Publication Date] : "3000"[Publication Date])
      * <p>
      * get a list of {@link biocode.fims.ncbi.models.BioSample#id}s that have a "bcid" attribute from the NCBI BioSample
      * database
      */
     public List<String> getBioSampleIdsWithBcidAttribute() {
-        ESearchRequest request = apiFactory.getBioSampleESearchRequest();
+        LocalDate fetchStartDate = LocalDate.now().minusWeeks(fetchWeeksInPast);
+        ESearchRequest request = apiFactory.getBioSampleESearchRequest(fetchStartDate);
         return getESearchIds(request);
     }
 
@@ -70,9 +72,9 @@ public class EntrezApiService {
      * get a list of all SRA Experiment id's for a {@link biocode.fims.ncbi.models.BioSample#bioProjectId}
      * from the NCBI SRA database
      */
-    public List<String> getSraExperimentPackageIds(String bioProjectId) {
-        Assert.hasText(bioProjectId, "Parameter experimentPackageIds must not be empty");
-        ESearchRequest request = apiFactory.getSraESearchRequest(bioProjectId);
+    public List<String> getSraExperimentPackageIds(Set<String> bioProjectIds) {
+        Assert.notEmpty(bioProjectIds, "Parameter bioProjectIds must not be empty");
+        ESearchRequest request = apiFactory.getSraESearchRequest(bioProjectIds);
         return getESearchIds(request);
     }
 

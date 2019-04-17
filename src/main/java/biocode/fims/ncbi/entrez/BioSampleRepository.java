@@ -7,6 +7,7 @@ import org.springframework.util.Assert;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author rjewing
@@ -60,6 +61,13 @@ public class BioSampleRepository {
 
             bioSamples = entrez.getBioSamplesFromIds(bioSampleIds);
             lastFetched = Instant.now();
+
+            // avoid being rate limited
+            try {
+                TimeUnit.MILLISECONDS.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         return filterBioSamplesMatchingBcids(bioSamples, bcids);
@@ -94,17 +102,7 @@ public class BioSampleRepository {
     }
 
     private List<SraExperimentPackage> getExperimentsForBioProjects(Set<String> bioProjectIds) {
-        List<SraExperimentPackage> experimentPackages = new ArrayList<>();
-
-        for (String id : bioProjectIds) {
-            experimentPackages.addAll(getExperimentForBioProject(id));
-        }
-
-        return experimentPackages;
-    }
-
-    private List<SraExperimentPackage> getExperimentForBioProject(String bioProjectId) {
-        List<String> sraExperimentPackageIds = entrez.getSraExperimentPackageIds(bioProjectId);
+        List<String> sraExperimentPackageIds = entrez.getSraExperimentPackageIds(bioProjectIds);
         return entrez.getSraExperimentPackagesFromIds(sraExperimentPackageIds);
     }
 

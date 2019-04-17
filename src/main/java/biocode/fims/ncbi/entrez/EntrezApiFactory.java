@@ -4,17 +4,19 @@ import biocode.fims.ncbi.entrez.requests.BioSampleEFetchRequest;
 import biocode.fims.ncbi.entrez.requests.ESearchRequest;
 import biocode.fims.ncbi.entrez.requests.SraEFetchRequest;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author rjewing
  */
 public interface EntrezApiFactory {
-    ESearchRequest getBioSampleESearchRequest();
+    ESearchRequest getBioSampleESearchRequest(LocalDate startDate);
 
     BioSampleEFetchRequest getBioSamplesFromIds(List<String> bioSampleIds);
 
-    ESearchRequest getSraESearchRequest(String bioProjectId);
+    ESearchRequest getSraESearchRequest(Set<String> bioProjectIds);
 
     SraEFetchRequest getSraExperimentsFromIds(List<String> experimentPackageIds);
 }
