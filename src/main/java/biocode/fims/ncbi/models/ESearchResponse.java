@@ -18,7 +18,7 @@ public class ESearchResponse implements PaginatedResponse {
         this.eSearchResult = eSearchResult;
     }
 
-    @JsonProperty("eSearchResult")
+    @JsonProperty("esearchresult")
     public ESearchResult geteSearchResult() {
         return eSearchResult;
     }

@@ -29,8 +29,8 @@ public class AbstractEFetchRequest<T> extends AbstractEntrezRequest<T> implement
      * @param client
      * @param responseClass
      */
-    AbstractEFetchRequest(String db, List<String> ids, Client client, Class<T> responseClass) {
-        super(SERVICE_PATH, client, "POST", responseClass);
+    AbstractEFetchRequest(String db, List<String> ids, String apiKey, Client client, Class<T> responseClass) {
+        super(SERVICE_PATH, apiKey, client, "POST", responseClass);
         registerDefaultClientFeatures(client);
 
         setDefaultQueryParams(db);

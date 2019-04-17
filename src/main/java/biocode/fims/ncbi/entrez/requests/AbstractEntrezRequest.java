@@ -15,8 +15,10 @@ public abstract class AbstractEntrezRequest<T> extends AbstractRequest<T> implem
 
     protected int currentPage;
 
-    protected AbstractEntrezRequest(String path, Client client, String method, Class<T> responseClass) {
+    protected AbstractEntrezRequest(String path, String apiKey, Client client, String method, Class<T> responseClass) {
         super(method, responseClass, client, path, BASE_URL);
+        addQueryParam(EntrezQueryParams.API_KEY.getName(), apiKey);
+
         currentPage = 0;
     }
 

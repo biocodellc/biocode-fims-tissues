@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -20,7 +21,7 @@ public class EntrezApiServiceTest {
     @Test
     public void contructor_fails_fast_when_given_null_EntrezApiFactory_argument() {
         exception.expect(IllegalArgumentException.class);
-        new EntrezApiService(null);
+        new EntrezApiService(null, 2);
     }
 
     @Test
@@ -31,7 +32,7 @@ public class EntrezApiServiceTest {
                 ))
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
         List<String> bioSamples = apiService.getBioSampleIdsWithBcidAttribute();
         assertEquals(5, bioSamples.size());
@@ -45,7 +46,7 @@ public class EntrezApiServiceTest {
                 ))
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
         List<String> bioSamples = apiService.getBioSampleIdsWithBcidAttribute();
         assertEquals(15, bioSamples.size());
@@ -61,7 +62,7 @@ public class EntrezApiServiceTest {
                 .setTotalBioSamples(5)
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
         List<String> irreleventIdList = Collections.emptyList();
         List<BioSample> bioSamples = apiService.getBioSamplesFromIds(irreleventIdList);
@@ -78,7 +79,7 @@ public class EntrezApiServiceTest {
                 .setTotalBioSamples(25)
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
         List<String> irreleventIdList = Collections.emptyList();
         List<BioSample> bioSamples = apiService.getBioSamplesFromIds(irreleventIdList);
@@ -93,9 +94,9 @@ public class EntrezApiServiceTest {
                 ))
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
-        List<String> bioSamples = apiService.getSraExperimentPackageIds("bioProject1");
+        List<String> bioSamples = apiService.getSraExperimentPackageIds(new HashSet<>(Collections.singletonList("bioProject1")));
         assertEquals(5, bioSamples.size());
     }
 
@@ -107,9 +108,9 @@ public class EntrezApiServiceTest {
                 ))
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
-        List<String> bioSamples = apiService.getSraExperimentPackageIds("bioProject1");
+        List<String> bioSamples = apiService.getSraExperimentPackageIds(new HashSet<>(Collections.singletonList("bioProject1")));
         assertEquals(25, bioSamples.size());
     }
 
@@ -123,7 +124,7 @@ public class EntrezApiServiceTest {
                 .setTotalExperimentPackages(5)
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
         List<String> irreleventIdList = Collections.emptyList();
         List<SraExperimentPackage> experimentPackages = apiService.getSraExperimentPackagesFromIds(irreleventIdList);
@@ -140,7 +141,7 @@ public class EntrezApiServiceTest {
                 .setTotalExperimentPackages(25)
                 .build();
 
-        EntrezApiService apiService = new EntrezApiService(fakeApiFactory);
+        EntrezApiService apiService = new EntrezApiService(fakeApiFactory, 2);
 
         List<String> irreleventIdList = Collections.emptyList();
         List<SraExperimentPackage> experimentPackages = apiService.getSraExperimentPackagesFromIds(irreleventIdList);

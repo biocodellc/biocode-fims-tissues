@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class BioSampleEFetchRequestImpl extends AbstractEFetchRequest<BioSampleEFetchResult> implements BioSampleEFetchRequest {
 
-    public BioSampleEFetchRequestImpl(List<String> ids, Client client) {
-        super(NCBIDatabase.BIO_SAMPLE.getName(), ids, client, BioSampleEFetchResult.class);
+    public BioSampleEFetchRequestImpl(List<String> ids, String apiKey, Client client) {
+        super(NCBIDatabase.BIO_SAMPLE.getName(), ids, apiKey, client, BioSampleEFetchResult.class);
     }
 }

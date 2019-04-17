@@ -7,7 +7,9 @@ import biocode.fims.ncbi.models.BioSampleEFetchResult;
 import biocode.fims.ncbi.models.ESearchResponse;
 import biocode.fims.ncbi.models.SraEFetchResult;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author rjewing
@@ -76,7 +78,7 @@ class FakeApiFactory implements EntrezApiFactory {
     }
 
     @Override
-    public ESearchRequest getBioSampleESearchRequest() {
+    public ESearchRequest getBioSampleESearchRequest(LocalDate startDate) {
         return new FakeESearchRequest(bioSampleESearchResponse);
     }
 
@@ -86,7 +88,7 @@ class FakeApiFactory implements EntrezApiFactory {
     }
 
     @Override
-    public ESearchRequest getSraESearchRequest(String bioProjectId) {
+    public ESearchRequest getSraESearchRequest(Set<String> bioProjectIds) {
         return new FakeESearchRequest(sraESearchResponse);
     }
 

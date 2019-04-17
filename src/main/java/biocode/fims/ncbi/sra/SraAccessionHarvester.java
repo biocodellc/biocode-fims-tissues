@@ -24,7 +24,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.Assert;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * class for harvesting accession's for fimMetadata resource sequences submitted the NCBI SRA database
@@ -47,7 +49,7 @@ public class SraAccessionHarvester {
         this.bioSampleRepository = bioSampleRepository;
     }
 
-    @Scheduled(cron = "0 0 1 * * *")
+    @Scheduled(cron = "${sraCronSetting}")
     public void harvestForAllProjects() {
         for (Project project : projectService.getProjects()) {
             harvest(project);
@@ -71,14 +73,20 @@ public class SraAccessionHarvester {
                     }
 
                     Entity sampleEntity = config.entity("Sample");
+                    Entity parentEntity = config.entity(e.getParentEntity());
                     RecordJoiner joiner = new RecordJoiner(config, e, queryResults);
 
                     QueryResult result = queryResults.getResult(e.getConceptAlias());
 
+                    // TODO remove sample from bcidsToQuery, now that GeomeBioDampleMapper uses the correct bcid
                     List<String> bcidsToQuery = result.records().stream()
-                            .map(r -> {
+                            .flatMap(r -> {
                                 Record sample = joiner.getParent(sampleEntity.getConceptAlias(), r);
-                                return sample.rootIdentifier() + sample.get(sampleEntity.getUniqueKeyURI());
+                                Record parent = joiner.getParent(parentEntity.getConceptAlias(), r);
+                                return Stream.of(
+                                        sample.rootIdentifier() + sample.get(sampleEntity.getUniqueKeyURI()),
+                                        parent.rootIdentifier() + parent.get(parentEntity.getUniqueKeyURI())
+                                );
                             })
                             .collect(Collectors.toList());
                     List<BioSample> bioSamples = bioSampleRepository.getBioSamples(bcidsToQuery);
@@ -87,8 +95,15 @@ public class SraAccessionHarvester {
                         return;
                     }
 
-                    Dataset d = generateUpdateDataset(result, sampleEntity, bioSamples);
+                    Dataset d = generateUpdateDataset(result, parentEntity, bioSamples);
                     recordRepository.saveDataset(d, project.getNetwork().getId());
+
+                    // avoid being rate limited
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 });
     }
 
