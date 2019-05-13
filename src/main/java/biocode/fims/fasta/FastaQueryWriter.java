@@ -93,6 +93,10 @@ public class FastaQueryWriter implements QueryWriter {
                 writer.write(parentUniqueKey);
                 writer.write(" = ");
                 writer.write(String.valueOf(record.getOrDefault(parentUniqueKey, "")));
+                writer.write("] [genus = ");
+                writer.write(String.valueOf(record.getOrDefault("urn:genus", "")));
+                writer.write("] [specificEpithet = ");
+                writer.write(String.valueOf(record.getOrDefault("urn:species", "")));
                 writer.write("]\n");
 
                 // TODO add more metadata (locality, genus, species) once networks are implemented
