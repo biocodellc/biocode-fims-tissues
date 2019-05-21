@@ -50,11 +50,13 @@ public class TissueConverter implements DataConverter {
 
         TissueEntity tissueEntity = (TissueEntity) recordSet.entity();
 
-        if (!tissueEntity.isGenerateID() || recordSet.recordsToPersist().size() == 0) return;
+        if (!tissueEntity.isGenerateID()) return;
 
         if (!tissueEntity.isGenerateEmptyTissue()) {
             removeEmptyTissues(recordSet);
         }
+
+        if (recordSet.recordsToPersist().size() == 0) return;
 
         String parent = tissueEntity.getParentEntity();
         parentKey = config.entity(parent).getUniqueKeyURI();
