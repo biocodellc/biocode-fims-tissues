@@ -87,13 +87,6 @@ public class TissueChildConverter implements DataConverter {
 
                 Record newChild = child.clone();
                 newChild.set(TissueProps.IDENTIFIER.uri(), tissue.get(TissueProps.IDENTIFIER.uri()));
-                newChild.set(
-                        FastaProps.IDENTIFIER.uri(),
-                        FastaRecord.generateIdentifier(
-                                tissue.get(TissueProps.IDENTIFIER.uri()),
-                                newChild.get(FastaProps.MARKER.uri())
-                        )
-                );
 
                 recordSet.remove(child);
                 recordSet.add(newChild);

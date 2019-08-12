@@ -78,7 +78,10 @@ public class BioSampleRepository {
         List<BioSample> filteredBioSamples = new ArrayList<>();
 
         for (BioSample bioSample : bioSamples) {
-            if (bcids.contains(bioSample.getBcid())) {
+            String bcid = bioSample.getBcid();
+            // strip any prefix to the ark id
+            bcid = bcid.substring(bcid.indexOf("ark:/"));
+            if (bcids.contains(bcid)) {
                 filteredBioSamples.add(bioSample);
             }
         }

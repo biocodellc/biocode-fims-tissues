@@ -25,15 +25,14 @@ public class FastqRecord extends GenericRecord {
     private List<String> filenames;
     private BioSample bioSample;
 
-    public FastqRecord(String parentUniqueKeyUri, String identifier, List<String> filenames, RecordMetadata recordMetadata) {
+    public FastqRecord(String parentUniqueKeyUri, String parentIdentifier, List<String> filenames, RecordMetadata recordMetadata) {
         super();
         this.filenames = filenames;
-        properties.put(parentUniqueKeyUri, identifier);
-        // only a single fastq record is allowed / parent record
-        properties.put(FastqProps.IDENTIFIER.uri(), identifier);
+        properties.put(parentUniqueKeyUri, parentIdentifier);
+        // don't place the record identifier here b/c FastqConverter will auto-generate and id
 
         for (Map.Entry e : recordMetadata.metadata().entrySet()) {
-            properties.put((String) e.getKey(), (String) e.getValue());
+            properties.put((String) e.getKey(), e.getValue());
         }
 //        for (Map.Entry e : recordMetadata.metadata().entrySet()) {
 //            FastqProps p;
@@ -143,7 +142,6 @@ public class FastqRecord extends GenericRecord {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(super.hashCode(), filenames, bioSample);
     }
 }
