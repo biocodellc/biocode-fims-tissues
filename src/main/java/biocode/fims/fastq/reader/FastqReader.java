@@ -38,8 +38,8 @@ public class FastqReader implements DataReader {
     private static final String CONCEPT_ALIAS_KEY = "conceptAlias";
     private static final List<String> EXTS = Arrays.asList("txt");
 
-    private static final Pattern SINGLE_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PAIRED_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)([.|_]+.*[12]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SINGLE_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(-.*)?\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAIRED_ID_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(-.*)?([.|_]+.*[12]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$", Pattern.CASE_INSENSITIVE);
 
     protected File file;
     protected ProjectConfig config;
