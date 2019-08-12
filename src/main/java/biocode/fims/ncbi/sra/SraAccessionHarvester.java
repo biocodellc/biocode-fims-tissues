@@ -1,5 +1,7 @@
 package biocode.fims.ncbi.sra;
 
+import biocode.fims.application.config.FimsProperties;
+import biocode.fims.bcid.BcidBuilder;
 import biocode.fims.bcid.Identifier;
 import biocode.fims.config.Config;
 import biocode.fims.config.models.Entity;
@@ -72,21 +74,17 @@ public class SraAccessionHarvester {
                         return;
                     }
 
-                    Entity sampleEntity = config.entity("Sample");
                     Entity parentEntity = config.entity(e.getParentEntity());
                     RecordJoiner joiner = new RecordJoiner(config, e, queryResults);
 
                     QueryResult result = queryResults.getResult(e.getConceptAlias());
+                    // always use an empty prefix as we only match later on from the ark:/ after
+                    BcidBuilder bcidBuilder = new BcidBuilder(parentEntity, config.entity(parentEntity.getParentEntity()), "");
 
-                    // TODO remove sample from bcidsToQuery, now that GeomeBioDampleMapper uses the correct bcid
                     List<String> bcidsToQuery = result.records().stream()
-                            .flatMap(r -> {
-                                Record sample = joiner.getParent(sampleEntity.getConceptAlias(), r);
+                            .map(r -> {
                                 Record parent = joiner.getParent(parentEntity.getConceptAlias(), r);
-                                return Stream.of(
-                                        sample.rootIdentifier() + sample.get(sampleEntity.getUniqueKeyURI()),
-                                        parent.rootIdentifier() + parent.get(parentEntity.getUniqueKeyURI())
-                                );
+                                return bcidBuilder.build(parent);
                             })
                             .collect(Collectors.toList());
                     List<BioSample> bioSamples = bioSampleRepository.getBioSamples(bcidsToQuery);

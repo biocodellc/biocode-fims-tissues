@@ -93,7 +93,7 @@ public class PlateService {
         if (queryResults.isEmpty()) return null;
 
         Entity parentEntity = getTissueParentEntity(project);
-        BcidBuilder bcidBuilder = new BcidBuilder(entity, parentEntity);
+        BcidBuilder bcidBuilder = new BcidBuilder(entity, parentEntity, props.bcidResolverPrefix());
 
         ArrayList<Attribute> attributes = new ArrayList<>(entity.getAttributes());
         attributes.addAll(parentEntity.getAttributes());
