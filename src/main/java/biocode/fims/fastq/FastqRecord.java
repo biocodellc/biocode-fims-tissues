@@ -142,7 +142,6 @@ public class FastqRecord extends GenericRecord {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(super.hashCode(), filenames, bioSample);
     }
 }
