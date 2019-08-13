@@ -19,8 +19,8 @@ public class FastqFilenamesRule extends AbstractRule {
     private static final String MISSING_GROUP_MESSAGE = "Missing fastq filenames";
     private static final String INVALID_GROUP_MESSAGE = "Invalid fastq filenames";
 
-    private static final Pattern PAIRED_FILE1_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(-.*)?([.|_]+.*[1]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
-    private static final Pattern PAIRED_FILE2_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(-.*)?([.|_]+.*[2]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
+    private static final Pattern PAIRED_FILE1_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(-.*)?([.|_|-]+.*[1]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
+    private static final Pattern PAIRED_FILE2_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(-.*)?([.|_|-]+.*[2]+)\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
     private static final Pattern SINGLE_FILE_PATTERN = Pattern.compile("^([a-zA-Z0-9+=:._()~*]+)(-.*)?\\.(fq|fastq)(\\.gz|\\.gzip|\\.bz2)?$");
 
     public FastqFilenamesRule() {
