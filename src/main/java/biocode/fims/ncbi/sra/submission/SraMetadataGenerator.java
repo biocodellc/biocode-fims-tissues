@@ -5,6 +5,7 @@ import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.utils.FileUtils;
 
 import java.io.*;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -25,8 +26,10 @@ public class SraMetadataGenerator {
         try (FileWriter fw = new FileWriter(metadataFile)) {
             List<String> headers = mapper.getHeaderValues();
 
-            for (String header : headers) {
-                fw.write(header + DELIMITER);
+            Iterator<String> it = headers.iterator();
+            while (it.hasNext()) {
+                fw.write(it.next());
+                if (it.hasNext()) fw.write(DELIMITER);
             }
             fw.write("\n");
 
@@ -34,8 +37,11 @@ public class SraMetadataGenerator {
                 List<String> resourceMetadata = mapper.getResourceMetadata();
 
                 if (!resourceMetadata.isEmpty()) {
-                    for (String mValue : resourceMetadata) {
-                        fw.write(mValue + DELIMITER);
+                    it = resourceMetadata.iterator();
+
+                    while (it.hasNext()) {
+                        fw.write(it.next());
+                        if (it.hasNext()) fw.write(DELIMITER);
                     }
                     fw.write("\n");
                 }

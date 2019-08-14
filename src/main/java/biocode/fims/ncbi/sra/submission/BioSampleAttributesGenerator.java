@@ -7,6 +7,7 @@ import biocode.fims.utils.FileUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,6 +20,7 @@ public class BioSampleAttributesGenerator {
 
     /**
      * generates a bioSample attributes file from the provided {@link BioSampleMapper}
+     *
      * @param mapper {@link BioSampleMapper} implementation
      * @return
      */
@@ -29,8 +31,10 @@ public class BioSampleAttributesGenerator {
 
             List<String> headers = mapper.getHeaderValues();
 
-            for (String header: headers) {
-                fw.write(header + DELIMITER);
+            Iterator<String> it = headers.iterator();
+            while (it.hasNext()) {
+                fw.write(it.next());
+                if (it.hasNext()) fw.write(DELIMITER);
             }
             fw.write("\n");
 
@@ -38,9 +42,13 @@ public class BioSampleAttributesGenerator {
                 List<String> bioSampleAttributes = mapper.getBioSampleAttributes();
 
                 if (!bioSampleAttributes.isEmpty()) {
-                    for (String mValue : bioSampleAttributes) {
-                        fw.write(mValue + DELIMITER);
+                    it = bioSampleAttributes.iterator();
+
+                    while (it.hasNext()) {
+                        fw.write(it.next());
+                        if (it.hasNext()) fw.write(DELIMITER);
                     }
+
                     fw.write("\n");
                 }
             }
