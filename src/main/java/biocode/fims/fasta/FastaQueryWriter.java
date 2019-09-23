@@ -31,7 +31,7 @@ public class FastaQueryWriter implements QueryWriter {
         }
         this.queryResult = queryResult;
 
-        if (queryResult.get(false).size() == 0) {
+        if (queryResult.get(false, true).size() == 0) {
             throw new FimsRuntimeException(QueryCode.NO_RESOURCES, 400);
         }
 
@@ -62,7 +62,7 @@ public class FastaQueryWriter implements QueryWriter {
     private Map<String, List<Map<String, Object>>> sortByMarker() {
         Map<String, List<Map<String, Object>>> fastaFileMap = new HashMap<>();
 
-        for (Map<String, Object> record : queryResult.get(false)) {
+        for (Map<String, Object> record : queryResult.get(false, true)) {
             String marker = String.valueOf(record.get(FastaProps.MARKER.uri()));
 
             fastaFileMap
