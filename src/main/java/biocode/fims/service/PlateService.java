@@ -18,6 +18,7 @@ import biocode.fims.query.dsl.*;
 import biocode.fims.reader.DataConverterFactory;
 import biocode.fims.records.*;
 import biocode.fims.repositories.RecordRepository;
+import biocode.fims.run.DatasetAction;
 import biocode.fims.run.DatasetAuthorizer;
 import biocode.fims.run.DatasetProcessor;
 import biocode.fims.run.ProcessorStatus;
@@ -44,16 +45,19 @@ public class PlateService {
     private final RecordRepository recordRepository;
     private final RecordValidatorFactory validatorFactory;
     private final DatasetAuthorizer datasetAuthorizer;
+    private final List<DatasetAction> datasetActions;
     private final DataConverterFactory dataConverterFactory;
     private final FimsProperties props;
 
     public PlateService(TissueRepository tissueRepository, RecordRepository recordRepository, DataConverterFactory dataConverterFactory,
-                        RecordValidatorFactory validatorFactory, DatasetAuthorizer datasetAuthorizer, FimsProperties props) {
+                        RecordValidatorFactory validatorFactory, DatasetAuthorizer datasetAuthorizer, List<DatasetAction> datasetActions,
+                        FimsProperties props) {
         this.tissueRepository = tissueRepository;
         this.recordRepository = recordRepository;
         this.dataConverterFactory = dataConverterFactory;
         this.validatorFactory = validatorFactory;
         this.datasetAuthorizer = datasetAuthorizer;
+        this.datasetActions = datasetActions;
         this.props = props;
     }
 
@@ -93,7 +97,7 @@ public class PlateService {
         if (queryResults.isEmpty()) return null;
 
         Entity parentEntity = getTissueParentEntity(project);
-        BcidBuilder bcidBuilder = new BcidBuilder(entity, parentEntity, props.bcidResolverPrefix());
+        BcidBuilder bcidBuilder = new BcidBuilder(entity, parentEntity, "");
 
         ArrayList<Attribute> attributes = new ArrayList<>(entity.getAttributes());
         attributes.addAll(parentEntity.getAttributes());
@@ -182,6 +186,7 @@ public class PlateService {
                 .validatorFactory(validatorFactory)
                 .dataConverterFactory(dataConverterFactory)
                 .datasetAuthorizer(datasetAuthorizer)
+                .datasetActions(datasetActions)
                 .serverDataDir(props.serverRoot())
                 .uploadValid();
 

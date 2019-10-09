@@ -167,8 +167,9 @@ public class TissueConverter implements DataConverter {
                 } else if (!(createdTissues.containsKey(hash) && r.properties().size() == 1 && !parentID.equals(""))) {
                     // we want to exclude any duplicate tissues which contain only parentID
                     // this will happen if a duplicate sample is placed on a spreadsheet
-                    newTissue = r.clone();
-                    newTissue.set(TissueProps.IDENTIFIER.uri(), existingRecord.get(TissueProps.IDENTIFIER.uri()));
+                    // or if an empty tissue has already been created & the sample is updated
+                    // so we remove the new empty tissue
+                    recordSet.remove(r);
                 }
 
                 if (newTissue != null) {
