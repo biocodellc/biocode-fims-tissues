@@ -41,9 +41,11 @@ public class SraAccessionHarvester {
     private final BioSampleRepository bioSampleRepository;
     private final ProjectService projectService;
     private final RecordRepository recordRepository;
+    private final FimsProperties props;
 
     public SraAccessionHarvester(RecordRepository recordRepository, BioSampleRepository bioSampleRepository,
-                                 ProjectService projectService) {
+                                 ProjectService projectService, FimsProperties props) {
+        this.props = props;
         Assert.notNull(bioSampleRepository);
         Assert.notNull(recordRepository);
         this.projectService = projectService;
@@ -123,7 +125,11 @@ public class SraAccessionHarvester {
         });
 
         for (BioSample bioSample : bioSamples) {
-            String parentIdentifier = new Identifier(bioSample.getBcid()).getSuffix();
+            String bcid = bioSample.getBcid();
+            if (bcid.startsWith(props.bcidResolverPrefix())) {
+                bcid = bcid.substring(props.bcidResolverPrefix().length());
+            }
+            String parentIdentifier = new Identifier(bcid).getSuffix();
 
             FastqRecord record = (FastqRecord) records.get(parentIdentifier);
             record.setBioSample(bioSample);
