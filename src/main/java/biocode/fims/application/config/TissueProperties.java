@@ -12,6 +12,22 @@ public class TissueProperties {
         this.env = env;
     }
 
+    public String sraSubmissionUser() {
+        return env.getRequiredProperty("sraSubmissionUser");
+    }
+
+    public String sraSubmissionPassword() {
+        return env.getRequiredProperty("sraSubmissionPassword");
+    }
+
+    public String sraSubmissionUrl() {
+        return env.getRequiredProperty("sraSubmissionUrl");
+    }
+
+    public String sraSubmissionRootDir() {
+        return env.getRequiredProperty("sraSubmissionRootDir");
+    }
+
     public String sraSubmissionDir() {
         String dir = env.getRequiredProperty("sraSubmissionDir");
         if (!dir.endsWith("/")) {

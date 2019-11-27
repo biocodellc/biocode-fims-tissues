@@ -26,6 +26,9 @@ public class SraSubmission {
     private Date modified;
 
 
+    // needed for hibernate
+    private SraSubmission() {}
+
     public SraSubmission(Project project, Expedition expedition, User user, Path submissionDir) {
         this.user = user;
         this.project = project;
@@ -136,7 +139,7 @@ public class SraSubmission {
     }
 
     public enum Status {
-        READY, SUBMITTED, FAILED
+        READY, SUBMITTED, COMPLETED, FAILED
     }
 
 }

@@ -43,6 +43,8 @@ dependencies {
     compile group: 'org.glassfish.jersey.ext', name: 'jersey-spring4', version: '2.27'
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+    // https://mvnrepository.com/artifact/commons-net/commons-net
+    compile group: 'commons-net', name: 'commons-net', version: '3.6'
 
     compile composite.resolveDependency("org.biocode:biocode-fims-commons:${fimsCommonsVersion}", ":biocode-fims-commons")
 
