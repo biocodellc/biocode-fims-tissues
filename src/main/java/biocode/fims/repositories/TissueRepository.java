@@ -1,4 +1,4 @@
-package biocode.fims.tissues;
+package biocode.fims.repositories;
 
 import biocode.fims.records.Record;
 

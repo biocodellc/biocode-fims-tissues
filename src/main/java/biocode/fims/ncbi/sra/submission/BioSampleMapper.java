@@ -1,5 +1,10 @@
 package biocode.fims.ncbi.sra.submission;
 
+import biocode.fims.config.Config;
+import biocode.fims.config.models.Entity;
+import biocode.fims.ncbi.models.SubmittableBioSample;
+import biocode.fims.query.QueryResults;
+
 import java.util.List;
 
 /**
@@ -12,4 +17,8 @@ public interface BioSampleMapper {
     List<String> getHeaderValues();
 
     List<String> getBioSampleAttributes();
+
+    List<SubmittableBioSample> getSubmittableBioSamples();
+
+    BioSampleMapper newInstance(Config config, Entity fastqEntity, QueryResults queryResults, String bcidResolverPrefix);
 }

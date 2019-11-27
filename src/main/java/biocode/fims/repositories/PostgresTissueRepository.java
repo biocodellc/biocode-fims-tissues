@@ -1,7 +1,6 @@
-package biocode.fims.tissues;
+package biocode.fims.repositories;
 
 import biocode.fims.query.PostgresUtils;
-import biocode.fims.records.GenericRecord;
 import biocode.fims.records.GenericRecordRowMapper;
 import biocode.fims.records.Record;
 import org.apache.commons.text.StringSubstitutor;
@@ -11,7 +10,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author rjewing
