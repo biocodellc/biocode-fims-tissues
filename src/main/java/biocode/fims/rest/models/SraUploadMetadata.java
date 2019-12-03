@@ -2,10 +2,15 @@ package biocode.fims.rest.models;
 
 import biocode.fims.models.Expedition;
 import biocode.fims.models.Project;
+import biocode.fims.models.User;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -52,10 +57,40 @@ public class SraUploadMetadata {
     public String bioProjectTitle;
     public String bioProjectDescription;
 
-    public Date holdDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    public LocalDate releaseDate;
+
+    public String sraUsername;
+    public String sraEmail;
+    public String sraFirstName;
+    public String sraLastName;
 
     @JsonSetter(nulls = Nulls.FAIL)
     public BioSampleType bioSampleType;
     @JsonSetter(nulls = Nulls.FAIL, contentNulls = Nulls.FAIL)
     public List<String> bioSamples;
+
+    public boolean setUserSraProfile(User user) {
+        boolean updated = false;
+
+        if (sraUsername != null && !sraUsername.equals(user.getSraUsername())) {
+            user.setSraUsername(sraUsername);
+            updated = true;
+        }
+        if (sraEmail != null && !sraEmail.equals(user.getSraEmail())) {
+            user.setSraEmail(sraEmail);
+            updated = true;
+        }
+        if (sraFirstName != null && !sraFirstName.equals(user.getSraFirstName())) {
+            user.setSraFirstName(sraFirstName);
+            updated = true;
+        }
+        if (sraLastName != null && !sraLastName.equals(user.getSraLastName())) {
+            user.setSraLastName(sraLastName);
+            updated = true;
+        }
+
+        return updated;
+    }
 }

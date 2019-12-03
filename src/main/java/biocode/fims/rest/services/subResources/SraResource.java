@@ -29,6 +29,7 @@ import biocode.fims.rest.responses.SraUploadCreateResponse;
 import biocode.fims.rest.responses.SraUploadResponse;
 import biocode.fims.service.ExpeditionService;
 import biocode.fims.service.ProjectService;
+import biocode.fims.service.UserService;
 import biocode.fims.tools.FileCache;
 import biocode.fims.utils.FileUtils;
 import org.apache.commons.collections.keyvalue.MultiKey;
@@ -68,6 +69,7 @@ public class SraResource extends ResumableUploadResource {
     private final SraUploadStore uploadStore;
     private final ProjectService projectService;
     private final ExpeditionService expeditionService;
+    private final UserService userService;
     private final QueryAuthorizer queryAuthorizer;
     private final RecordRepository recordRepository;
     private final FileCache fileCache;
@@ -77,13 +79,14 @@ public class SraResource extends ResumableUploadResource {
     private SraSubmissionRepository sraSubmissionRepository;
 
     @Autowired
-    public SraResource(FimsProperties props, ProjectService projectService, ExpeditionService expeditionService,
+    public SraResource(FimsProperties props, ProjectService projectService, ExpeditionService expeditionService, UserService userService,
                        QueryAuthorizer queryAuthorizer, RecordRepository recordRepository, FileCache fileCache,
                        TissueProperties tissueProperties, SraMetadataMapper sraMetadataMapper,
                        BioSampleMapper bioSampleMapperInstance, SraSubmissionRepository sraSubmissionRepository) {
         super(props);
         this.projectService = projectService;
         this.expeditionService = expeditionService;
+        this.userService = userService;
         this.queryAuthorizer = queryAuthorizer;
         this.recordRepository = recordRepository;
         this.fileCache = fileCache;
@@ -222,6 +225,10 @@ public class SraResource extends ResumableUploadResource {
         }
         metadata.project = project;
         metadata.expedition = expedition;
+
+        if (metadata.setUserSraProfile(user)) {
+            userService.update(user);
+        }
 
         UUID processId = UUID.randomUUID();
         uploadStore.put(processId, metadata, user.getUserId());
