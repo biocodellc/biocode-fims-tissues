@@ -10,7 +10,7 @@ import biocode.fims.records.GenericRecord;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordSet;
 import biocode.fims.tissues.TissueProps;
-import biocode.fims.tissues.TissueRepository;
+import biocode.fims.repositories.TissueRepository;
 import biocode.fims.utils.RecordHasher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
