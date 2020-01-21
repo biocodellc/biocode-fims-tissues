@@ -162,7 +162,7 @@ public class SraResource extends ResumableUploadResource {
 
         if (format.equalsIgnoreCase("json")) {
             return new SraSubmissionData(
-                    bioSampleMapper.getSubmittableBioSamples(),
+                    bioSampleMapper.getBioSamples(),
                     metadataMapper.getResourceMetadataAsMap()
             );
         }

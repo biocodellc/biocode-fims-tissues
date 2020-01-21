@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,6 +42,22 @@ public class SraUploadMetadata {
             return name;
         }
     }
+
+//    public enum BioProjectType {
+//        GENOME("genome sequencing"),
+//        ;
+//
+//        private final String name;
+//
+//        BioProjectType(String name) {
+//            this.name = name;
+//        }
+//
+//        @Override
+//        public String toString() {
+//            return name;
+//        }
+//    }
 
     @JsonSetter(nulls = Nulls.FAIL)
     public String expeditionCode;

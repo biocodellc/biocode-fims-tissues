@@ -1,6 +1,7 @@
 package biocode.fims.ncbi.sra.submission;
 
 import biocode.fims.models.User;
+import biocode.fims.ncbi.models.GeomeBioSample;
 import biocode.fims.ncbi.models.SraMetadata;
 import biocode.fims.ncbi.models.SraSubmissionData;
 import biocode.fims.ncbi.models.SubmittableBioSample;
@@ -135,8 +136,8 @@ public class SraLoader {
     }
 
     private SraSubmissionData getSraSubmissionData() {
-        List<SubmittableBioSample> bioSamples = sraSubmissionData.bioSamples.stream()
-                .filter(b -> metadata.bioSamples.contains(b.getSampleName()))
+        List<GeomeBioSample> bioSamples = sraSubmissionData.bioSamples.stream()
+                .filter(b -> metadata.bioSamples.contains(b.get("sample_name")))
                 .collect(Collectors.toList());
         List<SraMetadata> sraMetadata = sraSubmissionData.sraMetadata.stream()
                 .filter(m -> metadata.bioSamples.contains(m.get("sample_name")))

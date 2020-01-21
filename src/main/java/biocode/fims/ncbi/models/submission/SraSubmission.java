@@ -2,7 +2,6 @@ package biocode.fims.ncbi.models.submission;
 
 import biocode.fims.models.User;
 import biocode.fims.models.dataTypes.converters.DateAdaptor;
-import biocode.fims.ncbi.models.SraMetadata;
 import biocode.fims.ncbi.models.SraSubmissionData;
 import biocode.fims.ncbi.models.SubmittableBioSample;
 import biocode.fims.rest.models.SraUploadMetadata;
@@ -14,7 +13,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,17 +23,17 @@ import java.util.List;
 @XmlRootElement(name = "Submission")
 public class SraSubmission {
 
-    @XmlPath("Description/Organization")
-    public Organization organization;
     @XmlPath("Description/Submitter/@user_name")
     private String submitter;
+    @XmlPath("Description/Organization")
+    public Organization organization;
     @XmlPath("Description/Hold/@release_date")
     @XmlJavaTypeAdapter(DateAdaptor.class)
     private LocalDate releaseDate;
     @XmlElements({
             @XmlElement(name = "Action", type = BioProject.class),
             @XmlElement(name = "Action", type = SubmittableBioSample.class),
-            @XmlElement(name = "Action", type = SraMetadata.class),
+            @XmlElement(name = "Action", type = SubmittableSraMetadata.class),
     })
     private List<Object> actions;
 
@@ -57,22 +55,19 @@ public class SraSubmission {
 
         BioProject finalBioProject = bioProject;
         data.bioSamples.forEach(b -> {
-            if (finalBioProject == null) {
-                b.setBioProjectAccession(metadata.bioProjectAccession);
-            } else {
-                b.setBioProjectId(finalBioProject.getIdentifier());
-            }
-            b.setType(metadata.bioSampleType);
-            this.actions.add(b);
+            String bioProjectId = finalBioProject == null ? null : finalBioProject.getIdentifier();
+            this.actions.add(
+                    SubmittableBioSample.fromBioSample(b, metadata.bioProjectAccession, bioProjectId, metadata.bioSampleType)
+            );
         });
 
         data.sraMetadata.forEach(m -> {
-            if (finalBioProject == null) {
-                m.setBioProjectAccession(metadata.bioProjectAccession);
-            } else {
-                m.setBioProjectId(finalBioProject.getIdentifier());
-            }
-            this.actions.add(m);
+            String bioProjectId = finalBioProject == null ? null : finalBioProject.getIdentifier();
+            this.actions.add(
+                    SubmittableSraMetadata.fromMetadata(
+                            m, metadata.bioProjectAccession, bioProjectId
+                    )
+            );
         });
     }
 }

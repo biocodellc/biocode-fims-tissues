@@ -1,21 +1,19 @@
 package biocode.fims.ncbi.models;
 
-import biocode.fims.ncbi.models.submission.Attribute;
+import biocode.fims.ncbi.models.submission.BioSampleAttribute;
+import biocode.fims.ncbi.models.submission.BioSampleTypeAdaptor;
 import biocode.fims.rest.models.SraUploadMetadata;
-import biocode.fims.serializers.SubmittableBioSampleSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.eclipse.persistence.oxm.annotations.XmlPath;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author rjewing
  */
-@JsonSerialize(using = SubmittableBioSampleSerializer.class)
+@XmlType(propOrder = {"sampleName", "sampleTitle", "organism", "bioProjectAccession", "bioProjectId", "type", "attributes", "identifier"})
 public class SubmittableBioSample {
     private static ArrayList<String> IGNOREABLE_ATTRIBUTES = new ArrayList<String>() {{
         add("sample_name");
@@ -23,76 +21,81 @@ public class SubmittableBioSample {
         add("organism");
     }};
 
-    private LinkedHashMap<String, String> attributes = new LinkedHashMap<>();
-
     @XmlPath("AddData/@target_db")
     private static String targetDb = "BioSample";
     @XmlPath("AddData/Data/@content_type")
     private static String contentType = "xml";
+    @XmlPath("AddData/Data/XmlContent/BioSample/@schema_version")
+    private static String schemaVersion = "2.0";
+
+    @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/@spuid_namespace")
+    private static String spuidNamespace = SPUIDNamespace.value;
+    @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/text()")
+    private String sampleName;
+
+    @XmlPath("AddData/Data/XmlContent/BioSample/Descriptor/Title/text()")
+    private String sampleTitle;
+
+    @XmlPath("AddData/Data/XmlContent/BioSample/Organism/OrganismName/text()")
+    private String organism;
 
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/PrimaryId/text()")
     private String bioProjectAccession;
+    @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/@spuid_namespace")
+    private static String spuidNamespace2 = SPUIDNamespace.value;
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/text()")
     private String bioProjectId;
     @XmlPath("AddData/Data/XmlContent/BioSample/Package/text()")
+    @XmlJavaTypeAdapter(BioSampleTypeAdaptor.class)
     private SraUploadMetadata.BioSampleType type;
 
-    // we can't just extend a Map b/c marshelling doesn't work correctly
-    public String get(String key) {
-        return this.attributes.get(key);
+    @XmlPath("AddData/Data/XmlContent/BioSample/Attributes/Attribute")
+    private List<BioSampleAttribute> attributes;
+
+    private SubmittableBioSample() {
     }
 
-    public String put(String key, String val) {
-        return this.attributes.put(key, val);
+    private SubmittableBioSample(String sampleName, String sampleTitle, String organism,
+                                 List<BioSampleAttribute> attributes, SraUploadMetadata.BioSampleType bioSampleType,
+                                 String bioProjectAccession, String bioProjectId) {
+        this.sampleName = sampleName;
+        this.sampleTitle = sampleTitle;
+        this.organism = organism;
+        this.attributes = attributes;
+        type = bioSampleType;
+        this.bioProjectAccession = bioProjectAccession;
+        this.bioProjectId = bioProjectId;
     }
 
-    public Collection<String> values() {
-        return this.attributes.values();
-    }
-
-    @XmlPath("AddData/Data/XmlContent/BioSample/SampleID/SPUID/text()")
-    public String getSampleName() {
-        return get("sample_name");
-    }
-
-    @XmlPath("AddData/Data/XmlContent/BioSample/Descriptor/Title/text()")
-    public String getSampleTitle() {
-        return get("sample_title");
-    }
-
-    @XmlPath("AddData/Data/XmlContent/BioSample/Organism/OrganismName/text()")
-    public String getOrganism() {
-        return get("organism");
-    }
 
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/PrimaryId/@db")
     public String getBioProjectDb() {
         return this.bioProjectAccession == null ? null : "BioProject";
     }
 
-    @XmlPath("AddData/Data/XmlContent/BioSample/Attributes/Attribute")
-    public List<Attribute> getAttributes() {
-        return this.attributes.entrySet().stream()
-                .filter(e -> !IGNOREABLE_ATTRIBUTES.contains(e.getKey()))
-                .map(e -> new Attribute(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
-    }
+    @XmlPath("AddData/Identifier/SPUID/@spuid_namespace")
+    private static String spuidNamespace3 = SPUIDNamespace.value;
 
     @XmlPath("AddData/Identifier/SPUID/text()")
     public String getIdentifier() {
-        return this.getSampleName();
+        return sampleName;
     }
 
-    public void setBioProjectAccession(String accession) {
-        this.bioProjectAccession = accession;
-    }
+    public static SubmittableBioSample fromBioSample(GeomeBioSample bioSample, String bioProjectAccession, String bioProjectId, SraUploadMetadata.BioSampleType bioSampleType) {
+        List<BioSampleAttribute> attributes = bioSample.entrySet().stream()
+                .filter(e -> !IGNOREABLE_ATTRIBUTES.contains(e.getKey()))
+                .map(e -> new BioSampleAttribute(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
 
-    public void setType(SraUploadMetadata.BioSampleType type) {
-        this.type = type;
-    }
-
-    public void setBioProjectId(String bioProjectId) {
-        this.bioProjectId = bioProjectId;
+        return new SubmittableBioSample(
+                bioSample.get("sample_name"),
+                bioSample.get("sample_title"),
+                bioSample.get("organism"),
+                attributes,
+                bioSampleType,
+                bioProjectAccession,
+                bioProjectId
+        );
     }
 }
 
