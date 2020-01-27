@@ -38,6 +38,8 @@ import java.util.stream.Stream;
  * @author rjewing
  */
 public class SraAccessionHarvester {
+    private static final long TWENTYFOUR_HOURS = 1000 * 60 * 60 * 24;
+
     private static final Logger logger = LoggerFactory.getLogger(SraAccessionHarvester.class);
 
     private final BioSampleRepository bioSampleRepository;
@@ -55,7 +57,7 @@ public class SraAccessionHarvester {
         this.bioSampleRepository = bioSampleRepository;
     }
 
-    @Scheduled(cron = "${sraCronSetting}", initialDelay = 2 * 60 * 1000)
+    @Scheduled(fixedDelay = TWENTYFOUR_HOURS, initialDelay = 2 * 60 * 1000)
     public void harvestForAllProjects() {
         for (Project project : projectService.getProjects()) {
             harvest(project);
