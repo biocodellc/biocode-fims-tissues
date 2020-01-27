@@ -55,7 +55,7 @@ public class SraAccessionHarvester {
         this.bioSampleRepository = bioSampleRepository;
     }
 
-    @Scheduled(cron = "${sraCronSetting}")
+    @Scheduled(cron = "${sraCronSetting}", initialDelay = 2 * 60 * 1000)
     public void harvestForAllProjects() {
         for (Project project : projectService.getProjects()) {
             harvest(project);
