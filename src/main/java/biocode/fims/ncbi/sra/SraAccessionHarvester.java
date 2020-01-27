@@ -53,7 +53,7 @@ public class SraAccessionHarvester {
         this.bioSampleRepository = bioSampleRepository;
     }
 
-    @Scheduled(cron = "${sraCronSetting}")
+//    @Scheduled(cron = "${sraCronSetting}")
     public void harvestForAllProjects() {
         for (Project project : projectService.getProjects()) {
             harvest(project);
