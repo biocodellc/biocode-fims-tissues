@@ -42,9 +42,9 @@ dependencies {
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.27'
     compile group: 'org.glassfish.jersey.ext', name: 'jersey-spring4', version: '2.27'
 
-    compile group: 'org.eclipse.persistence', name: 'core', version: '2.6.4'
-    compile group: 'org.eclipse.persistence', name: 'moxy', version: '2.6.4'
-    compile group: 'org.eclipse.persistence', name: 'asm', version: '2.6.4'
+    compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.core', version: '2.6.4'
+    compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.moxy', version: '2.6.4'
+    compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.asm', version: '2.6.4'
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
