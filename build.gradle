@@ -17,7 +17,7 @@ buildscript {
 apply plugin: "org.biocode.fims-app"
 
 if (!project.hasProperty('fimsCommonsVersion')) {
-    ext.fimsCommonsVersion = "2.2.0"
+    ext.fimsCommonsVersion = "2.3.1"
 }
 
 fims {
@@ -43,6 +43,11 @@ dependencies {
     compile group: 'org.glassfish.jersey.ext', name: 'jersey-spring4', version: '2.27'
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.1'
+
+    // https://mvnrepository.com/artifact/commons-net/commons-net
+    compile group: 'commons-net', name: 'commons-net', version: '3.6'
 
     compile composite.resolveDependency("org.biocode:biocode-fims-commons:${fimsCommonsVersion}", ":biocode-fims-commons")
 

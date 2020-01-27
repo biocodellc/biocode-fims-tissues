@@ -7,6 +7,8 @@ import biocode.fims.config.Config;
 import biocode.fims.config.models.Entity;
 import biocode.fims.config.models.FastqEntity;
 import biocode.fims.fastq.FastqRecord;
+import biocode.fims.fimsExceptions.FimsAbstractException;
+import biocode.fims.fimsExceptions.errorCodes.ConfigCode;
 import biocode.fims.models.Project;
 import biocode.fims.records.GenericRecord;
 import biocode.fims.records.Record;
@@ -61,50 +63,59 @@ public class SraAccessionHarvester {
     }
 
     private void harvest(Project project) {
-        Config config = project.getProjectConfig();
+        try {
+            Config config = project.getProjectConfig();
 
-        config.entities().stream()
-                .filter(e -> e.type().equals(FastqEntity.TYPE))
-                .forEach(e -> {
-                    // TODO need to make the select query configurable
-                    String q = "_select_:[Sample,Tissue] not _exists_:bioSample and _projects_:" + project.getProjectId();
+            config.entities().stream()
+                    .filter(e -> e.type().equals(FastqEntity.TYPE))
+                    .forEach(e -> {
+                        // TODO need to make the select query configurable
+                        String q = "_select_:[Sample,Tissue] not _exists_:bioSample and _projects_:" + project.getProjectId();
 
-                    Query query = Query.build(project, e.getConceptAlias(), q);
-                    QueryResults queryResults = recordRepository.query(query);
+                        Query query = Query.build(project, e.getConceptAlias(), q);
+                        QueryResults queryResults = recordRepository.query(query);
 
-                    if (queryResults.isEmpty()) {
-                        return;
-                    }
+                        if (queryResults.isEmpty()) {
+                            return;
+                        }
 
-                    Entity parentEntity = config.entity(e.getParentEntity());
-                    RecordJoiner joiner = new RecordJoiner(config, e, queryResults);
+                        Entity parentEntity = config.entity(e.getParentEntity());
+                        RecordJoiner joiner = new RecordJoiner(config, e, queryResults);
 
-                    QueryResult result = queryResults.getResult(e.getConceptAlias());
-                    // always use an empty prefix as we only match later on from the ark:/ after
-                    BcidBuilder bcidBuilder = new BcidBuilder(parentEntity, config.entity(parentEntity.getParentEntity()), "");
+                        QueryResult result = queryResults.getResult(e.getConceptAlias());
+                        // always use an empty prefix as we only match later on from the ark:/ after
+                        BcidBuilder bcidBuilder = new BcidBuilder(parentEntity, config.entity(parentEntity.getParentEntity()), "");
 
-                    List<String> bcidsToQuery = result.records().stream()
-                            .map(r -> {
-                                Record parent = joiner.getParent(parentEntity.getConceptAlias(), r);
-                                return bcidBuilder.build(parent);
-                            })
-                            .collect(Collectors.toList());
-                    List<BioSample> bioSamples = bioSampleRepository.getBioSamples(bcidsToQuery);
+                        List<String> bcidsToQuery = result.records().stream()
+                                .map(r -> {
+                                    Record parent = joiner.getParent(parentEntity.getConceptAlias(), r);
+                                    return bcidBuilder.build(parent);
+                                })
+                                .collect(Collectors.toList());
+                        List<BioSample> bioSamples = bioSampleRepository.getBioSamples(bcidsToQuery);
 
-                    if (bioSamples.isEmpty()) {
-                        return;
-                    }
+                        if (bioSamples.isEmpty()) {
+                            return;
+                        }
 
-                    Dataset d = generateUpdateDataset(result, parentEntity, bioSamples);
-                    recordRepository.saveDataset(d, project.getNetwork().getId());
+                        Dataset d = generateUpdateDataset(result, parentEntity, bioSamples);
+                        recordRepository.saveDataset(d, project.getNetwork().getId());
 
-                    // avoid being rate limited
-                    try {
-                        TimeUnit.SECONDS.sleep(1);
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
-                });
+                        // avoid being rate limited
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    });
+        } catch (FimsAbstractException e) {
+            if (e.getErrorCode().equals(ConfigCode.MISSING_ATTRIBUTE)) {
+                // skip this project if config is invalid
+                logger.error(e.toString());
+            } else {
+                throw e;
+            }
+        }
     }
 
     private Dataset generateUpdateDataset(QueryResult fastqResults, Entity parentEntity, List<BioSample> bioSamples) {

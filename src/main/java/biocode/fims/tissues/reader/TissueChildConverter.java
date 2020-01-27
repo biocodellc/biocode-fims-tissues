@@ -3,15 +3,13 @@ package biocode.fims.tissues.reader;
 import biocode.fims.config.models.Entity;
 import biocode.fims.config.models.TissueEntity;
 import biocode.fims.config.project.ProjectConfig;
-import biocode.fims.fasta.FastaProps;
-import biocode.fims.fasta.FastaRecord;
 import biocode.fims.fimsExceptions.FimsRuntimeException;
 import biocode.fims.fimsExceptions.errorCodes.DataReaderCode;
 import biocode.fims.reader.DataConverter;
 import biocode.fims.records.Record;
 import biocode.fims.records.RecordSet;
 import biocode.fims.tissues.TissueProps;
-import biocode.fims.tissues.TissueRepository;
+import biocode.fims.repositories.TissueRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

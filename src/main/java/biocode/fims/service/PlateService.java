@@ -18,6 +18,7 @@ import biocode.fims.query.dsl.*;
 import biocode.fims.reader.DataConverterFactory;
 import biocode.fims.records.*;
 import biocode.fims.repositories.RecordRepository;
+import biocode.fims.repositories.TissueRepository;
 import biocode.fims.run.DatasetAction;
 import biocode.fims.run.DatasetAuthorizer;
 import biocode.fims.run.DatasetProcessor;
