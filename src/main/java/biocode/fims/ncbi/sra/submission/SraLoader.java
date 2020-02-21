@@ -67,17 +67,22 @@ public class SraLoader {
             return new SraUploadResponse(false, "Invalid bioSamples provided");
         }
 
+
         try {
             extractFiles();
+            logger.debug("Files successfully extracted");
         } catch (IOException e) {
+            logger.debug("Error extracting files", e);
             deleteSubmissionDir();
             return new SraUploadResponse(false, "Invalid/corrupt zip file.");
         }
 
+        logger.debug("Checking for missing files");
         // check that all filenames are present
         List<String> missingFiles = checkForMissingFiles(filteredSubmissionData);
 
         if (missingFiles.size() > 0) {
+            logger.debug("Missing files found");
             deleteSubmissionDir();
             return new SraUploadResponse(
                     false,
@@ -87,6 +92,7 @@ public class SraLoader {
             );
         }
 
+        logger.debug("No missing files found. Writing submission xml");
 
         try {
             writeSubmissionXml(filteredSubmissionData);
@@ -95,6 +101,8 @@ public class SraLoader {
             deleteSubmissionDir();
             return new SraUploadResponse(false, "Error creating submission.xml file");
         }
+
+        logger.debug("submission.xml file written. Saving to db");
 
         try {
             sraSubmissionRepository.save(
@@ -105,11 +113,13 @@ public class SraLoader {
                             getSubmissionDirectory()
                     )
             );
+            logger.debug("sra submission saved");
         } catch (Exception e) {
             logger.error("Error saving SraSubmission", e);
             deleteSubmissionDir();
             return new SraUploadResponse(false, "Error saving SRA submission");
         }
+        logger.debug("sra submission is valid");
 
         // validate is from
         return new SraUploadResponse(true, null);

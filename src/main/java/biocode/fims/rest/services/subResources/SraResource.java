@@ -288,11 +288,13 @@ public class SraResource extends ResumableUploadResource {
                         uploadEntry.targetFile.delete();
                     } catch (Exception e) {
                         // ignore error
+                        logger.debug("Failed to delete uploadEntry file");
                     }
                 }
                 resumableUploads.remove(getKey(userContext.getUser(), uploadId));
             }
         } catch (IOException e) {
+            logger.debug("Error", e);
             if (!(e.getCause() instanceof TimeoutException)) {
                 logger.info("Sra submission IOException", e);
             }
@@ -301,6 +303,7 @@ public class SraResource extends ResumableUploadResource {
             try {
                 is.close();
             } catch (IOException ignored) {
+                logger.debug("Error closing input stream", ignored);
             }
         }
     }
