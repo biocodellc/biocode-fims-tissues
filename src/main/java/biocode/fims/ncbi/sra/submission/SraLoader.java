@@ -129,7 +129,9 @@ public class SraLoader {
         SraSubmission submission = new SraSubmission(filteredSubmissionData, metadata, user, url);
         JAXBContext jaxbContext = JAXBContext.newInstance(SraSubmission.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
+        logger.debug("opening submission.xml file");
         File file = new File(getSubmissionDirectory().toString(), "submission.xml");
+        logger.debug("marshaling submission.xml file");
         marshaller.marshal(submission, file);
     }
 
