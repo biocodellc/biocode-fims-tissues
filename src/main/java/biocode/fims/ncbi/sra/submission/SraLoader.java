@@ -96,7 +96,7 @@ public class SraLoader {
 
         try {
             writeSubmissionXml(filteredSubmissionData);
-        } catch (JAXBException e) {
+        } catch (Exception e) {
             logger.error("Error creating submission.xml", e);
             deleteSubmissionDir();
             return new SraUploadResponse(false, "Error creating submission.xml file");
