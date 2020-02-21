@@ -126,13 +126,21 @@ public class SraLoader {
     }
 
     private void writeSubmissionXml(SraSubmissionData filteredSubmissionData) throws JAXBException {
-        SraSubmission submission = new SraSubmission(filteredSubmissionData, metadata, user, url);
-        JAXBContext jaxbContext = JAXBContext.newInstance(SraSubmission.class);
-        Marshaller marshaller = jaxbContext.createMarshaller();
-        logger.debug("opening submission.xml file");
-        File file = new File(getSubmissionDirectory().toString(), "submission.xml");
-        logger.debug("marshaling submission.xml file");
-        marshaller.marshal(submission, file);
+        try {
+            logger.debug("creating SraSubmission object");
+            SraSubmission submission = new SraSubmission(filteredSubmissionData, metadata, user, url);
+            logger.debug("initiating JAXBContext");
+            JAXBContext jaxbContext = JAXBContext.newInstance(SraSubmission.class);
+            logger.debug("creating marshaller");
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            logger.debug("opening submission.xml file");
+            File file = new File(getSubmissionDirectory().toString(), "submission.xml");
+            logger.debug("marshaling submission.xml file");
+            marshaller.marshal(submission, file);
+        } catch (Exception e) {
+            logger.error("Error", e);
+            throw e;
+        }
     }
 
     private List<String> checkForMissingFiles(SraSubmissionData filteredSubmissionData) {
