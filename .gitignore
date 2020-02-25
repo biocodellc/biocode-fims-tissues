@@ -4,6 +4,7 @@ src/main/web/app/components/auth/clientId.js
 *.props
 *.properties
 !gradle/wrapper/gradle-wrapper.properties
+!**/jaxb.properties
 dist/*
 build/*
 classes/*
