@@ -31,26 +31,29 @@ public class SubmittableBioSample {
     @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/@spuid_namespace")
     private static String spuidNamespace = SPUIDNamespace.value;
     @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/text()")
-    private String sampleName;
+    public String sampleName;
 
     @XmlPath("AddData/Data/XmlContent/BioSample/Descriptor/Title/text()")
-    private String sampleTitle;
+    public String sampleTitle;
 
     @XmlPath("AddData/Data/XmlContent/BioSample/Organism/OrganismName/text()")
-    private String organism;
+    public String organism;
 
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/PrimaryId/text()")
-    private String bioProjectAccession;
+    public String bioProjectAccession;
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/@spuid_namespace")
     private static String spuidNamespace2 = SPUIDNamespace.value;
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/text()")
-    private String bioProjectId;
+    public String bioProjectId;
     @XmlPath("AddData/Data/XmlContent/BioSample/Package/text()")
     @XmlJavaTypeAdapter(BioSampleTypeAdaptor.class)
-    private SraUploadMetadata.BioSampleType type;
+    public SraUploadMetadata.BioSampleType type;
 
     @XmlPath("AddData/Data/XmlContent/BioSample/Attributes/Attribute")
-    private List<BioSampleAttribute> attributes;
+    public List<BioSampleAttribute> attributes;
+
+    @XmlPath("AddData/Identifier/SPUID/text()")
+    public String identifier;
 
     private SubmittableBioSample() {
     }
@@ -59,6 +62,7 @@ public class SubmittableBioSample {
                                  List<BioSampleAttribute> attributes, SraUploadMetadata.BioSampleType bioSampleType,
                                  String bioProjectAccession, String bioProjectId) {
         this.sampleName = sampleName;
+        this.identifier = sampleName;
         this.sampleTitle = sampleTitle;
         this.organism = organism;
         this.attributes = attributes;
@@ -75,11 +79,6 @@ public class SubmittableBioSample {
 
     @XmlPath("AddData/Identifier/SPUID/@spuid_namespace")
     private static String spuidNamespace3 = SPUIDNamespace.value;
-
-    @XmlPath("AddData/Identifier/SPUID/text()")
-    public String getIdentifier() {
-        return sampleName;
-    }
 
     public static SubmittableBioSample fromBioSample(GeomeBioSample bioSample, String bioProjectAccession, String bioProjectId, SraUploadMetadata.BioSampleType bioSampleType) {
         List<BioSampleAttribute> attributes = bioSample.entrySet().stream()
