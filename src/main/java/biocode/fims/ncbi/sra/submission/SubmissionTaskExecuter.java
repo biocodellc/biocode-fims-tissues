@@ -29,8 +29,7 @@ public class SubmissionTaskExecuter {
         this.tissueProperties = tissueProperties;
     }
 
-    //    @Scheduled(initialDelay = 60 * 1000 * 2, fixedDelay = ONE_HOUR)
-    @Scheduled(fixedDelay = ONE_HOUR)
+    @Scheduled(initialDelay = 60 * 1000 * 2, fixedDelay = ONE_HOUR)
     public void scheduleTasks() {
         for (SraSubmission submission : submissionRepository.getByStatus(SraSubmission.Status.READY)) {
             submit(submission);
@@ -44,6 +43,7 @@ public class SubmissionTaskExecuter {
         try {
             client.connect(tissueProperties.sraSubmissionUrl());
             client.login(tissueProperties.sraSubmissionUser(), tissueProperties.sraSubmissionPassword());
+            client.enterLocalPassiveMode();
 
             String dirName = tissueProperties.sraSubmissionRootDir() + "/" + submission.getSubmissionDir().getFileName().toString();
 
@@ -69,6 +69,7 @@ public class SubmissionTaskExecuter {
         } catch (IOException e) {
             logger.error("Failed to submit via FTP to SRA.", e);
             submission.setStatus(SraSubmission.Status.FAILED);
+            submission.setMessage(e.getMessage());
         } finally {
             try {
                 if (fis != null) {
