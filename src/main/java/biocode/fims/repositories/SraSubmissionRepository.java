@@ -1,20 +1,20 @@
 package biocode.fims.repositories;
 
-import biocode.fims.models.SraSubmission;
+import biocode.fims.models.SraSubmissionEntry;
 import org.springframework.data.repository.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 /**
- * This repositories provides CRUD operations for {@link biocode.fims.models.SraSubmission} objects
+ * This repositories provides CRUD operations for {@link SraSubmissionEntry} objects
  */
 @Transactional
-public interface SraSubmissionRepository extends Repository<SraSubmission, Integer> {
+public interface SraSubmissionRepository extends Repository<SraSubmissionEntry, Integer> {
 
-    void save(SraSubmission submission);
+    void save(SraSubmissionEntry submission);
 
-    SraSubmission findOneById(int id);
+    SraSubmissionEntry findOneById(int id);
 
-    List<SraSubmission> getByStatus(SraSubmission.Status status);
+    List<SraSubmissionEntry> getByStatus(SraSubmissionEntry.Status status);
 }

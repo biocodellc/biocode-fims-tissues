@@ -1,16 +1,15 @@
 package biocode.fims.ncbi.sra.submission;
 
+import biocode.fims.models.SraSubmissionEntry;
 import biocode.fims.models.User;
 import biocode.fims.ncbi.models.GeomeBioSample;
 import biocode.fims.ncbi.models.SraMetadata;
 import biocode.fims.ncbi.models.SraSubmissionData;
-import biocode.fims.ncbi.models.SubmittableBioSample;
 import biocode.fims.ncbi.models.submission.SraSubmission;
 import biocode.fims.repositories.SraSubmissionRepository;
 import biocode.fims.rest.models.SraUploadMetadata;
 import biocode.fims.rest.responses.SraUploadResponse;
 import biocode.fims.utils.FileUtils;
-import biocode.fims.utils.StringGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,6 @@ import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -106,7 +104,7 @@ public class SraLoader {
 
         try {
             sraSubmissionRepository.save(
-                    new biocode.fims.models.SraSubmission(
+                    new SraSubmissionEntry(
                             metadata.project,
                             metadata.expedition,
                             user,
