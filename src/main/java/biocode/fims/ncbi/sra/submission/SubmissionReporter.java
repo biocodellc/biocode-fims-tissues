@@ -99,6 +99,7 @@ public class SubmissionReporter {
                     "Your submission for \"" + submission.getExpedition().getExpeditionTitle() + "\" has been successfully processed by the SRA.\n\n" +
                             "You should have received an email from the SRA asking you to take ownership of your submission. If you did not, please contact geome.help@gmail.com."
             );
+            submission.getSubmissionDir().toFile().delete();
         } else if (submission.getStatus().equals(SraSubmissionEntry.Status.SUBMISSION_ERROR)) {
             EmailUtils.sendEmail(
                     submission.getUser().getEmail(),
