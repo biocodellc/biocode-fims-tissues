@@ -1,7 +1,7 @@
 package biocode.fims.ncbi.sra.submission;
 
 import biocode.fims.application.config.TissueProperties;
-import biocode.fims.models.SraSubmission;
+import biocode.fims.models.SraSubmissionEntry;
 import biocode.fims.ncbi.models.submission.SraSubmissionReport;
 import biocode.fims.repositories.SraSubmissionRepository;
 import biocode.fims.utils.EmailUtils;
@@ -30,44 +30,52 @@ public class SubmissionReporter {
         this.tissueProperties = tissueProperties;
     }
 
-    @Scheduled(initialDelay = 60 * 1000 * 2, fixedDelay = FOUR_HOURS)
-    public void checkSubmissions() {
-        for (SraSubmission submission : submissionRepository.getByStatus(SraSubmission.Status.SUBMITTED)) {
-            checkReport(submission);
+    @Scheduled(initialDelay = 60 * 1000 * 5, fixedDelay = FOUR_HOURS)
+    public void checkSubmissions() throws IOException {
+        FTPClient client = new FTPClient();
+        client.connect(tissueProperties.sraSubmissionUrl());
+        client.login(tissueProperties.sraSubmissionUser(), tissueProperties.sraSubmissionPassword());
+        client.enterLocalPassiveMode();
+
+        for (SraSubmissionEntry submission : submissionRepository.getByStatus(SraSubmissionEntry.Status.SUBMITTED)) {
+            checkReport(client, submission);
         }
+
+        client.logout();
+        client.disconnect();
     }
 
-    private void checkReport(SraSubmission submission) {
-        FTPClient client = new FTPClient();
-        PipedOutputStream os = new PipedOutputStream();
-        PipedInputStream is = null;
+    private void checkReport(FTPClient client, SraSubmissionEntry submission) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ByteArrayInputStream is = null;
 
         try {
-            client.connect(tissueProperties.sraSubmissionUrl());
-            client.login(tissueProperties.sraSubmissionUser(), tissueProperties.sraSubmissionPassword());
-
             String dirName = tissueProperties.sraSubmissionRootDir() + "/" + submission.getSubmissionDir().getFileName().toString();
-
-            client.changeWorkingDirectory(dirName);
+            String reportFile= dirName + "/report.xml";
 
             // hasn't started processing yet
-            if (client.listFiles(dirName + "/" + "report.xml").length == 0) {
+            if (client.listFiles(reportFile).length == 0) {
                 return;
             }
 
-            is = new PipedInputStream(os);
-            client.retrieveFile("report.xml", os);
+            client.retrieveFile(reportFile, os);
 
-            System.out.println(is);
+            is = new ByteArrayInputStream(os.toByteArray());
+            JAXBContext jaxbContext = JAXBContext.newInstance(SraSubmissionReport.class);
+            Unmarshaller marshaller = jaxbContext.createUnmarshaller();
+            SraSubmissionReport report = (SraSubmissionReport) marshaller.unmarshal(is);
 
-//            JAXBContext jaxbContext = JAXBContext.newInstance(SraSubmissionReport.class);
-//            Unmarshaller marshaller = jaxbContext.createUnmarshaller();
-//            SraSubmissionReport report = marshaller.unmarshal(is);
+            if (report.isProcessing()) return;
 
-//            submission.setStatus(SraSubmission.Status.COMPLETED);
-
-            client.logout();
-//        } catch (JAXBException e) {
+            if (report.isSuccess()) {
+                submission.setStatus(SraSubmissionEntry.Status.COMPLETED);
+                submission.setMessage(null);
+            } else if (report.isError()) {
+                submission.setStatus(SraSubmissionEntry.Status.SUBMISSION_ERROR);
+                submission.setMessage(report.getErrorMessage());
+            }
+        } catch (JAXBException e) {
+            logger.error("Failed to unmarshall report.xml", e);
         } catch (IOException e) {
             logger.error("Failed to read SRA submission report.", e);
         } finally {
@@ -76,20 +84,27 @@ public class SubmissionReporter {
                 if (is != null) {
                     is.close();
                 }
-                client.disconnect();
             } catch (IOException e) {
                 logger.error("Error closing input stream", e);
             }
         }
 
-//        this.submissionRepository.save(submission);
+        this.submissionRepository.save(submission);
 
         // notify user
-//        EmailUtils.sendEmail(
-//                submission.getUser().getEmail(),
-//                "SRA Submission Successful",
-//                "Your submission for \"" + submission.getExpedition().getExpeditionTitle() + "\" has been successfully uploaded to the SRA via GEOME.\n\n" +
-//                        "You will receive another email with a status report once the SRA has processed your submission."
-//        );
+        if (submission.getStatus().equals(SraSubmissionEntry.Status.COMPLETED)) {
+            EmailUtils.sendEmail(
+                    submission.getUser().getEmail(),
+                    "GEOME - SRA Submission Successful",
+                    "Your submission for \"" + submission.getExpedition().getExpeditionTitle() + "\" has been successfully processed by the SRA.\n\n" +
+                            "You should have received an email from the SRA asking you to take ownership of your submission. If you did not, please contact geome.help@gmail.com."
+            );
+        } else if (submission.getStatus().equals(SraSubmissionEntry.Status.SUBMISSION_ERROR)) {
+            EmailUtils.sendEmail(
+                    submission.getUser().getEmail(),
+                    "GEOME - SRA Submission Failed",
+                    "Your submission for \"" + submission.getExpedition().getExpeditionTitle() + "\" has failed with the following reason:\n\n\n" + submission.getMessage() + "\n\n\nPlease contact geome.help@geome.com if you need assistance"
+            );
+        }
     }
 }

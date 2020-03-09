@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "sra_submissions")
-public class SraSubmission {
+public class SraSubmissionEntry {
 
     private int id;
     private User user;
@@ -27,9 +27,9 @@ public class SraSubmission {
 
 
     // needed for hibernate
-    private SraSubmission() {}
+    private SraSubmissionEntry() {}
 
-    public SraSubmission(Project project, Expedition expedition, User user, Path submissionDir) {
+    public SraSubmissionEntry(Project project, Expedition expedition, User user, Path submissionDir) {
         this.user = user;
         this.project = project;
         this.expedition = expedition;
@@ -139,7 +139,7 @@ public class SraSubmission {
     }
 
     public enum Status {
-        READY, SUBMITTED, COMPLETED, FAILED
+        READY, SUBMITTED, COMPLETED, FAILED, SUBMISSION_ERROR
     }
 
 }
