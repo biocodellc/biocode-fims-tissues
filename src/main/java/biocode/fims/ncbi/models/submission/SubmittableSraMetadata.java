@@ -33,7 +33,7 @@ public class SubmittableSraMetadata {
     private static String spuidNamespace = SPUIDNamespace.value;
 
     @XmlPath("AddFiles/Attribute")
-    public List<Attribute> attributes;
+    private List<Attribute> attributes;
 
     @XmlElements({
             @XmlElement(name = "AddFiles/File", type = File.class),
@@ -46,7 +46,7 @@ public class SubmittableSraMetadata {
     private List<AttributeRef> refs;
 
     @XmlPath("AddFiles/Identifier/SPUID/text()")
-    public String identifier;
+    private String identifier;
 
     SubmittableSraMetadata() {}
 
