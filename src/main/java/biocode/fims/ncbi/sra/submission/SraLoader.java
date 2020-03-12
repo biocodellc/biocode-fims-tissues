@@ -1,5 +1,6 @@
 package biocode.fims.ncbi.sra.submission;
 
+import com.sun.xml.bind.v2.runtime.IllegalAnnotationsException;
 import biocode.fims.models.SraSubmissionEntry;
 import biocode.fims.models.User;
 import biocode.fims.ncbi.models.GeomeBioSample;
@@ -91,12 +92,15 @@ public class SraLoader {
         }
 
         logger.debug("No missing files found. Writing submission xml");
+        logger.error("testing logger.error");
 
         try {
             writeSubmissionXml(filteredSubmissionData);
         } catch (Exception e) {
+            logger.debug("Exception thrown, deleting submission dir");
             logger.error("Error creating submission.xml", e);
             deleteSubmissionDir();
+            logger.debug("submission dir successfully deleted");
             return new SraUploadResponse(false, "Error creating submission.xml file");
         }
 
@@ -136,6 +140,7 @@ public class SraLoader {
             logger.debug("marshaling submission.xml file");
             marshaller.marshal(submission, file);
         } catch (Exception e) {
+            logger.debug("Exception thrown");
             logger.error("Error", e);
             throw e;
         }
