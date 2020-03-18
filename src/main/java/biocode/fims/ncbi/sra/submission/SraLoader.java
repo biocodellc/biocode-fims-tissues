@@ -131,7 +131,7 @@ public class SraLoader {
         try {
             logger.debug("creating SraSubmission object");
             SraSubmission submission = new SraSubmission(filteredSubmissionData, metadata, user, url);
-            logger.debug("initiating JAXBContext");
+            logger.debug("initiating JAXBContext: " + JAXBContext.JAXB_CONTEXT_FACTORY);
             JAXBContext jaxbContext = JAXBContext.newInstance(SraSubmission.class);
             logger.debug("creating marshaller");
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -139,9 +139,8 @@ public class SraLoader {
             File file = new File(getSubmissionDirectory().toString(), "submission.xml");
             logger.debug("marshaling submission.xml file");
             marshaller.marshal(submission, file);
-        } catch (Exception e) {
-            logger.debug("Exception thrown");
-            logger.error("Error", e);
+        } catch (JAXBException e) {
+            logger.error("", e);
             throw e;
         }
     }
