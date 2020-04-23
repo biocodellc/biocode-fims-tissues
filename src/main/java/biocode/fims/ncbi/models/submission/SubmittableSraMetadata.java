@@ -60,7 +60,7 @@ public class SubmittableSraMetadata {
     public static SubmittableSraMetadata fromMetadata(SraMetadata m, String bioProjectAccession, String bioProjectId) {
 
         List<AttributeRef> refs = new ArrayList<>();
-        refs.add(new AttributeRef(bioProjectAccession, bioProjectId, "BioProject"));
+        refs.add(new AttributeRef(bioProjectId, bioProjectAccession, "BioProject"));
         refs.add(new AttributeRef(m.get("sample_name"), null, "BioSample"));
 
         List<Attribute> attributes = m.entrySet().stream()
@@ -76,6 +76,7 @@ public class SubmittableSraMetadata {
     }
 
     private static class AttributeRef {
+        @XmlPath("@name")
         private String name;
         @XmlPath("RefId/PrimaryId/@db")
         private String db;
