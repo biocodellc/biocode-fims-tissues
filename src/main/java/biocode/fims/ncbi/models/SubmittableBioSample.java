@@ -28,8 +28,13 @@ public class SubmittableBioSample {
     @XmlPath("AddData/Data/XmlContent/BioSample/@schema_version")
     private static String schemaVersion = "2.0";
 
-    @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/@spuid_namespace")
-    private static String spuidNamespace = SPUIDNamespace.value;
+    // TODO implement this
+    // The challenge is that we store the BioSample Accession number on the FastqMetadata objectt
+    // really, this information should be stored on the BioSample and only store the Sra accessions
+    // on the FastqMetadata. A quick hack would be to make another query to pull the bioSample.accession
+    // for any fastqMetadata children of a given BioSample
+    @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/PrimaryId/text()")
+    private String bioSampleAccession;
     @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/text()")
     private String sampleName;
 
@@ -41,8 +46,6 @@ public class SubmittableBioSample {
 
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/PrimaryId/text()")
     private String bioProjectAccession;
-    @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/@spuid_namespace")
-    private static String spuidNamespace2 = SPUIDNamespace.value;
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/text()")
     private String bioProjectId;
     @XmlPath("AddData/Data/XmlContent/BioSample/Package/text()")
@@ -73,12 +76,34 @@ public class SubmittableBioSample {
         return this.bioProjectAccession == null ? null : "BioProject";
     }
 
+    @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/@spuid_namespace")
+    private String getSpuidNamespace2() {
+        return this.bioProjectAccession == null ? null : SPUIDNamespace.value;
+    }
+
+    @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/@spuid_namespace")
+    private String getSpuidNamespace() {
+        return this.bioSampleAccession == null ? null : SPUIDNamespace.value;
+    }
+
     @XmlPath("AddData/Identifier/SPUID/@spuid_namespace")
-    private static String spuidNamespace3 = SPUIDNamespace.value;
+    private String getSpuidNamespace3() {
+        return this.bioSampleAccession == null ? null : SPUIDNamespace.value;
+    }
 
     @XmlPath("AddData/Identifier/SPUID/text()")
     public String getIdentifier() {
         return sampleName;
+    }
+
+    @XmlPath("AddData/Identifier/PrimaryId/@db")
+    public String getIdentifierDbIfAccession() {
+        return bioProjectAccession == null ? null : targetDb;
+    }
+
+    @XmlPath("AddData/Identifier/PrimaryId/text()")
+    public String getIdentifierIfAccession() {
+        return bioSampleAccession;
     }
 
     public static SubmittableBioSample fromBioSample(GeomeBioSample bioSample, String bioProjectAccession, String bioProjectId, SraUploadMetadata.BioSampleType bioSampleType) {
