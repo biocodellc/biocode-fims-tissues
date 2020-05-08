@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * @author rjewing
  */
-@XmlType(propOrder = {"sampleName", "sampleTitle", "organism", "bioProjectAccession", "bioProjectId", "type", "attributes", "identifier"})
+@XmlType(propOrder = {"sampleName", "sampleTitle", "organism", "bioProjectAccession", "bioProjectId", "type", "attributes", "identifier", "bioSampleAccession"})
 public class SubmittableBioSample {
     private static ArrayList<String> IGNOREABLE_ATTRIBUTES = new ArrayList<String>() {{
         add("sample_name");
