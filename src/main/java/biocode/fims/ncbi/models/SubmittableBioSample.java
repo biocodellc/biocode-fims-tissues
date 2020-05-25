@@ -78,17 +78,17 @@ public class SubmittableBioSample {
 
     @XmlPath("AddData/Data/XmlContent/BioSample/BioProject/SPUID/@spuid_namespace")
     private String getSpuidNamespace2() {
-        return this.bioProjectAccession == null ? null : SPUIDNamespace.value;
+        return this.bioProjectId == null ? null : SPUIDNamespace.value;
     }
 
     @XmlPath("AddData/Data/XmlContent/BioSample/SampleId/SPUID/@spuid_namespace")
     private String getSpuidNamespace() {
-        return this.bioSampleAccession == null ? null : SPUIDNamespace.value;
+        return this.sampleName == null ? null : SPUIDNamespace.value;
     }
 
     @XmlPath("AddData/Identifier/SPUID/@spuid_namespace")
     private String getSpuidNamespace3() {
-        return this.bioSampleAccession == null ? null : SPUIDNamespace.value;
+        return this.sampleName == null ? null : SPUIDNamespace.value;
     }
 
     @XmlPath("AddData/Identifier/SPUID/text()")
@@ -98,7 +98,7 @@ public class SubmittableBioSample {
 
     @XmlPath("AddData/Identifier/PrimaryId/@db")
     public String getIdentifierDbIfAccession() {
-        return bioProjectAccession == null ? null : targetDb;
+        return bioSampleAccession == null ? null : targetDb;
     }
 
     @XmlPath("AddData/Identifier/PrimaryId/text()")
