@@ -11,6 +11,7 @@ import biocode.fims.repositories.SraSubmissionRepository;
 import biocode.fims.rest.models.SraUploadMetadata;
 import biocode.fims.rest.responses.SraUploadResponse;
 import biocode.fims.utils.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,7 +150,7 @@ public class SraLoader {
         List<String> requiredFiles = filteredSubmissionData.sraMetadata.stream()
                 .flatMap(m ->
                         Stream.of(m.get("filename"), m.get("filename2"))
-                ).filter(Objects::nonNull)
+                ).filter(n -> !StringUtils.isBlank(n))
                 .collect(Collectors.toList());
 
         return requiredFiles.stream()
