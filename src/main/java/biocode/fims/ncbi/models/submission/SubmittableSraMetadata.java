@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author rjewing
  */
-@XmlType(propOrder={"files", "attributes", "refs", "identifier"})
+@XmlType(propOrder = {"files", "attributes", "refs", "identifier"})
 public class SubmittableSraMetadata {
     private static ArrayList<String> IGNOREABLE_ATTRIBUTES = new ArrayList<String>() {{
         add("sample_name");
@@ -48,7 +48,8 @@ public class SubmittableSraMetadata {
     @XmlPath("AddFiles/Identifier/SPUID/text()")
     private String identifier;
 
-    SubmittableSraMetadata() {}
+    SubmittableSraMetadata() {
+    }
 
     private SubmittableSraMetadata(String identifier, List<File> files, List<AttributeRef> refs, List<Attribute> attributes) {
         this.identifier = identifier;
@@ -70,7 +71,7 @@ public class SubmittableSraMetadata {
 
         List<File> files = new ArrayList<>();
         files.add(new File(m.get("filename")));
-        if (m.containsKey("filename2")) files.add(new File(m.get("filename2")));
+        if (!StringUtils.isBlank(m.getOrDefault("filename2", ""))) files.add(new File(m.get("filename2")));
 
         return new SubmittableSraMetadata(m.get("library_ID"), files, refs, attributes);
     }
